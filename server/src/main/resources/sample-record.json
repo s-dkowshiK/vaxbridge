@@ -1,0 +1,226 @@
+{
+  "childName": "Sofía Ejemplo (sample)",
+  "dateOfBirth": "2017-09-14",
+  "country": "Guatemala",
+  "language": "Spanish",
+  "warnings": [
+    "This is a made-up sample record for demonstration."
+  ],
+  "entries": [
+    {
+      "originalText": "BCG",
+      "englishName": "BCG (tuberculosis)",
+      "antigens": [
+        "BCG"
+      ],
+      "date": "2017-09-14",
+      "dateAsWritten": "14/09/2017",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "Hepatitis B (RN)",
+      "englishName": "Hepatitis B, birth dose",
+      "antigens": [
+        "HepB"
+      ],
+      "date": "2017-09-14",
+      "dateAsWritten": "14/09/2017",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "Pentavalente 1a",
+      "englishName": "Pentavalent dose 1 (DTwP-HepB-Hib)",
+      "antigens": [
+        "DTaP",
+        "HepB",
+        "Hib"
+      ],
+      "date": "2017-11-14",
+      "dateAsWritten": "14/11/2017",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "IPV 1a",
+      "englishName": "Inactivated polio dose 1",
+      "antigens": [
+        "IPV"
+      ],
+      "date": "2017-11-14",
+      "dateAsWritten": "14/11/2017",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "Rotavirus 1a",
+      "englishName": "Rotavirus dose 1",
+      "antigens": [
+        "RV"
+      ],
+      "date": "2017-11-14",
+      "dateAsWritten": "14/11/2017",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "Neumococo 1a",
+      "englishName": "Pneumococcal conjugate dose 1",
+      "antigens": [
+        "PCV"
+      ],
+      "date": "2017-11-14",
+      "dateAsWritten": "14/11/2017",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "Pentavalente 2a",
+      "englishName": "Pentavalent dose 2",
+      "antigens": [
+        "DTaP",
+        "HepB",
+        "Hib"
+      ],
+      "date": "2018-01-15",
+      "dateAsWritten": "15/01/2018",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "bOPV 2a",
+      "englishName": "Oral polio (bivalent) dose 2",
+      "antigens": [
+        "OPV"
+      ],
+      "date": "2018-01-15",
+      "dateAsWritten": "15/01/2018",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "Rotavirus 2a",
+      "englishName": "Rotavirus dose 2",
+      "antigens": [
+        "RV"
+      ],
+      "date": "2018-01-15",
+      "dateAsWritten": "15/01/2018",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "Neumococo 2a",
+      "englishName": "Pneumococcal conjugate dose 2",
+      "antigens": [
+        "PCV"
+      ],
+      "date": "2018-01-15",
+      "dateAsWritten": "15/01/2018",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "Pentavalente 3a",
+      "englishName": "Pentavalent dose 3",
+      "antigens": [
+        "DTaP",
+        "HepB",
+        "Hib"
+      ],
+      "date": "2018-03-14",
+      "dateAsWritten": "14/03/2018",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "bOPV 3a",
+      "englishName": "Oral polio (bivalent) dose 3",
+      "antigens": [
+        "OPV"
+      ],
+      "date": "2018-03-14",
+      "dateAsWritten": "14/03/2018",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "SPR 1a",
+      "englishName": "MMR dose 1 (sarampión, paperas, rubéola)",
+      "antigens": [
+        "MMR"
+      ],
+      "date": "2018-09-20",
+      "dateAsWritten": "20/09/2018",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "Neumococo refuerzo",
+      "englishName": "Pneumococcal booster",
+      "antigens": [
+        "PCV"
+      ],
+      "date": "2018-09-20",
+      "dateAsWritten": "20/09/2018",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "DPT 1er refuerzo",
+      "englishName": "DTP booster 1",
+      "antigens": [
+        "DTaP"
+      ],
+      "date": "2019-03-18",
+      "dateAsWritten": "18/03/2019",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "bOPV 1er refuerzo",
+      "englishName": "Oral polio booster 1",
+      "antigens": [
+        "OPV"
+      ],
+      "date": "2019-03-18",
+      "dateAsWritten": "18/03/2019",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "SPR 2a",
+      "englishName": "MMR dose 2",
+      "antigens": [
+        "MMR"
+      ],
+      "date": "2019-03-18",
+      "dateAsWritten": "18/03/2019",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "originalText": "DPT 2o refuerzo",
+      "englishName": "DTP booster 2",
+      "antigens": [
+        "DTaP"
+      ],
+      "date": "2021-09-20",
+      "dateAsWritten": "20/09/2021",
+      "confidence": "low",
+      "notes": "Day could be 20 or 28; ink is smudged."
+    },
+    {
+      "originalText": "bOPV 2o refuerzo",
+      "englishName": "Oral polio booster 2",
+      "antigens": [
+        "OPV"
+      ],
+      "date": "2021-09-20",
+      "dateAsWritten": "20/09/2021",
+      "confidence": "low",
+      "notes": "Same smudged date as the DPT booster."
+    }
+  ]
+}

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VaxBridge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=DM+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Icons from Lucide (ISC license), used as <svg class="i"><use href="#i-name"/></svg> -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-syringe" viewBox="0 0 24 24"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6 6"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
+      <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+      <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+      <symbol id="i-minus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+      <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></symbol>
+      <symbol id="i-loader" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+      <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+      <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></symbol>
+      <symbol id="i-list" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+      <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M9.94 14.06 4 20"/><path d="m14 4 1.5 3.5L19 9l-3.5 1.5L14 14l-1.5-3.5L9 9l3.5-1.5z"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="shell">
+    <aside class="sidebar no-print">
+      <div class="brand">
+        <div class="logo"><svg class="i"><use href="#i-syringe"/></svg></div>
+        <span>VaxBridge</span>
+        <span id="dueBadge" class="badge hidden"></span>
+      </div>
+
+      <div id="childCard" class="child-card hidden">
+        <div id="childInitials" class="avatar"></div>
+        <div class="child-text">
+          <p id="childCardName"></p>
+          <p id="childCardMeta" class="sub"></p>
+        </div>
+      </div>
+
+      <button id="newRecordBtn" class="primary cta"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+
+      <div id="alertStrip" class="alert-strip hidden"></div>
+
+      <nav id="nav">
+        <p class="nav-label">Workflow</p>
+        <button data-view="upload" class="active"><svg class="i"><use href="#i-upload"/></svg><span>Upload record</span></button>
+        <button data-view="review" disabled><svg class="i"><use href="#i-list"/></svg><span>Review entries</span></button>
+        <button data-view="report" disabled><svg class="i"><use href="#i-file"/></svg><span>Report</span></button>
+        <p class="nav-label">App</p>
+        <button data-view="help"><svg class="i"><use href="#i-help"/></svg><span>Help</span></button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <svg class="i"><use href="#i-shield"/></svg>
+        <span>A licensed provider makes every decision. VaxBridge only reads and checks.</span>
+      </div>
+    </aside>
+
+    <main>
+      <!-- Step 1: upload -->
+      <section id="upload" class="view narrow">
+        <div class="view-head">
+          <h1>Upload record</h1>
+          <p class="sub">A photo or scan of the child's vaccination card, in any language</p>
+        </div>
+
+        <div id="pickStage">
+          <div class="dropzone" id="dropzone">
+            <input type="file" id="files" class="hidden" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" multiple>
+            <input type="file" id="cameraInput" class="hidden" accept="image/*" capture="environment">
+            <div class="tile lg"><svg class="i"><use href="#i-upload"/></svg></div>
+            <div class="center">
+              <p class="strong">Drop photos here, or click to browse</p>
+              <p class="sub">JPG, PNG, WebP or PDF. Several photos can be pages of the same record.</p>
+            </div>
+            <div class="row">
+              <button id="browseBtn" class="outline"><svg class="i"><use href="#i-file"/></svg> Browse files</button>
+              <button id="cameraBtn" class="outline"><svg class="i"><use href="#i-camera"/></svg> Use camera</button>
+            </div>
+          </div>
+
+          <div id="selectedCard" class="card stack hidden">
+            <div id="fileList"></div>
+            <hr>
+            <button id="readBtn" class="primary wide">Read record</button>
+          </div>
+
+          <div class="sample-row">
+            <span class="sub">No record handy?</span>
+            <button id="sampleBtn" class="link"><svg class="i"><use href="#i-sparkle"/></svg> Try a sample record</button>
+          </div>
+
+          <p id="uploadStatus" class="status"></p>
+
+          <div class="note-box">
+            <svg class="i"><use href="#i-shield"/></svg>
+            <p>VaxBridge reads the record with AI and does not save it. The results are for a school nurse
+              or pediatrician to check against the original. They are not a medical decision.</p>
+          </div>
+        </div>
+
+        <div id="processing" class="processing hidden">
+          <div class="tile xl"><svg class="i spin"><use href="#i-loader"/></svg></div>
+          <h2>Reading the record</h2>
+          <p class="sub">Detecting the language, reading each vaccine and date, and translating. This can take up to a minute.</p>
+          <div class="bar"><div></div></div>
+        </div>
+      </section>
+
+      <!-- Step 2: nurse reviews what the AI read -->
+      <section id="review" class="view hidden">
+        <button id="backToUpload" class="back"><svg class="i"><use href="#i-back"/></svg> Back to upload</button>
+        <div class="view-head">
+          <h1>Check what was read</h1>
+          <p class="sub">Compare each row with the original record and fix anything that is wrong. Rows marked
+            <span class="pill low"><svg class="i"><use href="#i-alert"/></svg>Check</span> were hard to read.
+            Nothing is decided until you continue.</p>
+        </div>
+
+        <div id="warnings"></div>
+
+        <div class="card">
+          <div class="child-fields">
+            <label>Child's name <input id="childName" type="text"></label>
+            <label>Date of birth <input id="dob" type="date" required></label>
+            <label>Country <input id="country" type="text"></label>
+            <label>Language <input id="language" type="text"></label>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-wrap">
+            <table class="entries">
+              <thead>
+                <tr><th>On the record</th><th>English</th><th>Vaccine parts</th><th>Date given</th><th></th></tr>
+              </thead>
+              <tbody id="entryRows"></tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            <button id="addRow" class="link"><svg class="i"><use href="#i-plus"/></svg> Add a row</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="evaluateBtn" class="primary">Check against US schedule</button>
+        </div>
+        <p id="reviewStatus" class="status"></p>
+      </section>
+
+      <!-- Step 3: report to print and sign -->
+      <section id="report" class="view hidden">
+        <button id="backToReview" class="back no-print"><svg class="i"><use href="#i-back"/></svg> Edit entries</button>
+        <div class="report-head">
+          <div class="tile"><svg class="i"><use href="#i-file"/></svg></div>
+          <div class="grow">
+            <h1>Immunization catch-up report</h1>
+            <div id="reportMeta" class="meta"></div>
+          </div>
+          <button id="printBtn" class="primary no-print"><svg class="i"><use href="#i-print"/></svg> Print / save PDF</button>
+        </div>
+
+        <div id="summaryCounts" class="stats"></div>
+
+        <div class="note-box warn">
+          <svg class="i"><use href="#i-shield"/></svg>
+          <p>This report was generated by software from a translated record and checked against the CDC
+            catch-up immunization schedule. It is not a medical decision. A licensed provider must verify the
+            original record and approve any vaccines given. State school requirements may differ.</p>
+        </div>
+
+        <div class="table-card">
+          <div class="series-header">
+            <span>Vaccine</span><span class="hide-sm">Next dose</span><span>Status</span>
+          </div>
+          <div id="seriesList"></div>
+        </div>
+        <div id="ignoredList"></div>
+
+        <div class="card signoff">
+          <p class="card-title"><svg class="i"><use href="#i-check"/></svg> Provider review</p>
+          <div class="sign-grid">
+            <div><span>Reviewed by (name, credentials)</span><div class="line"></div></div>
+            <div><span>Signature</span><div class="line"></div></div>
+            <div><span>Date</span><div class="line"></div></div>
+            <div><span>Clinic / school</span><div class="line"></div></div>
+          </div>
+          <label class="approve"><span class="box"></span> I reviewed the original record and approve this report.</label>
+        </div>
+      </section>
+
+      <!-- Help -->
+      <section id="help" class="view narrow hidden">
+        <div class="view-head">
+          <h1>Help &amp; about</h1>
+          <p class="sub">How VaxBridge works and what it does not do</p>
+        </div>
+        <div class="about">
+          <div class="logo lg"><svg class="i"><use href="#i-syringe"/></svg></div>
+          <div>
+            <p class="strong">VaxBridge</p>
+            <p class="sub">Reads a child's vaccination record from another country and checks it against the US
+              catch-up schedule, so immigrant and refugee kids can enroll in school without weeks of delay or
+              unneeded shots.</p>
+          </div>
+        </div>
+        <div class="faq">
+          <details open>
+            <summary>What can I upload?<svg class="i"><use href="#i-chevron"/></svg></summary>
+            <p>Photos (JPG, PNG, WebP) or a PDF of the vaccination card, in any language. Use a clear, well-lit
+              photo with every date visible. Several photos can be pages of one record.</p>
+          </details>
+          <details>
+            <summary>Who decides what the child needs?<svg class="i"><use href="#i-chevron"/></svg></summary>
+            <p>A school nurse or pediatrician. VaxBridge reads and translates the record and does the date math,
+              but a licensed provider checks the original record and signs the report.</p>
+          </details>
+          <details>
+            <summary>How are doses checked?<svg class="i"><use href="#i-chevron"/></svg></summary>
+            <p>A rules engine checks every dose against the CDC catch-up schedule: minimum ages, minimum
+              intervals, the 4-day grace period, live-vaccine spacing and the 2016 oral polio switch. Each dose
+              that does not count shows the reason.</p>
+          </details>
+          <details>
+            <summary>Why does a row say "Check"?<svg class="i"><use href="#i-chevron"/></svg></summary>
+            <p>The AI was not sure it read that entry correctly, for example a smudged date. Compare it with the
+              original record and fix it before continuing.</p>
+          </details>
+          <details>
+            <summary>Is the record saved?<svg class="i"><use href="#i-chevron"/></svg></summary>
+            <p>No. VaxBridge sends the photo to the AI to read it and does not store it. Print or save the report
+              as a PDF to keep it.</p>
+          </details>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="rowTemplate">
+    <tr>
+      <td><input class="orig" type="text"><small class="as-written"></small></td>
+      <td><input class="english" type="text"><small class="note"></small></td>
+      <td class="antigen-cell"><div class="chips"></div>
+        <select class="add-antigen"><option value="">+ Add</option></select></td>
+      <td><input class="date" type="date"></td>
+      <td><button class="remove" title="Remove row"><svg class="i"><use href="#i-trash"/></svg></button></td>
+    </tr>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
