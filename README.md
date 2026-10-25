@@ -114,9 +114,11 @@ it sleeps or restarts.
 - Accounts are a working demo, not a certified system for children's health records. Real use would need
   HTTPS hosting, encrypted storage and backups, password reset, and a privacy review (FERPA/HIPAA).
 
-## Live preview
+## Live app
 
-https://s-dkowshik.github.io/vaxbridge/ is a copy of the website that runs entirely in the browser
+The real app runs at https://vaxbridge.onrender.com (Render + Neon, see above).
+
+https://s-dkowshik.github.io/vaxbridge/ is a demo copy of the website that runs entirely in the browser
 (`docs/index.html`). Accounts and saved records there are stored only in that browser, and only the sample
 record can be read. The first version is kept at https://s-dkowshik.github.io/vaxbridge/v1/.
 
