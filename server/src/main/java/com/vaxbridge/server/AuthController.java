@@ -1,5 +1,8 @@
 package com.vaxbridge.server;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.util.Locale;
@@ -27,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
     static final String SESSION_KEY = "userId";
-    private static final BCryptPasswordEncoder PASSWORDS = new BCryptPasswordEncoder();
+    static final BCryptPasswordEncoder PASSWORDS = new BCryptPasswordEncoder();
 
     private final UserRepository users;
 
@@ -41,11 +44,22 @@ public class AuthController {
     public record LoginRequest(String email, String password) {
     }
 
-    public record UserInfo(Long id, String name, String email) {
+    /** What the website knows about the signed-in user, including their Settings. */
+    public record UserInfo(Long id, String name, String email, boolean hasAvatar, JsonNode theme) {
         static UserInfo of(AppUser u) {
-            return new UserInfo(u.id, u.name, u.email);
+            JsonNode theme = null;
+            if (u.themeJson != null) {
+                try {
+                    theme = JSON.readTree(u.themeJson);
+                } catch (JsonProcessingException e) {
+                    theme = null;  // a broken theme falls back to the default look
+                }
+            }
+            return new UserInfo(u.id, u.name, u.email, u.avatar != null, theme);
         }
     }
+
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     @PostMapping("/signup")
     public UserInfo signup(@RequestBody SignupRequest req, HttpServletRequest http) {
@@ -108,7 +122,7 @@ public class AuthController {
         http.getSession().setAttribute(SESSION_KEY, user.id);
     }
 
-    private static String normalize(String email) {
+    static String normalize(String email) {
         return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
     }
 }

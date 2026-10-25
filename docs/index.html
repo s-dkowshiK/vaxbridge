@@ -14,12 +14,14 @@
   --card: #ffffff;
   --primary: #0B7A5E;
   --primary-foreground: #ffffff;
-  --secondary: #E8F4F0;
+  --secondary: color-mix(in srgb, var(--primary) 9%, var(--card));
   --muted: #ECEEF3;
   --muted-foreground: #6B7280;
   --border: rgba(26, 31, 46, 0.1);
+  --border-soft: rgba(26, 31, 46, 0.08);
   --input-background: #F0F1F5;
-  --ring: rgba(11, 122, 94, 0.4);
+  --ring: color-mix(in srgb, var(--primary) 40%, transparent);
+  --warn-text: #92400E; --warn-icon: #D97706; --due-strong: #DC2626;
 
   --ok: #047857;   --ok-bg: #ECFDF5;   --ok-border: #A7F3D0;
   --soon: #B45309; --soon-bg: #FFFBEB; --soon-border: #FDE68A;
@@ -31,6 +33,21 @@
   --sans: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --serif: "Fraunces", Georgia, serif;
   --mono: "DM Mono", ui-monospace, Menlo, monospace;
+}
+
+/* Background choices from Settings. The accent color, corners and text size are set from app.js. */
+:root[data-bg="warm"] { --background: #F7F4EF; --input-background: #F1EDE6; --muted: #EEEAE3; --off-bg: #EEEAE3; }
+:root[data-bg="cool"] { --background: #EEF3F9; --input-background: #E8EEF6; --muted: #E3E9F2; --off-bg: #E3E9F2; }
+:root[data-bg="dark"] {
+  color-scheme: dark;
+  --background: #0F131B; --foreground: #E7EAF0; --card: #171C26;
+  --muted: #222937; --muted-foreground: #9AA3B2; --input-background: #1E2430;
+  --border: rgba(231, 234, 240, 0.12); --border-soft: rgba(231, 234, 240, 0.08);
+  --warn-text: #FCD34D; --warn-icon: #FBBF24; --due-strong: #F87171;
+  --ok: #34D399;   --ok-bg: rgba(16, 185, 129, 0.14);  --ok-border: rgba(52, 211, 153, 0.35);
+  --soon: #FBBF24; --soon-bg: rgba(245, 158, 11, 0.14); --soon-border: rgba(251, 191, 36, 0.35);
+  --due: #F87171;  --due-bg: rgba(239, 68, 68, 0.14);  --due-border: rgba(248, 113, 113, 0.35);
+  --off: #9AA3B2;  --off-bg: #222937; --off-border: rgba(231, 234, 240, 0.12);
 }
 
 * { box-sizing: border-box; }
@@ -72,16 +89,16 @@ hr { border: none; border-top: 1px solid var(--border); margin: 0; }
   display: flex; flex-direction: column; gap: 12px;
   padding: 20px 12px 12px;
   background: var(--card);
-  border-right: 1px solid rgba(26, 31, 46, 0.08);
+  border-right: 1px solid var(--border-soft);
 }
 .brand { display: flex; align-items: center; gap: 10px; padding: 0 4px; font-family: var(--serif); font-weight: 600; font-size: 15px; }
 .logo {
   width: 28px; height: 28px; border-radius: 8px;
-  background: var(--primary); color: #fff;
+  background: var(--primary); color: var(--primary-foreground);
   display: flex; align-items: center; justify-content: center;
 }
 .logo .i { width: 14px; height: 14px; }
-.logo.xl { width: 56px; height: 56px; border-radius: var(--radius-lg); box-shadow: 0 10px 15px -3px rgba(11, 122, 94, 0.2); }
+.logo.xl { width: 56px; height: 56px; border-radius: var(--radius-lg); box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--primary) 20%, transparent); }
 .logo.xl .i { width: 28px; height: 28px; }
 .logo.lg { width: 40px; height: 40px; border-radius: var(--radius); }
 .logo.lg .i { width: 20px; height: 20px; }
@@ -90,10 +107,10 @@ hr { border: none; border-top: 1px solid var(--border); margin: 0; }
   background: #EF4444; color: #fff; font: 700 10px/20px var(--sans); text-align: center;
 }
 
-.child-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius); background: rgba(232, 244, 240, 0.6); }
+.child-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius); background: color-mix(in srgb, var(--secondary) 60%, transparent); }
 .avatar {
   width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-  background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;
+  background: var(--primary); color: var(--primary-foreground); font-size: 11px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
 }
 .child-text { min-width: 0; }
@@ -123,7 +140,7 @@ nav button.active, nav button.active:hover:not(:disabled) { background: var(--se
 nav button:disabled { opacity: 0.45; cursor: default; }
 nav button span { flex: 1; }
 
-.sidebar-foot { padding-top: 8px; border-top: 1px solid rgba(26, 31, 46, 0.08); }
+.sidebar-foot { padding-top: 8px; border-top: 1px solid var(--border-soft); }
 .sidebar-foot button {
   display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 12px;
   border: none; border-radius: var(--radius); background: none;
@@ -133,7 +150,7 @@ nav button span { flex: 1; }
 nav .count { font: 500 11px var(--mono); color: var(--muted-foreground); }
 nav .count:empty { display: none; }
 
-main { flex: 1; min-width: 0; }
+main { flex: 1; min-width: 0; zoom: var(--text-zoom, 1); }
 .view { max-width: 1000px; margin: 0 auto; padding: 32px; display: flex; flex-direction: column; gap: 20px; }
 .view.narrow { max-width: 640px; }
 .view-head .sub { margin-top: 4px; }
@@ -197,13 +214,13 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 2px var(--ring); }
 
 .note-box {
   display: flex; gap: 12px; align-items: flex-start; padding: 16px;
-  background: rgba(232, 244, 240, 0.4); border: 1px solid var(--border); border-radius: var(--radius);
+  background: color-mix(in srgb, var(--secondary) 40%, transparent); border: 1px solid var(--border); border-radius: var(--radius);
 }
 .note-box .i { color: var(--primary); margin-top: 1px; }
 .note-box p { font-size: 12px; line-height: 1.6; color: var(--muted-foreground); }
 .note-box.warn { background: var(--soon-bg); border-color: var(--soon-border); }
-.note-box.warn .i { color: #D97706; }
-.note-box.warn p { color: #92400E; }
+.note-box.warn .i { color: var(--warn-icon); }
+.note-box.warn p { color: var(--warn-text); }
 
 .pill {
   display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
@@ -226,7 +243,7 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 2px var(--ring); }
   border: 2px dashed var(--border); border-radius: var(--radius-lg);
   transition: border-color 0.15s, background 0.15s;
 }
-.dropzone:hover, .dropzone.drag { border-color: rgba(11, 122, 94, 0.4); background: rgba(232, 244, 240, 0.25); }
+.dropzone:hover, .dropzone.drag { border-color: color-mix(in srgb, var(--primary) 40%, transparent); background: color-mix(in srgb, var(--secondary) 25%, transparent); }
 .dropzone .sub { font-size: 12px; margin-top: 4px; }
 .row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 
@@ -250,9 +267,9 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 2px var(--ring); }
 
 .warning {
   display: flex; gap: 10px; align-items: flex-start; padding: 12px 16px; font-size: 13px;
-  background: var(--soon-bg); color: #92400E; border: 1px solid var(--soon-border); border-radius: var(--radius);
+  background: var(--soon-bg); color: var(--warn-text); border: 1px solid var(--soon-border); border-radius: var(--radius);
 }
-.warning .i { color: #D97706; margin-top: 2px; }
+.warning .i { color: var(--warn-icon); margin-top: 2px; }
 #warnings { display: flex; flex-direction: column; gap: 8px; }
 #warnings:empty { display: none; }
 
@@ -264,12 +281,12 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 2px var(--ring); }
 table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
 .entries th, .series-header {
   font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: 0.05em;
-  color: var(--muted-foreground); background: rgba(236, 238, 243, 0.4);
+  color: var(--muted-foreground); background: color-mix(in srgb, var(--muted) 40%, transparent);
 }
 .entries th { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--border); }
 .entries th:first-child, .entries td:first-child { padding-left: 20px; }
 .entries td { vertical-align: top; padding: 12px 10px; border-bottom: 1px solid var(--border); }
-.entries tr:hover td { background: rgba(236, 238, 243, 0.3); }
+.entries tr:hover td { background: color-mix(in srgb, var(--muted) 30%, transparent); }
 .entries tr.low td { background: var(--soon-bg); }
 .entries tr.low td:first-child { box-shadow: inset 3px 0 0 #F59E0B; }
 .entries small { display: block; color: var(--muted-foreground); font-size: 12px; margin-top: 4px; }
@@ -282,7 +299,7 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
 .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
 .chip {
   font: 500 12px var(--mono); padding: 2px 8px; border-radius: 999px; cursor: pointer;
-  background: var(--secondary); color: var(--primary); border: 1px solid rgba(11, 122, 94, 0.2);
+  background: var(--secondary); color: var(--primary); border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
 }
 .chip:hover { text-decoration: line-through; background: var(--due-bg); color: var(--due); border-color: var(--due-border); }
 .add-antigen { font-size: 12px; padding: 4px 8px; width: auto; max-width: 150px; }
@@ -300,7 +317,7 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
 .stat b { display: block; font: 700 30px/1.1 var(--serif); }
 .stat .label { font-size: 14px; font-weight: 500; margin-top: 4px; }
 .stat .sub { font-size: 12px; }
-.stat.DUE { background: var(--due-bg); } .stat.DUE b { color: #DC2626; }
+.stat.DUE { background: var(--due-bg); } .stat.DUE b { color: var(--due-strong); }
 .stat.UPCOMING { background: var(--soon-bg); } .stat.UPCOMING b { color: var(--soon); }
 .stat.COMPLETE { background: var(--ok-bg); } .stat.COMPLETE b { color: var(--ok); }
 .stat.NOT_NEEDED { background: var(--muted); }
@@ -321,7 +338,7 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
 .doses .ok .i { color: var(--ok); }
 .doses .bad { color: var(--due); }
 .doses .bad .i { color: var(--due); }
-.plan { margin-top: 10px; font-size: 12px; padding: 8px 12px; border-radius: 10px; background: rgba(232, 244, 240, 0.6); color: var(--primary); }
+.plan { margin-top: 10px; font-size: 12px; padding: 8px 12px; border-radius: 10px; background: color-mix(in srgb, var(--secondary) 60%, transparent); color: var(--primary); }
 .plan b { font-weight: 600; }
 .notes { margin: 8px 0 0; padding-left: 18px; font-size: 12px; color: var(--muted-foreground); font-style: italic; }
 
@@ -336,7 +353,7 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
 
 /* ---- help ----------------------------------------------------------------- */
 
-.about { display: flex; gap: 16px; align-items: flex-start; padding: 20px; background: rgba(232, 244, 240, 0.6); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.about { display: flex; gap: 16px; align-items: flex-start; padding: 20px; background: color-mix(in srgb, var(--secondary) 60%, transparent); border: 1px solid var(--border); border-radius: var(--radius-lg); }
 .about .sub { margin-top: 4px; }
 .faq { display: flex; flex-direction: column; gap: 8px; }
 .faq details { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); }
@@ -378,7 +395,7 @@ button.link.small { font-size: 12px; padding: 0; }
   background: none; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer;
   font: inherit; color: inherit; transition: border-color 0.15s, background 0.15s;
 }
-.mini-item:hover { border-color: rgba(11, 122, 94, 0.3); background: rgba(236, 238, 243, 0.3); }
+.mini-item:hover { border-color: color-mix(in srgb, var(--primary) 30%, transparent); background: color-mix(in srgb, var(--muted) 30%, transparent); }
 .mini-item .tile { width: 32px; height: 32px; border-radius: 8px; }
 .mini-item .tile .i { width: 16px; height: 16px; }
 .mini-item .strong { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -399,15 +416,15 @@ button.link.small { font-size: 12px; padding: 0; }
   padding: 6px 12px; border-radius: var(--radius); border: 1px solid var(--border);
   background: var(--card); color: var(--muted-foreground); font: 500 12px var(--sans);
 }
-.filters button:hover { border-color: rgba(11, 122, 94, 0.4); color: var(--foreground); }
-.filters button.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.filters button:hover { border-color: color-mix(in srgb, var(--primary) 40%, transparent); color: var(--foreground); }
+.filters button.active { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
 .record-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
 .record-card {
   display: flex; flex-direction: column; gap: 16px; padding: 20px; text-align: left; cursor: pointer;
   background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
   font: inherit; color: inherit; transition: border-color 0.15s, box-shadow 0.15s;
 }
-.record-card:hover { border-color: rgba(11, 122, 94, 0.3); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+.record-card:hover { border-color: color-mix(in srgb, var(--primary) 30%, transparent); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
 .record-card .top { display: flex; align-items: flex-start; gap: 12px; }
 .record-card .top > .i { color: var(--muted-foreground); margin-top: 2px; }
 .record-card .strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -440,13 +457,80 @@ button.link.small { font-size: 12px; padding: 0; }
 .file-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .file-thumb .frame .i { width: 28px; height: 28px; }
 .file-thumb span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.file-thumb:hover .frame { border-color: rgba(11, 122, 94, 0.4); }
+.file-thumb:hover .frame { border-color: color-mix(in srgb, var(--primary) 40%, transparent); }
 .delete-row { display: flex; justify-content: flex-end; }
 button.danger {
   display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: var(--radius);
-  background: var(--card); color: #DC2626; border: 1px solid var(--due-border); font: 500 13px var(--sans);
+  background: var(--card); color: var(--due-strong); border: 1px solid var(--due-border); font: 500 13px var(--sans);
 }
 button.danger:hover, button.danger.confirm { background: var(--due-bg); }
+
+/* ---- settings ------------------------------------------------------------- */
+
+button.child-card { width: 100%; border: none; text-align: left; font: inherit; color: inherit; cursor: pointer; transition: background 0.15s; }
+button.child-card:hover { background: var(--secondary); }
+.avatar { overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar.xl { width: 72px; height: 72px; font-size: 24px; }
+.settings-card { display: flex; flex-direction: column; gap: 16px; }
+.settings-card .card-title { margin: 0; }
+.settings-card .card-title + .sub { margin-top: -10px; }
+.profile-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.profile-row .row { justify-content: flex-start; gap: 8px; }
+.field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.field-grid label, .settings-card > label { display: flex; flex-direction: column; gap: 6px; }
+.settings-card .actions { align-items: center; }
+.settings-card .actions .status { margin: 0; }
+.setting-label { font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; justify-content: space-between; }
+.setting-label span { font: 500 12px var(--mono); color: var(--muted-foreground); }
+.swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+.swatch {
+  width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--card); padding: 0;
+  box-shadow: 0 0 0 1px var(--border); cursor: pointer; position: relative;
+}
+.swatch.active { box-shadow: 0 0 0 2px var(--foreground); }
+.swatch.custom { overflow: hidden; background: conic-gradient(#ef4444, #f59e0b, #10b981, #3b82f6, #8b5cf6, #ef4444); }
+.swatch.custom input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; padding: 0; border: none; }
+.bg-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.bg-option {
+  display: flex; flex-direction: column; gap: 8px; padding: 8px; border-radius: var(--radius);
+  border: 1px solid var(--border); background: var(--card); color: var(--foreground); font: 500 12px var(--sans);
+}
+.bg-option .swatch-bg { height: 36px; border-radius: calc(var(--radius) - 4px); border: 1px solid rgba(26, 31, 46, 0.1); display: flex; align-items: flex-end; padding: 4px; gap: 3px; }
+.bg-option .swatch-bg i { display: block; height: 10px; flex: 1; border-radius: 3px; background: var(--primary); }
+.bg-option .swatch-bg i + i { background: rgba(255, 255, 255, 0.7); flex: 2; }
+.bg-option.active { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+input[type="range"] { padding: 0; border: none; background: none; accent-color: var(--primary); box-shadow: none; }
+.theme-preview { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--radius); background: var(--background); border: 1px solid var(--border); flex-wrap: wrap; }
+.theme-preview .pill { font-size: 12px; }
+
+/* ---- state formats -------------------------------------------------------- */
+
+.state-pick { display: grid; grid-template-columns: minmax(220px, 320px) 1fr; gap: 20px; align-items: start; }
+.state-pick label { display: flex; flex-direction: column; gap: 6px; }
+.registry { display: flex; gap: 12px; align-items: flex-start; }
+.registry .grow > * + * { margin-top: 4px; }
+a.link { display: inline-flex; align-items: center; gap: 6px; color: var(--primary); font-size: 14px; font-weight: 500; text-decoration: none; }
+a.link:hover { text-decoration: underline; }
+a.link .i { width: 14px; height: 14px; }
+.format-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.format-card { display: flex; flex-direction: column; gap: 10px; }
+.format-card .top { display: flex; align-items: center; gap: 12px; }
+.format-card .sub { font-size: 13px; flex: 1; }
+.format-card .tag { font: 500 11px var(--mono); color: var(--muted-foreground); }
+.format-card button { align-self: flex-start; }
+.format-card.main { border-color: color-mix(in srgb, var(--primary) 35%, transparent); background: color-mix(in srgb, var(--secondary) 50%, var(--card)); }
+.dose-grid-wrap { overflow-x: auto; }
+table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font-size: 13px; }
+.dose-grid th, .dose-grid td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; }
+.dose-grid th { font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); background: color-mix(in srgb, var(--muted) 40%, transparent); }
+.dose-grid td { font-family: var(--mono); font-size: 12px; }
+.dose-grid td:first-child { font-family: var(--sans); font-size: 13px; font-weight: 500; }
+.dose-grid td.bad { color: var(--due); }
+.dose-grid td.none { color: var(--muted-foreground); }
+
+/* the state grid header is a single title, not the report's three columns */
+.series-header.state-grid-head { display: block; }
 
 /* ---- small screens: sidebar becomes a top bar ----------------------------- */
 
@@ -455,14 +539,16 @@ button.danger:hover, button.danger.confirm { background: var(--due-bg); }
   .sidebar {
     width: auto; height: auto; position: sticky; z-index: 10;
     flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px;
-    padding: 10px 16px; border-right: none; border-bottom: 1px solid rgba(26, 31, 46, 0.08);
+    padding: 10px 16px; border-right: none; border-bottom: 1px solid var(--border-soft);
   }
   .child-card, .cta, .alert-strip, .nav-label { display: none !important; }
   .sidebar-foot { margin-left: auto; padding: 0; border: none; order: 1; }
   .sidebar-foot button { padding: 6px 8px; font-size: 13px; gap: 6px; }
   .brand { order: 0; }
   nav { order: 2; }
-  .dash-grid { grid-template-columns: 1fr; }
+  .dash-grid, .state-pick { grid-template-columns: 1fr; }
+  .bg-options { grid-template-columns: repeat(2, 1fr); }
+  .format-grid { grid-template-columns: 1fr; }
   .brand { padding: 0; }
   .badge { margin-left: 6px; }
   nav { flex: 1 1 100%; flex-direction: row; gap: 4px; overflow-x: auto; }
@@ -478,11 +564,21 @@ button.danger:hover, button.danger.confirm { background: var(--due-bg); }
 }
 
 @media print {
+  :root[data-bg] {
+    --background: #fff; --foreground: #1A1F2E; --card: #fff; --muted: #ECEEF3; --muted-foreground: #6B7280;
+    --border: rgba(26, 31, 46, 0.1); --border-soft: rgba(26, 31, 46, 0.08);
+    --warn-text: #92400E; --warn-icon: #D97706; --due-strong: #DC2626;
+    --ok: #047857;   --ok-bg: #ECFDF5;   --ok-border: #A7F3D0;
+    --soon: #B45309; --soon-bg: #FFFBEB; --soon-border: #FDE68A;
+    --due: #B91C1C;  --due-bg: #FEF2F2;  --due-border: #FECACA;
+    --off: #6B7280;  --off-bg: #ECEEF3;  --off-border: rgba(26, 31, 46, 0.1);
+  }
   body { background: #fff; }
+  main { zoom: 1; }
   .no-print { display: none !important; }
   .shell { display: block; }
   .view { padding: 0; max-width: none; gap: 14px; }
-  #upload, #review, #help, #dashboard, #records { display: none !important; }
+  #upload, #review, #help, #dashboard, #records, #settings, #state { display: none !important; }
   .table-card, .card, .stat { box-shadow: none; }
   .stats { grid-template-columns: repeat(4, 1fr); }
   .series-header, .series-main { grid-template-columns: 1fr 150px 190px; }
@@ -528,6 +624,15 @@ button.danger:hover, button.danger.confirm { background: var(--due-bg); }
       <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></symbol>
       <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
       <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M9.94 14.06 4 20"/><path d="m14 4 1.5 3.5L19 9l-3.5 1.5L14 14l-1.5-3.5L9 9l3.5-1.5z"/></symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+      <symbol id="i-map" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+      <symbol id="i-palette" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></symbol>
+      <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+      <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3"/></symbol>
+      <symbol id="i-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></symbol>
+      <symbol id="i-table" viewBox="0 0 24 24"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></symbol>
     </defs>
   </svg>
 
@@ -562,13 +667,13 @@ button.danger:hover, button.danger.confirm { background: var(--due-bg); }
         <span id="dueBadge" class="badge hidden" title="Saved records with doses due now"></span>
       </div>
 
-      <div class="child-card">
+      <button id="userCard" class="child-card" data-goto="settings" title="Settings">
         <div id="userInitials" class="avatar"></div>
         <div class="child-text">
           <p id="userName"></p>
           <p id="userMeta" class="sub"></p>
         </div>
-      </div>
+      </button>
 
       <button id="newRecordBtn" class="primary cta"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
 
@@ -582,7 +687,9 @@ button.danger:hover, button.danger.confirm { background: var(--due-bg); }
         <button data-view="upload"><svg class="i"><use href="#i-upload"/></svg><span>Upload record</span></button>
         <button data-view="review"><svg class="i"><use href="#i-list"/></svg><span>Review entries</span></button>
         <button data-view="report"><svg class="i"><use href="#i-file"/></svg><span>Report</span></button>
+        <button data-view="state"><svg class="i"><use href="#i-map"/></svg><span>State format</span></button>
         <p class="nav-label">App</p>
+        <button data-view="settings"><svg class="i"><use href="#i-settings"/></svg><span>Settings</span></button>
         <button data-view="help"><svg class="i"><use href="#i-help"/></svg><span>Help</span></button>
       </nav>
 
@@ -774,6 +881,7 @@ button.danger:hover, button.danger.confirm { background: var(--due-bg); }
           <div class="report-actions no-print">
             <button id="saveBtn" class="primary"><svg class="i"><use href="#i-save"/></svg> <span>Save to records</span></button>
             <button id="printBtn" class="outline"><svg class="i"><use href="#i-print"/></svg> Print</button>
+            <button class="outline" data-goto="state"><svg class="i"><use href="#i-map"/></svg> State format</button>
           </div>
         </div>
         <p id="saveStatus" class="status no-print"></p>
@@ -815,6 +923,150 @@ button.danger:hover, button.danger.confirm { background: var(--due-bg); }
           <button id="deleteBtn" class="danger"><svg class="i"><use href="#i-trash"/></svg> Delete this saved record</button>
         </div>
         </div>
+      </section>
+
+      <!-- State format: the reviewed record in the layout states use, for a provider to sign -->
+      <section id="state" class="view hidden">
+        <div class="empty card no-record">
+          <div class="tile lg"><svg class="i"><use href="#i-map"/></svg></div>
+          <p class="strong">No report yet</p>
+          <p class="sub">Check a record against the US schedule first, or open a saved record. Then you can get it ready for a state here.</p>
+          <div class="row">
+            <button class="primary go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+            <button class="outline" data-goto="records"><svg class="i"><use href="#i-folder"/></svg> Saved records</button>
+          </div>
+        </div>
+        <div class="has-record">
+        <div class="view-head">
+          <h1>Get it ready for a state</h1>
+          <p class="sub">Puts the reviewed record into the layout state school forms and registries use, with US vaccine names and dates.</p>
+        </div>
+
+        <div class="card state-pick">
+          <label>State
+            <select id="stateSelect"></select>
+          </label>
+          <div id="registryInfo" class="registry"></div>
+        </div>
+
+        <div class="note-box warn">
+          <svg class="i"><use href="#i-shield"/></svg>
+          <p>VaxBridge is not a state agency or a health care provider. These are transcriptions to save typing. A
+            licensed provider has to check them against the original record and sign before a school or registry will
+            accept them. VaxBridge never sends anything to a state.</p>
+        </div>
+
+        <div class="table-card">
+          <div class="series-header state-grid-head"><span id="gridTitle">Doses by vaccine</span></div>
+          <div class="dose-grid-wrap"><table class="dose-grid" id="doseGrid"></table></div>
+        </div>
+
+        <div class="format-grid">
+          <div class="card format-card main">
+            <div class="top"><div class="tile"><svg class="i"><use href="#i-print"/></svg></div>
+              <div><p class="strong">School immunization record</p><p class="tag">Printable, for a provider to sign</p></div></div>
+            <p class="sub">Every dose in a vaccine-by-dose grid with MM/DD/YYYY dates, the way state school forms ask for them.
+              Use it to fill in the state's official form, or attach it to the original record.</p>
+            <button id="printStateBtn" class="primary"><svg class="i"><use href="#i-print"/></svg> Open printable record</button>
+          </div>
+          <div class="card format-card">
+            <div class="top"><div class="tile"><svg class="i"><use href="#i-code"/></svg></div>
+              <div><p class="strong">State registry file</p><p class="tag">HL7 2.5.1 VXU · .hl7</p></div></div>
+            <p id="hl7Text" class="sub">The message format state immunization registries accept from clinics. A clinic enrolled with the
+              registry uploads it as historical doses.</p>
+            <button class="outline" data-export="hl7"><svg class="i"><use href="#i-download"/></svg> Download .hl7</button>
+          </div>
+          <div class="card format-card">
+            <div class="top"><div class="tile"><svg class="i"><use href="#i-file"/></svg></div>
+              <div><p class="strong">Health record file</p><p class="tag">FHIR R4 · .json</p></div></div>
+            <p class="sub">The standard most clinic health record systems import. Doses are marked as transcribed from another
+              record, not given by the clinic.</p>
+            <button class="outline" data-export="fhir"><svg class="i"><use href="#i-download"/></svg> Download .json</button>
+          </div>
+          <div class="card format-card">
+            <div class="top"><div class="tile"><svg class="i"><use href="#i-table"/></svg></div>
+              <div><p class="strong">Spreadsheet</p><p class="tag">CSV · .csv</p></div></div>
+            <p class="sub">One row per dose, with the vaccine code, the US name and the text on the original record.</p>
+            <button class="outline" data-export="csv"><svg class="i"><use href="#i-download"/></svg> Download .csv</button>
+          </div>
+        </div>
+        <p id="exportStatus" class="status"></p>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section id="settings" class="view narrow hidden">
+        <div class="view-head">
+          <h1>Settings</h1>
+          <p class="sub">Your profile and how VaxBridge looks. Saved to your account, so they follow you to any device.</p>
+        </div>
+
+        <form id="profileForm" class="card settings-card" novalidate>
+          <p class="card-title"><svg class="i"><use href="#i-user"/></svg> Profile</p>
+          <div class="profile-row">
+            <div id="settingsAvatar" class="avatar xl"></div>
+            <div>
+              <div class="row">
+                <button id="avatarBtn" class="outline" type="button"><svg class="i"><use href="#i-camera"/></svg> Change picture</button>
+                <button id="avatarRemove" class="link" type="button">Remove</button>
+              </div>
+              <p class="sub" style="margin-top: 6px; font-size: 12px">JPG, PNG, GIF or WebP, up to 2 MB</p>
+              <input id="avatarInput" type="file" class="hidden" accept="image/jpeg,image/png,image/gif,image/webp">
+            </div>
+          </div>
+          <div class="field-grid">
+            <label>Name <input id="profileName" type="text" autocomplete="name"></label>
+            <label>Email <input id="profileEmail" type="email" autocomplete="email"></label>
+          </div>
+          <div class="actions">
+            <button class="primary" type="submit"><svg class="i"><use href="#i-save"/></svg> Save profile</button>
+            <p id="profileStatus" class="status"></p>
+          </div>
+        </form>
+
+        <div class="card settings-card">
+          <p class="card-title"><svg class="i"><use href="#i-palette"/></svg> Appearance</p>
+          <p class="sub">Changes show right away and save on their own.</p>
+          <div>
+            <p class="setting-label">Accent color <span id="accentValue"></span></p>
+            <div id="accentSwatches" class="swatches"></div>
+          </div>
+          <div>
+            <p class="setting-label">Background</p>
+            <div id="bgOptions" class="bg-options"></div>
+          </div>
+          <div>
+            <p class="setting-label">Corner roundness <span id="radiusValue"></span></p>
+            <input id="radiusInput" type="range" min="0" max="24" step="1">
+          </div>
+          <div>
+            <p class="setting-label">Text size <span id="textSizeValue"></span></p>
+            <input id="textSizeInput" type="range" min="13" max="19" step="1">
+          </div>
+          <div class="theme-preview">
+            <button class="primary" type="button" tabindex="-1">Button</button>
+            <span class="pill DUE"><svg class="i"><use href="#i-alert"/></svg>Due now</span>
+            <span class="pill COMPLETE"><svg class="i"><use href="#i-check"/></svg>Complete</span>
+            <span class="sub">Preview</span>
+          </div>
+          <div class="actions">
+            <button id="themeReset" class="outline" type="button">Reset to default</button>
+            <p id="themeStatus" class="status"></p>
+          </div>
+        </div>
+
+        <form id="passwordForm" class="card settings-card" novalidate>
+          <p class="card-title"><svg class="i"><use href="#i-lock"/></svg> Password</p>
+          <input type="email" autocomplete="username" class="hidden" id="passwordUser">
+          <div class="field-grid">
+            <label>Current password <input id="currentPassword" type="password" autocomplete="current-password"></label>
+            <label>New password <input id="newPassword" type="password" autocomplete="new-password" placeholder="At least 8 characters"></label>
+          </div>
+          <div class="actions">
+            <button class="primary" type="submit">Change password</button>
+            <p id="passwordStatus" class="status"></p>
+          </div>
+        </form>
       </section>
 
       <!-- Help -->
@@ -914,6 +1166,9 @@ function previewSummary(r) {
     counts, dueVaccines: due, nextDose: next };
 }
 
+// What the server's UserInfo holds. The preview keeps the picture as a data URL, so it hands that over directly.
+const previewInfo = (u) => ({ id: u.id, name: u.name, email: u.email, hasAvatar: !!u.avatar, avatarUrl: u.avatar || null, theme: u.theme || null });
+
 const readAsDataUrl = (file) => new Promise((resolve) => {
   const reader = new FileReader();
   reader.onload = () => resolve(reader.result);
@@ -945,18 +1200,63 @@ window.fetch = async (path, options = {}) => {
     users[key] = { id: Date.now(), name: name.trim(), email: key, hash: await previewHash(password) };
     previewStore.set("vb-users", users);
     previewStore.set("vb-session", key);
-    return reply(200, { id: users[key].id, name: users[key].name, email: key });
+    return reply(200, previewInfo(users[key]));
   }
   if (path === "/api/auth/login") {
     const { email: e = "", password = "" } = body();
     const u = users[e.trim().toLowerCase()];
     if (!u || u.hash !== await previewHash(password)) return fail(401, "Email or password is incorrect.");
     previewStore.set("vb-session", u.email);
-    return reply(200, { id: u.id, name: u.name, email: u.email });
+    return reply(200, previewInfo(u));
   }
   if (path === "/api/auth/logout") { previewStore.set("vb-session", null); return reply(204, {}); }
   if (!user) return fail(401, "Sign in to see saved records.");
-  if (path === "/api/auth/me") return reply(200, { id: user.id, name: user.name, email: user.email });
+  if (path === "/api/auth/me") return reply(200, previewInfo(user));
+
+  if (path === "/api/account" && method === "PUT") {
+    const { name, email: e, theme } = body();
+    if (name !== undefined) {
+      if (!String(name).trim()) return fail(400, "Enter your name.");
+      user.name = String(name).trim();
+    }
+    if (e !== undefined) {
+      const next = String(e).trim().toLowerCase();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(next)) return fail(400, "Enter a valid email address.");
+      if (next !== user.email) {
+        if (users[next]) return fail(409, "Another account already uses this email.");
+        previewStore.set("vb-records:" + next, previewStore.get("vb-records:" + user.email, []));
+        previewStore.set("vb-records:" + user.email, []);
+        delete users[user.email];
+        user.email = next;
+        users[next] = user;
+        previewStore.set("vb-session", next);
+      }
+    }
+    if (theme !== undefined) user.theme = theme;
+    previewStore.set("vb-users", users);
+    return reply(200, previewInfo(user));
+  }
+  if (path === "/api/account/password" && method === "PUT") {
+    const { currentPassword = "", newPassword = "" } = body();
+    if (user.hash !== await previewHash(currentPassword)) return fail(400, "Your current password is incorrect.");
+    if (newPassword.length < 8) return fail(400, "Use a new password with at least 8 characters.");
+    user.hash = await previewHash(newPassword);
+    previewStore.set("vb-users", users);
+    return reply(204, {});
+  }
+  if (path === "/api/account/avatar") {
+    if (method === "PUT") {
+      const f = options.body.get("file");
+      if (!/^image\/(jpeg|png|gif|webp)$/.test(f.type)) return fail(400, "Use a JPEG, PNG, GIF or WebP picture.");
+      // Browser storage is small, so the preview keeps only small pictures.
+      if (f.size > 500000) return fail(400, "The preview keeps pictures up to 500 KB. The full app takes up to 2 MB.");
+      user.avatar = await readAsDataUrl(f);
+    } else if (method === "DELETE") {
+      user.avatar = null;
+    }
+    previewStore.set("vb-users", users);
+    return reply(200, previewInfo(user));
+  }
 
   const key = "vb-records:" + user.email;
   const records = previewStore.get(key, []);
@@ -997,7 +1297,260 @@ window.fetch = async (path, options = {}) => {
   return fail(405, "Not supported in the preview.");
 };
 
-// VaxBridge front end. Talks to the JSON API in ApiController.java, AuthController.java and RecordsController.java.
+// VaxBridge state formats: turns a reviewed record into the files states and clinics use.
+// Everything here is a transcription for a licensed provider to check and sign. Nothing is sent anywhere.
+
+// State and territory immunization registries, from the CDC directory
+// (https://www.cdc.gov/iis/contacts-locate-records/index.html). registry is null where the CDC page gives no name.
+const STATES = [
+  {"name": "Alabama", "code": "AL", "registry": "Immunization Provider Registry with Internet Technology (ImmPRINT)", "url": "https://www.alabamapublichealth.gov/Immunization/"},
+  {"name": "Alaska", "code": "AK", "registry": null, "url": "https://health.alaska.gov/dph/Epi/iz/Pages/records.aspx"},
+  {"name": "Arizona", "code": "AZ", "registry": "Arizona State Immunization Information System", "url": "https://irr.azdhs.gov/irr-form.php"},
+  {"name": "Arkansas", "code": "AR", "registry": null, "url": "https://healthy.arkansas.gov/programs-services/community-family-child-health/immunizations/"},
+  {"name": "California", "code": "CA", "registry": "California Immunization Registry (CAIR)", "url": "https://myvaccinerecord.cdph.ca.gov/"},
+  {"name": "Colorado", "code": "CO", "registry": "Colorado Immunization Information System (CIIS)", "url": "https://cdphe.colorado.gov/prevention-and-wellness/disease-and-injury-prevention/immunization/for-the-public/get-a-copy-of"},
+  {"name": "Connecticut", "code": "CT", "registry": "Connecticut WebIZ", "url": "https://portal.ct.gov/dph/individuals-and-families/immunizations/public-landing-page/ct-wiz"},
+  {"name": "Delaware", "code": "DE", "registry": null, "url": "https://delvaxpublicportal.dhss.delaware.gov/"},
+  {"name": "District of Columbia", "code": "DC", "registry": null, "url": "https://vaccines.dc.gov/page/immunization-records-docket"},
+  {"name": "Florida", "code": "FL", "registry": "Florida SHOTS", "url": "https://flshotsusers.com"},
+  {"name": "Georgia", "code": "GA", "registry": "Georgia Immunization Registry (GRITS)", "url": "https://dph.georgia.gov/immunization-records-request"},
+  {"name": "Hawaii", "code": "HI", "registry": "Hawaii State Immunization System (HiSIS)", "url": "https://hisis.hawaii.gov/"},
+  {"name": "Idaho", "code": "ID", "registry": null, "url": "https://healthandwelfare.idaho.gov/immunizationrecords"},
+  {"name": "Illinois", "code": "IL", "registry": "Illinois Comprehensive Automated Immunization Registry Exchange (I-CARE)", "url": "https://idphportal.illinois.gov/s/"},
+  {"name": "Indiana", "code": "IN", "registry": "MyVaxIndiana", "url": "https://eportal.isdh.in.gov/MyVaxIndiana/Default2.aspx"},
+  {"name": "Iowa", "code": "IA", "registry": "Immunization Registry Information System (IRIS)", "url": "https://iris.iowa.gov"},
+  {"name": "Kansas", "code": "KS", "registry": "Kansas Statewide Immunization Registry", "url": "https://www.kdhe.ks.gov/326/Statewide-Immunization-Registry"},
+  {"name": "Kentucky", "code": "KY", "registry": "Kentucky Immunization Registry", "url": "https://www.chfs.ky.gov/agencies/dph/dehp/idb/Pages/kyirportal.aspx"},
+  {"name": "Louisiana", "code": "LA", "registry": null, "url": "https://ldh.la.gov/immunization-program/request-vaccination-records"},
+  {"name": "Maine", "code": "ME", "registry": "Maine Immunization Program (ImmPact2)", "url": "https://www.maine.gov/dhhs/mecdc/diseases-conditions/immunization/immunization-records"},
+  {"name": "Maryland", "code": "MD", "registry": "ImmuNet", "url": "https://health.maryland.gov/phpa/OIDEOR/IMMUN/Pages/immunet.aspx"},
+  {"name": "Massachusetts", "code": "MA", "registry": "Massachusetts Immunization Information System (MIIS)", "url": "https://www.myvaxrecords.mass.gov/"},
+  {"name": "Michigan", "code": "MI", "registry": "Michigan Care Improvement Registry (MCIR)", "url": "https://mcir.org/public/"},
+  {"name": "Minnesota", "code": "MN", "registry": "Minnesota Immunization Information Connection (MIIC)", "url": "https://www.health.state.mn.us/people/immunize/miic/records.html"},
+  {"name": "Mississippi", "code": "MS", "registry": null, "url": "https://msdh.ms.gov/msdhsite/_static/14,0,71,969.html"},
+  {"name": "Missouri", "code": "MO", "registry": null, "url": "https://health.mo.gov/living/wellness/immunizations/tips.php"},
+  {"name": "Montana", "code": "MT", "registry": "Montana Immunization Information System", "url": "https://dphhs.mt.gov/publichealth/Immunization/copyofimmunizationrecord"},
+  {"name": "Nebraska", "code": "NE", "registry": "Nebraska State Immunization Information System (NESIIS)", "url": "https://nesiis-dhhs-prod.ne.gov/prd_ir/public/clientSearch.do?language=en"},
+  {"name": "Nevada", "code": "NV", "registry": "Nevada WebIZ", "url": "https://izrecord.nv.gov/public/Application/PublicPortal"},
+  {"name": "New Hampshire", "code": "NH", "registry": null, "url": "https://www.vaccines.nh.gov/vaccination-record-instructions"},
+  {"name": "New Jersey", "code": "NJ", "registry": "New Jersey Immunization Information System (NJIIS)", "url": "https://njiis.nj.gov/core/web/index.html#/home/requestImmunizationRecord"},
+  {"name": "New Mexico", "code": "NM", "registry": null, "url": "https://vaxview.doh.nm.gov/"},
+  {"name": "New York (outside NYC)", "code": "NY", "registry": "New York State Immunization Information System (NYSIIS)", "url": "https://www.health.ny.gov/prevention/immunization/information_system"},
+  {"name": "New York City", "code": "NY", "registry": "Citywide Immunization Registry (CIR)", "url": "https://www.nyc.gov/site/doh/services/cir-parents-guardians.page"},
+  {"name": "North Carolina", "code": "NC", "registry": "North Carolina Immunization Registry (NCIR)", "url": "https://immunization.dph.ncdhhs.gov/family/locating_immnz_record.htm"},
+  {"name": "North Dakota", "code": "ND", "registry": "North Dakota Immunization Information System (NDIIS)", "url": "https://www.ndiis.org/"},
+  {"name": "Ohio", "code": "OH", "registry": "Ohio Impact SIIS", "url": "https://www.ohiopublichealthreporting.info/Enrollment/FileSystem/HL7/Public_Instructions_to_access_ImpactSIIS_record.pdf"},
+  {"name": "Oklahoma", "code": "OK", "registry": "Oklahoma State Immunization Information System (OSIIS)", "url": "https://shotrecords.health.ok.gov/"},
+  {"name": "Oregon", "code": "OR", "registry": "ALERT Immunization Information System", "url": "https://www.oregon.gov/oha/PH/PREVENTIONWELLNESS/VACCINESIMMUNIZATION/GETTINGIMMUNIZED/Pages/ImmRecords.aspx"},
+  {"name": "Pennsylvania", "code": "PA", "registry": "Pennsylvania Immunization Electronic Registry System (PIERS)", "url": "https://www.pa.gov/agencies/health/healthcare-and-public-health-professionals/piers"},
+  {"name": "Philadelphia", "code": "PA", "registry": "PhilaVax", "url": "https://vaccines.phila.gov/"},
+  {"name": "Puerto Rico", "code": "PR", "registry": "Puerto Rico Electronic Immunization System (PREIS)", "url": "https://prcp1web.stchealthops.com/iweb/"},
+  {"name": "Rhode Island", "code": "RI", "registry": null, "url": "https://health.ri.gov/programs/detail.php?pgm_id=156681"},
+  {"name": "South Carolina", "code": "SC", "registry": null, "url": "https://dph.sc.gov/public/your-local-health-department-online/south-carolina-vaccination-records"},
+  {"name": "South Dakota", "code": "SD", "registry": null, "url": "https://doh.sd.gov/topics/immunizations-vaccinations/request-copy-of-immunization-record/"},
+  {"name": "Tennessee", "code": "TN", "registry": "Tennessee Immunization Information System (TennIIS)", "url": "https://redcap.health.tn.gov/redcap/surveys/?s=NDW7XEFTKHHXHR3Y"},
+  {"name": "Texas", "code": "TX", "registry": "Texas Immunization Registry (ImmTrac2)", "url": "https://www.dshs.texas.gov/immunizations"},
+  {"name": "Utah", "code": "UT", "registry": "Utah Statewide Immunization Information System (USIIS)", "url": "https://immunize.utah.gov/usiis-parents-individuals/"},
+  {"name": "Vermont", "code": "VT", "registry": "Vermont Immunization Registry", "url": "https://www.healthvermont.gov/sites/default/files/documents/pdf/IMR_Requesting_Vaccine_Records.pdf"},
+  {"name": "Virginia", "code": "VA", "registry": "Virginia Immunization Information System (VIIS)", "url": "https://myirmobile.com/"},
+  {"name": "Washington", "code": "WA", "registry": "Washington State Immunization Information System", "url": "https://myirmobile.com/"},
+  {"name": "West Virginia", "code": "WV", "registry": "West Virginia Statewide Immunization Information System (WVSIIS)", "url": "https://www.wvimm.org/wvsiis/"},
+  {"name": "Wisconsin", "code": "WI", "registry": "Wisconsin Immunization Registry (WIR)", "url": "https://dhs.wisconsin.gov/immunization/wir.htm"},
+  {"name": "Wyoming", "code": "WY", "registry": null, "url": "https://health.wyo.gov/publichealth/immunization/immunization-records/"},
+  {"name": "Guam", "code": "GU", "registry": null, "url": "https://getimmunizedguam.org/"},
+  {"name": "U.S. Virgin Islands", "code": "VI", "registry": "Virgin Islands Immunization Registry System (VIIRS)", "url": "https://viirs.vi.gov/ohca/"}
+];
+const CDC_DIRECTORY = "https://www.cdc.gov/iis/contacts-locate-records/index.html";
+
+// CDC CVX vaccine codes. Combination vaccines first, so a "pentavalent" entry gets one code, not three.
+const CVX_COMBOS = [
+  [["DTaP", "HepB", "Hib", "IPV"], "146", "DTaP-IPV-Hib-HepB"],
+  [["DTaP", "HepB", "Hib"], "198", "DTP-HepB-Hib (pentavalent)"],
+  [["DTaP", "Hib", "IPV"], "120", "DTaP-Hib-IPV"],
+  [["DTaP", "HepB", "IPV"], "110", "DTaP-HepB-IPV"],
+  [["DTaP", "IPV"], "130", "DTaP-IPV"],
+  [["DTaP", "Hib"], "50", "DTaP-Hib"],
+  [["MMR", "VAR"], "94", "MMRV"],
+  [["HepA", "HepB"], "104", "HepA-HepB"],
+  [["Hib", "HepB"], "51", "Hib-HepB"],
+];
+const CVX_SINGLE = {
+  HepB: ["45", "Hepatitis B, unspecified formulation"],
+  RV: ["122", "Rotavirus, unspecified formulation"],
+  DTaP: ["107", "DTaP, unspecified formulation"],
+  DT: ["28", "DT (pediatric)"],
+  Tdap: ["115", "Tdap"],
+  Td: ["139", "Td (adult), unspecified formulation"],
+  Hib: ["17", "Hib, unspecified formulation"],
+  PCV: ["152", "Pneumococcal conjugate, unspecified formulation"],
+  IPV: ["10", "IPV"],
+  OPV: ["182", "OPV, unspecified"],
+  MMR: ["03", "MMR"],
+  Measles: ["05", "Measles"],
+  MR: ["04", "Measles and rubella"],
+  VAR: ["21", "Varicella"],
+  HepA: ["85", "Hepatitis A, unspecified formulation"],
+  MenACWY: ["108", "Meningococcal ACWY, unspecified formulation"],
+  HPV: ["137", "HPV, unspecified formulation"],
+  BCG: ["19", "BCG"],
+  Other: ["999", "Unknown vaccine"],
+};
+
+// One or more CVX codes for one line on the record.
+function cvxCodes(entry) {
+  const parts = new Set(entry.antigens || []);
+  const codes = [];
+  for (const [combo, code, name] of CVX_COMBOS) {
+    if (combo.length === parts.size && combo.every((a) => parts.has(a))) return [{ code, name, antigens: combo }];
+  }
+  for (const a of parts) {
+    let [code, name] = CVX_SINGLE[a] || CVX_SINGLE.Other;
+    if (a === "OPV" && /bopv|bivalent/i.test(entry.originalText || "")) [code, name] = ["178", "OPV bivalent"];
+    codes.push({ code, name, antigens: [a] });
+  }
+  return codes;
+}
+
+// Every dated dose on the reviewed record, oldest first, with its CVX code.
+function exportDoses(record) {
+  const doses = [];
+  for (const entry of record.entries || []) {
+    if (!entry.date || !(entry.antigens || []).length) continue;
+    for (const c of cvxCodes(entry)) doses.push({ ...c, date: entry.date, original: entry.originalText || "", english: entry.englishName || "" });
+  }
+  return doses.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+const usDate = (iso) => (iso ? `${iso.slice(5, 7)}/${iso.slice(8, 10)}/${iso.slice(0, 4)}` : "");
+const compact = (iso) => (iso || "").replaceAll("-", "");
+
+function splitName(full) {
+  const words = (full || "").replace(/\(.*?\)/g, "").trim().split(/\s+/).filter(Boolean);
+  if (words.length < 2) return { given: words[0] || "", family: "" };
+  return { given: words.slice(0, -1).join(" "), family: words.at(-1) };
+}
+
+// HL7 v2.5.1 VXU^V04: the message state registries take from enrolled clinics. Doses are sent as
+// historical (RXA-9 "01"), which is what a transcribed record from another country is.
+function buildHl7(record, state) {
+  const esc = (t) => String(t ?? "").replace(/\\/g, "\\E\\").replace(/\|/g, "\\F\\").replace(/\^/g, "\\S\\")
+    .replace(/~/g, "\\R\\").replace(/&/g, "\\T\\").replace(/[\r\n]+/g, " ");
+  const now = new Date();
+  const stamp = now.toISOString().replace(/[-:T]/g, "").slice(0, 14);
+  const id = `VB${stamp}${Math.floor(Math.random() * 1000).toString().padStart(3, "0")}`;
+  const name = splitName(record.childName);
+  const segments = [
+    `MSH|^~\\&|VAXBRIDGE|VAXBRIDGE|${esc(state.code)}IIS|${esc(state.code)}|${stamp}||VXU^V04^VXU_V04|${id}|P|2.5.1|||ER|AL|||UNICODE UTF-8|||Z22^CDCPHINVS`,
+    `PID|1||${id}^^^VAXBRIDGE^MR||${esc(name.family)}^${esc(name.given)}^^^^^L||${compact(record.dateOfBirth)}|U`,
+  ];
+  exportDoses(record).forEach((d, i) => {
+    segments.push(`ORC|RE||${id}-${i + 1}^VAXBRIDGE`);
+    segments.push(`RXA|0|1|${compact(d.date)}|${compact(d.date)}|${d.code}^${esc(d.name)}^CVX|999|||01^Historical information - source unspecified^NIP001`);
+    segments.push(`NTE|1||${esc(`On the original record: ${d.original}${record.country ? ` (${record.country})` : ""}`)}`);
+  });
+  return segments.join("\r") + "\r";
+}
+
+// FHIR R4 collection Bundle with one Patient and one Immunization per dose.
+function buildFhir(record) {
+  const name = splitName(record.childName);
+  const patient = {
+    resourceType: "Patient",
+    name: [{ family: name.family || undefined, given: name.given ? [name.given] : undefined, text: record.childName || undefined }],
+    birthDate: record.dateOfBirth || undefined,
+  };
+  const entries = [{ fullUrl: "resource:0", resource: patient }];
+  exportDoses(record).forEach((d, i) => entries.push({
+    fullUrl: `resource:${i + 1}`,
+    resource: {
+      resourceType: "Immunization",
+      status: "completed",
+      vaccineCode: { coding: [{ system: "http://hl7.org/fhir/sid/cvx", code: d.code, display: d.name }], text: d.original || d.name },
+      patient: { reference: "resource:0" },
+      occurrenceDateTime: d.date,
+      primarySource: false,
+      reportOrigin: { text: `Transcribed from a vaccination record from ${record.country || "another country"} using VaxBridge` },
+      note: [{ text: `On the original record: ${d.original}` }],
+    },
+  }));
+  return JSON.stringify({ resourceType: "Bundle", type: "collection", timestamp: new Date().toISOString(), entry: entries }, null, 2);
+}
+
+function buildCsv(record) {
+  const cell = (v) => (/[",\n]/.test(String(v)) ? `"${String(v).replaceAll('"', '""')}"` : String(v ?? ""));
+  const rows = [["Child", "Date of birth", "Date given", "Vaccine (US name)", "CVX code", "Vaccine parts", "On the original record", "English"]];
+  for (const d of exportDoses(record)) {
+    rows.push([record.childName, usDate(record.dateOfBirth), usDate(d.date), d.name, d.code, d.antigens.join(" + "), d.original, d.english]);
+  }
+  return rows.map((r) => r.map(cell).join(",")).join("\r\n") + "\r\n";
+}
+
+// Doses by vaccine for the grid: each US series with its dose dates. Doses that don't count are flagged.
+function doseGrid(report) {
+  return report.series.filter((s) => s.doses.length).map((s) => ({
+    name: s.name,
+    doses: s.doses.map((d) => ({ date: d.given, valid: d.valid, reason: d.reason })),
+  }));
+}
+
+// A self-contained page to print: the record in the vaccine-by-dose layout of state school forms.
+function buildPrintable(record, report, state) {
+  const h = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const grid = doseGrid(report);
+  const columns = Math.max(5, ...grid.map((g) => g.doses.length));
+  const footnotes = [];
+  const rows = grid.map((g) => `<tr><th>${h(g.name)}</th>${Array.from({ length: columns }, (_, i) => {
+    const d = g.doses[i];
+    if (!d) return "<td></td>";
+    if (d.valid) return `<td>${usDate(d.date)}</td>`;
+    footnotes.push(`${g.name}, ${usDate(d.date)}: ${d.reason}`);
+    return `<td class="bad">${usDate(d.date)}<sup>${footnotes.length}</sup></td>`;
+  }).join("")}</tr>`).join("");
+  const other = report.ignored.map((d) => `<li>${h(d.sourceText || d.antigen)}, ${usDate(d.given)}: ${h(d.reason)}</li>`).join("");
+  const registry = state.registry || `${state.name} immunization registry`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${h(state.name)} school immunization record: ${h(record.childName || "child")}</title>
+<style>
+  body { font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1A1F2E; margin: 32px auto; max-width: 820px; padding: 0 16px; }
+  h1 { font-size: 20px; margin: 0; } h2 { font-size: 14px; margin: 24px 0 8px; }
+  .stamp { border: 2px solid #B45309; color: #92400E; background: #FFFBEB; padding: 10px 14px; border-radius: 8px; margin: 16px 0; font-weight: 600; }
+  .stamp span { display: block; font-weight: 400; margin-top: 2px; }
+  dl { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 24px; margin: 16px 0; }
+  dt { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #6B7280; } dd { margin: 0 0 6px; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #9CA3AF; padding: 6px 8px; text-align: left; }
+  thead th { background: #F3F4F6; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  tbody th { font-weight: 500; width: 34%; } td { font-family: ui-monospace, Menlo, monospace; font-size: 12px; } td.bad { color: #B91C1C; }
+  ol, ul { padding-left: 20px; margin: 6px 0; } .small { font-size: 11px; color: #4B5563; }
+  .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 32px; margin-top: 16px; }
+  .sign div { border-bottom: 1px solid #1A1F2E; height: 34px; } .sign span { font-size: 11px; color: #4B5563; }
+  .bar { display: flex; gap: 8px; margin-bottom: 16px; } .bar button { font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid #0B7A5E; background: #0B7A5E; color: #fff; cursor: pointer; }
+  @media print { .bar { display: none; } body { margin: 0 auto; } }
+</style></head><body>
+<div class="bar"><button onclick="window.print()">Print</button></div>
+<h1>School immunization record (transcription)</h1>
+<p class="small">${h(state.name)} · state registry: ${h(registry)} · prepared ${usDate(new Date().toISOString().slice(0, 10))}</p>
+<div class="stamp">Transcribed by VaxBridge from a foreign vaccination record. Not valid until verified and signed by a licensed health care provider.
+<span>Use this to complete ${h(state.name)}'s official school immunization form, or attach it to the original record. Dates are MM/DD/YYYY.</span></div>
+<dl>
+  <div><dt>Child</dt><dd>${h(record.childName || "")}</dd></div>
+  <div><dt>Date of birth</dt><dd>${usDate(record.dateOfBirth)}</dd></div>
+  <div><dt>Record from</dt><dd>${h([record.country, record.language].filter(Boolean).join(", ") || "Not given")}</dd></div>
+  <div><dt>Checked against</dt><dd>CDC catch-up schedule, ${usDate(report.asOf)}</dd></div>
+</dl>
+<table><thead><tr><th>Vaccine</th>${Array.from({ length: columns }, (_, i) => `<th>Dose ${i + 1}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table>
+${footnotes.length ? `<h2>Doses that don't count toward the US schedule</h2><ol>${footnotes.map((f) => `<li>${h(f)}</li>`).join("")}</ol>` : ""}
+${other ? `<h2>Other vaccines on the record</h2><ul>${other}</ul>` : ""}
+<h2>Provider verification</h2>
+<p class="small">I have reviewed the original vaccination record and verified that the doses above were transcribed correctly.</p>
+<div class="sign"><div></div><div></div></div>
+<div class="sign" style="margin-top:4px"><span>Provider name and credentials</span><span>Signature</span></div>
+<div class="sign"><div></div><div></div></div>
+<div class="sign" style="margin-top:4px"><span>Clinic or school</span><span>Date</span></div>
+</body></html>`;
+}
+
+// VaxBridge front end. Talks to the JSON API in ApiController.java, AuthController.java, AccountController.java
+// and RecordsController.java. The state formats are built in exports.js.
 
 const $ = (id) => document.getElementById(id);
 let antigenNames = {};
@@ -1025,7 +1578,7 @@ const STATUS = {
 // ---- helpers ---------------------------------------------------------------
 
 function show(view) {
-  for (const id of ["dashboard", "records", "upload", "review", "report", "help"]) {
+  for (const id of ["dashboard", "records", "upload", "review", "report", "state", "settings", "help"]) {
     $(id).classList.toggle("hidden", id !== view);
   }
   for (const btn of $("nav").querySelectorAll("button")) {
@@ -1034,6 +1587,8 @@ function show(view) {
   if (view === "dashboard") renderDashboard();
   if (view === "records") renderRecords();
   if (view === "report") updateNoReport();
+  if (view === "state") renderState();
+  if (view === "settings") renderSettings();
   window.scrollTo(0, 0);
 }
 
@@ -1125,10 +1680,10 @@ $("authForm").addEventListener("submit", async (e) => {
 
 async function signedIn(u) {
   user = u;
+  applyTheme(u.theme);
+  renderUser();
   $("signin").classList.add("hidden");
   $("app").classList.remove("hidden");
-  $("userInitials").textContent = initials(u.name);
-  $("userName").textContent = u.name;
   await loadSummaries();
   show("dashboard");
 }
@@ -1140,6 +1695,7 @@ function signedOut() {
   setFiles([]);
   $("review").classList.remove("open");
   $("report").classList.remove("open");
+  applyTheme(null);
   $("app").classList.add("hidden");
   $("signin").classList.remove("hidden");
   setAuthMode(false);
@@ -1617,6 +2173,268 @@ $("deleteBtn").addEventListener("click", async () => {
 
 $("backToReview").addEventListener("click", () => show("review"));
 $("printBtn").addEventListener("click", () => window.print());
+
+// ---- settings --------------------------------------------------------------
+
+const ACCENTS = [
+  ["Teal", "#0B7A5E"], ["Indigo", "#4F46E5"], ["Rose", "#E11D48"],
+  ["Amber", "#D97706"], ["Slate", "#475569"], ["Violet", "#7C3AED"],
+];
+const BACKGROUNDS = [
+  ["light", "Light", "#F5F6F8"], ["warm", "Warm", "#F7F4EF"], ["cool", "Cool", "#EEF3F9"], ["dark", "Dark", "#0F131B"],
+];
+const DEFAULT_THEME = { accent: "#0B7A5E", background: "light", radius: 12, textSize: 16 };
+let theme = { ...DEFAULT_THEME };
+let avatarVersion = Date.now();
+
+function hexToRgb(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+const rgbToHex = (rgb) => "#" + rgb.map((v) => Math.round(v).toString(16).padStart(2, "0")).join("");
+const mixWhite = (hex, amount) => rgbToHex(hexToRgb(hex).map((v) => v + (255 - v) * amount));
+
+// White or near-black text, whichever reads better on the color.
+function textOn(hex) {
+  const [r, g, b] = hexToRgb(hex).map((v) => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.4 ? "#1A1F2E" : "#ffffff";
+}
+
+function applyTheme(saved) {
+  theme = { ...DEFAULT_THEME, ...(saved || {}) };
+  if (!/^#[0-9a-fA-F]{6}$/.test(theme.accent)) theme.accent = DEFAULT_THEME.accent;
+  if (!BACKGROUNDS.some(([key]) => key === theme.background)) theme.background = DEFAULT_THEME.background;
+  theme.radius = Math.min(24, Math.max(0, Number(theme.radius) || 0));
+  theme.textSize = Math.min(19, Math.max(13, Number(theme.textSize) || DEFAULT_THEME.textSize));
+
+  const root = document.documentElement;
+  // On a dark background the accent is lightened so text in that color stays readable.
+  const primary = theme.background === "dark" ? mixWhite(theme.accent, 0.3) : theme.accent;
+  root.dataset.bg = theme.background;
+  root.style.setProperty("--primary", primary);
+  root.style.setProperty("--primary-foreground", textOn(primary));
+  root.style.setProperty("--radius", `${theme.radius}px`);
+  root.style.setProperty("--radius-lg", `${theme.radius + 4}px`);
+  root.style.setProperty("--text-zoom", theme.textSize / 16);
+}
+
+function avatarNode(target) {
+  target.replaceChildren(user.hasAvatar
+    ? el("img", { src: user.avatarUrl || `/api/account/avatar?v=${avatarVersion}`, alt: "" })
+    : initials(user.name));
+}
+
+function renderUser() {
+  avatarNode($("userInitials"));
+  $("userName").textContent = user.name;
+}
+
+function renderSettings() {
+  avatarNode($("settingsAvatar"));
+  $("avatarRemove").classList.toggle("hidden", !user.hasAvatar);
+  $("profileName").value = user.name;
+  $("profileEmail").value = user.email;
+  $("passwordUser").value = user.email;
+  for (const id of ["profileStatus", "themeStatus", "passwordStatus"]) setStatus($(id), "");
+  renderThemeControls();
+}
+
+function renderThemeControls() {
+  const preset = ACCENTS.find(([, hex]) => hex.toLowerCase() === theme.accent.toLowerCase());
+  $("accentValue").textContent = preset ? preset[0] : theme.accent.toUpperCase();
+  const custom = el("input", { type: "color", value: theme.accent, title: "Pick any color" });
+  custom.addEventListener("input", () => changeTheme({ accent: custom.value }, false));
+  custom.addEventListener("change", () => changeTheme({ accent: custom.value }));
+  $("accentSwatches").replaceChildren(
+    ...ACCENTS.map(([name, hex]) => el("button", {
+      type: "button", className: `swatch${preset && preset[1] === hex ? " active" : ""}`, title: name,
+      style: `background: ${hex}`, onclick: () => changeTheme({ accent: hex }),
+    })),
+    el("label", { className: `swatch custom${preset ? "" : " active"}`, title: "Custom color" }, custom));
+  $("bgOptions").replaceChildren(...BACKGROUNDS.map(([key, name, color]) => el("button", {
+    type: "button", className: `bg-option${theme.background === key ? " active" : ""}`,
+    onclick: () => changeTheme({ background: key }),
+  }, el("span", { className: "swatch-bg", style: `background: ${color}` }, el("i"), el("i")), name)));
+  $("radiusInput").value = theme.radius;
+  $("radiusValue").textContent = `${theme.radius}px`;
+  $("textSizeInput").value = theme.textSize;
+  $("textSizeValue").textContent = theme.textSize === 16 ? "16px (default)" : `${theme.textSize}px`;
+}
+
+// Shows a change right away; saves it to the account shortly after the last change.
+let themeTimer;
+function changeTheme(change, rerender = true) {
+  applyTheme({ ...theme, ...change });
+  if (rerender) renderThemeControls();
+  else $("accentValue").textContent = theme.accent.toUpperCase();
+  clearTimeout(themeTimer);
+  setStatus($("themeStatus"), "Saving…");
+  themeTimer = setTimeout(() => saveTheme(theme), 600);
+}
+
+async function saveTheme(value) {
+  try {
+    user = { ...user, ...(await postJson("/api/account", { theme: value }, "PUT")) };
+    setStatus($("themeStatus"), "Saved to your account.");
+  } catch (err) {
+    setStatus($("themeStatus"), err.message, true);
+  }
+}
+
+$("radiusInput").addEventListener("input", (e) => changeTheme({ radius: Number(e.target.value) }));
+$("textSizeInput").addEventListener("input", (e) => changeTheme({ textSize: Number(e.target.value) }));
+$("themeReset").addEventListener("click", () => {
+  clearTimeout(themeTimer);
+  applyTheme(null);
+  renderThemeControls();
+  saveTheme(null);
+});
+
+$("profileForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    user = await postJson("/api/account", { name: $("profileName").value, email: $("profileEmail").value }, "PUT");
+    renderUser();
+    renderSettings();
+    setStatus($("profileStatus"), "Profile saved.");
+  } catch (err) {
+    setStatus($("profileStatus"), err.message, true);
+  }
+});
+
+$("avatarBtn").addEventListener("click", () => $("avatarInput").click());
+$("avatarInput").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    setStatus($("profileStatus"), "Use a picture smaller than 2 MB.", true);
+    return;
+  }
+  const form = new FormData();
+  form.append("file", file);
+  try {
+    user = await api("/api/account/avatar", { method: "PUT", body: form });
+    avatarVersion = Date.now();
+    renderUser();
+    renderSettings();
+    setStatus($("profileStatus"), "Picture updated.");
+  } catch (err) {
+    setStatus($("profileStatus"), err.message, true);
+  }
+});
+$("avatarRemove").addEventListener("click", async () => {
+  try {
+    user = await api("/api/account/avatar", { method: "DELETE" });
+    renderUser();
+    renderSettings();
+  } catch (err) {
+    setStatus($("profileStatus"), err.message, true);
+  }
+});
+
+$("passwordForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    await postJson("/api/account/password",
+      { currentPassword: $("currentPassword").value, newPassword: $("newPassword").value }, "PUT");
+    $("currentPassword").value = "";
+    $("newPassword").value = "";
+    setStatus($("passwordStatus"), "Password changed.");
+  } catch (err) {
+    setStatus($("passwordStatus"), err.message, true);
+  }
+});
+
+// ---- state format ----------------------------------------------------------
+
+function chosenState() {
+  let code = null;
+  try { code = localStorage.getItem("vaxbridge.state"); } catch { /* storage can be blocked */ }
+  return STATES.find((s) => s.name === code) || STATES.find((s) => s.name === "California");
+}
+
+$("stateSelect").append(...STATES.map((s) => el("option", { value: s.name, textContent: s.name })));
+$("stateSelect").addEventListener("change", () => {
+  try { localStorage.setItem("vaxbridge.state", $("stateSelect").value); } catch { /* not remembered, that's fine */ }
+  renderState();
+});
+
+function renderState() {
+  // The state formats need a checked report that matches the entries.
+  const ready = $("report").classList.contains("open") && current.report;
+  $("state").classList.toggle("open", !!ready);
+  if (!ready) return;
+  const state = chosenState();
+  $("stateSelect").value = state.name;
+  const myIr = state.url.includes("myirmobile.com");
+  $("registryInfo").replaceChildren(
+    el("div", { className: "tile" }, icon("map")),
+    el("div", { className: "grow" },
+      el("p", { className: "strong", textContent: state.registry || `${state.name} immunization registry` }),
+      el("p", { className: "sub", textContent: myIr
+        ? "Families can see their record in MyIR Mobile once a clinic adds the doses."
+        : "Where the state keeps immunization records. Families can ask for a copy here once a clinic adds the doses." }),
+      el("a", { className: "link", href: state.url, target: "_blank", rel: "noopener" }, icon("external"), "State registry page"),
+      el("br"),
+      el("a", { className: "link", href: CDC_DIRECTORY, target: "_blank", rel: "noopener" }, icon("external"), "CDC directory of all state registries")));
+  $("hl7Text").textContent = `The message format state immunization registries accept from clinics. A clinic enrolled with ${
+    state.registry || `the ${state.name} registry`} uploads it as historical doses.`;
+
+  const grid = doseGrid(current.report);
+  const columns = Math.max(5, ...grid.map((g) => g.doses.length));
+  $("gridTitle").textContent = `Doses by vaccine, as ${state.name} school forms list them`;
+  $("doseGrid").replaceChildren(
+    el("thead", {}, el("tr", {}, el("th", { textContent: "Vaccine" }),
+      ...Array.from({ length: columns }, (_, i) => el("th", { textContent: `Dose ${i + 1}` })))),
+    el("tbody", {}, ...grid.map((g) => el("tr", {}, el("td", { textContent: g.name }),
+      ...Array.from({ length: columns }, (_, i) => {
+        const d = g.doses[i];
+        if (!d) return el("td", { className: "none" });
+        return el("td", { className: d.valid ? "" : "bad", textContent: usDate(d.date) + (d.valid ? "" : " ✕"),
+          title: d.valid ? "" : `Doesn't count: ${d.reason}` });
+      })))));
+  setStatus($("exportStatus"), "");
+}
+
+function fileBase() {
+  const name = ($("childName").value || "record").normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase();
+  return `${name || "record"}-${chosenState().code.toLowerCase()}`;
+}
+
+function download(name, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = el("a", { href: url, download: name });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+for (const btn of document.querySelectorAll("[data-export]")) {
+  btn.addEventListener("click", () => {
+    const record = reviewedRecord();
+    const state = chosenState();
+    const kind = btn.dataset.export;
+    if (kind === "hl7") download(`${fileBase()}.hl7`, buildHl7(record, state), "application/hl7-v2");
+    if (kind === "fhir") download(`${fileBase()}.fhir.json`, buildFhir(record), "application/fhir+json");
+    if (kind === "csv") download(`${fileBase()}.csv`, buildCsv(record), "text/csv");
+    setStatus($("exportStatus"), `Downloaded. ${exportDoses(record).length} doses for ${state.name}. Check it against the original before anyone uses it.`);
+  });
+}
+
+$("printStateBtn").addEventListener("click", () => {
+  const page = buildPrintable(reviewedRecord(), current.report, chosenState());
+  const url = URL.createObjectURL(new Blob([page], { type: "text/html" }));
+  const win = window.open(url, "_blank");
+  if (win) win.opener = null;
+  else download(`${fileBase()}-school-record.html`, page, "text/html");
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+});
 
 // ---- start -----------------------------------------------------------------
 

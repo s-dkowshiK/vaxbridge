@@ -40,6 +40,15 @@
       <symbol id="i-save" viewBox="0 0 24 24"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></symbol>
       <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></symbol>
       <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M9.94 14.06 4 20"/><path d="m14 4 1.5 3.5L19 9l-3.5 1.5L14 14l-1.5-3.5L9 9l3.5-1.5z"/></symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+      <symbol id="i-map" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+      <symbol id="i-palette" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></symbol>
+      <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+      <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3"/></symbol>
+      <symbol id="i-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></symbol>
+      <symbol id="i-table" viewBox="0 0 24 24"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></symbol>
     </defs>
   </svg>
 
@@ -73,13 +82,13 @@
         <span id="dueBadge" class="badge hidden" title="Saved records with doses due now"></span>
       </div>
 
-      <div class="child-card">
+      <button id="userCard" class="child-card" data-goto="settings" title="Settings">
         <div id="userInitials" class="avatar"></div>
         <div class="child-text">
           <p id="userName"></p>
           <p id="userMeta" class="sub"></p>
         </div>
-      </div>
+      </button>
 
       <button id="newRecordBtn" class="primary cta"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
 
@@ -93,7 +102,9 @@
         <button data-view="upload"><svg class="i"><use href="#i-upload"/></svg><span>Upload record</span></button>
         <button data-view="review"><svg class="i"><use href="#i-list"/></svg><span>Review entries</span></button>
         <button data-view="report"><svg class="i"><use href="#i-file"/></svg><span>Report</span></button>
+        <button data-view="state"><svg class="i"><use href="#i-map"/></svg><span>State format</span></button>
         <p class="nav-label">App</p>
+        <button data-view="settings"><svg class="i"><use href="#i-settings"/></svg><span>Settings</span></button>
         <button data-view="help"><svg class="i"><use href="#i-help"/></svg><span>Help</span></button>
       </nav>
 
@@ -284,6 +295,7 @@
           <div class="report-actions no-print">
             <button id="saveBtn" class="primary"><svg class="i"><use href="#i-save"/></svg> <span>Save to records</span></button>
             <button id="printBtn" class="outline"><svg class="i"><use href="#i-print"/></svg> Print</button>
+            <button class="outline" data-goto="state"><svg class="i"><use href="#i-map"/></svg> State format</button>
           </div>
         </div>
         <p id="saveStatus" class="status no-print"></p>
@@ -325,6 +337,150 @@
           <button id="deleteBtn" class="danger"><svg class="i"><use href="#i-trash"/></svg> Delete this saved record</button>
         </div>
         </div>
+      </section>
+
+      <!-- State format: the reviewed record in the layout states use, for a provider to sign -->
+      <section id="state" class="view hidden">
+        <div class="empty card no-record">
+          <div class="tile lg"><svg class="i"><use href="#i-map"/></svg></div>
+          <p class="strong">No report yet</p>
+          <p class="sub">Check a record against the US schedule first, or open a saved record. Then you can get it ready for a state here.</p>
+          <div class="row">
+            <button class="primary go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+            <button class="outline" data-goto="records"><svg class="i"><use href="#i-folder"/></svg> Saved records</button>
+          </div>
+        </div>
+        <div class="has-record">
+        <div class="view-head">
+          <h1>Get it ready for a state</h1>
+          <p class="sub">Puts the reviewed record into the layout state school forms and registries use, with US vaccine names and dates.</p>
+        </div>
+
+        <div class="card state-pick">
+          <label>State
+            <select id="stateSelect"></select>
+          </label>
+          <div id="registryInfo" class="registry"></div>
+        </div>
+
+        <div class="note-box warn">
+          <svg class="i"><use href="#i-shield"/></svg>
+          <p>VaxBridge is not a state agency or a health care provider. These are transcriptions to save typing. A
+            licensed provider has to check them against the original record and sign before a school or registry will
+            accept them. VaxBridge never sends anything to a state.</p>
+        </div>
+
+        <div class="table-card">
+          <div class="series-header state-grid-head"><span id="gridTitle">Doses by vaccine</span></div>
+          <div class="dose-grid-wrap"><table class="dose-grid" id="doseGrid"></table></div>
+        </div>
+
+        <div class="format-grid">
+          <div class="card format-card main">
+            <div class="top"><div class="tile"><svg class="i"><use href="#i-print"/></svg></div>
+              <div><p class="strong">School immunization record</p><p class="tag">Printable, for a provider to sign</p></div></div>
+            <p class="sub">Every dose in a vaccine-by-dose grid with MM/DD/YYYY dates, the way state school forms ask for them.
+              Use it to fill in the state's official form, or attach it to the original record.</p>
+            <button id="printStateBtn" class="primary"><svg class="i"><use href="#i-print"/></svg> Open printable record</button>
+          </div>
+          <div class="card format-card">
+            <div class="top"><div class="tile"><svg class="i"><use href="#i-code"/></svg></div>
+              <div><p class="strong">State registry file</p><p class="tag">HL7 2.5.1 VXU · .hl7</p></div></div>
+            <p id="hl7Text" class="sub">The message format state immunization registries accept from clinics. A clinic enrolled with the
+              registry uploads it as historical doses.</p>
+            <button class="outline" data-export="hl7"><svg class="i"><use href="#i-download"/></svg> Download .hl7</button>
+          </div>
+          <div class="card format-card">
+            <div class="top"><div class="tile"><svg class="i"><use href="#i-file"/></svg></div>
+              <div><p class="strong">Health record file</p><p class="tag">FHIR R4 · .json</p></div></div>
+            <p class="sub">The standard most clinic health record systems import. Doses are marked as transcribed from another
+              record, not given by the clinic.</p>
+            <button class="outline" data-export="fhir"><svg class="i"><use href="#i-download"/></svg> Download .json</button>
+          </div>
+          <div class="card format-card">
+            <div class="top"><div class="tile"><svg class="i"><use href="#i-table"/></svg></div>
+              <div><p class="strong">Spreadsheet</p><p class="tag">CSV · .csv</p></div></div>
+            <p class="sub">One row per dose, with the vaccine code, the US name and the text on the original record.</p>
+            <button class="outline" data-export="csv"><svg class="i"><use href="#i-download"/></svg> Download .csv</button>
+          </div>
+        </div>
+        <p id="exportStatus" class="status"></p>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section id="settings" class="view narrow hidden">
+        <div class="view-head">
+          <h1>Settings</h1>
+          <p class="sub">Your profile and how VaxBridge looks. Saved to your account, so they follow you to any device.</p>
+        </div>
+
+        <form id="profileForm" class="card settings-card" novalidate>
+          <p class="card-title"><svg class="i"><use href="#i-user"/></svg> Profile</p>
+          <div class="profile-row">
+            <div id="settingsAvatar" class="avatar xl"></div>
+            <div>
+              <div class="row">
+                <button id="avatarBtn" class="outline" type="button"><svg class="i"><use href="#i-camera"/></svg> Change picture</button>
+                <button id="avatarRemove" class="link" type="button">Remove</button>
+              </div>
+              <p class="sub" style="margin-top: 6px; font-size: 12px">JPG, PNG, GIF or WebP, up to 2 MB</p>
+              <input id="avatarInput" type="file" class="hidden" accept="image/jpeg,image/png,image/gif,image/webp">
+            </div>
+          </div>
+          <div class="field-grid">
+            <label>Name <input id="profileName" type="text" autocomplete="name"></label>
+            <label>Email <input id="profileEmail" type="email" autocomplete="email"></label>
+          </div>
+          <div class="actions">
+            <button class="primary" type="submit"><svg class="i"><use href="#i-save"/></svg> Save profile</button>
+            <p id="profileStatus" class="status"></p>
+          </div>
+        </form>
+
+        <div class="card settings-card">
+          <p class="card-title"><svg class="i"><use href="#i-palette"/></svg> Appearance</p>
+          <p class="sub">Changes show right away and save on their own.</p>
+          <div>
+            <p class="setting-label">Accent color <span id="accentValue"></span></p>
+            <div id="accentSwatches" class="swatches"></div>
+          </div>
+          <div>
+            <p class="setting-label">Background</p>
+            <div id="bgOptions" class="bg-options"></div>
+          </div>
+          <div>
+            <p class="setting-label">Corner roundness <span id="radiusValue"></span></p>
+            <input id="radiusInput" type="range" min="0" max="24" step="1">
+          </div>
+          <div>
+            <p class="setting-label">Text size <span id="textSizeValue"></span></p>
+            <input id="textSizeInput" type="range" min="13" max="19" step="1">
+          </div>
+          <div class="theme-preview">
+            <button class="primary" type="button" tabindex="-1">Button</button>
+            <span class="pill DUE"><svg class="i"><use href="#i-alert"/></svg>Due now</span>
+            <span class="pill COMPLETE"><svg class="i"><use href="#i-check"/></svg>Complete</span>
+            <span class="sub">Preview</span>
+          </div>
+          <div class="actions">
+            <button id="themeReset" class="outline" type="button">Reset to default</button>
+            <p id="themeStatus" class="status"></p>
+          </div>
+        </div>
+
+        <form id="passwordForm" class="card settings-card" novalidate>
+          <p class="card-title"><svg class="i"><use href="#i-lock"/></svg> Password</p>
+          <input type="email" autocomplete="username" class="hidden" id="passwordUser">
+          <div class="field-grid">
+            <label>Current password <input id="currentPassword" type="password" autocomplete="current-password"></label>
+            <label>New password <input id="newPassword" type="password" autocomplete="new-password" placeholder="At least 8 characters"></label>
+          </div>
+          <div class="actions">
+            <button class="primary" type="submit">Change password</button>
+            <p id="passwordStatus" class="status"></p>
+          </div>
+        </form>
       </section>
 
       <!-- Help -->
@@ -386,6 +542,7 @@
     </tr>
   </template>
 
+  <script src="exports.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

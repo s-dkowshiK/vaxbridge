@@ -1,4 +1,5 @@
-// VaxBridge front end. Talks to the JSON API in ApiController.java, AuthController.java and RecordsController.java.
+// VaxBridge front end. Talks to the JSON API in ApiController.java, AuthController.java, AccountController.java
+// and RecordsController.java. The state formats are built in exports.js.
 
 const $ = (id) => document.getElementById(id);
 let antigenNames = {};
@@ -26,7 +27,7 @@ const STATUS = {
 // ---- helpers ---------------------------------------------------------------
 
 function show(view) {
-  for (const id of ["dashboard", "records", "upload", "review", "report", "help"]) {
+  for (const id of ["dashboard", "records", "upload", "review", "report", "state", "settings", "help"]) {
     $(id).classList.toggle("hidden", id !== view);
   }
   for (const btn of $("nav").querySelectorAll("button")) {
@@ -35,6 +36,8 @@ function show(view) {
   if (view === "dashboard") renderDashboard();
   if (view === "records") renderRecords();
   if (view === "report") updateNoReport();
+  if (view === "state") renderState();
+  if (view === "settings") renderSettings();
   window.scrollTo(0, 0);
 }
 
@@ -126,10 +129,10 @@ $("authForm").addEventListener("submit", async (e) => {
 
 async function signedIn(u) {
   user = u;
+  applyTheme(u.theme);
+  renderUser();
   $("signin").classList.add("hidden");
   $("app").classList.remove("hidden");
-  $("userInitials").textContent = initials(u.name);
-  $("userName").textContent = u.name;
   await loadSummaries();
   show("dashboard");
 }
@@ -141,6 +144,7 @@ function signedOut() {
   setFiles([]);
   $("review").classList.remove("open");
   $("report").classList.remove("open");
+  applyTheme(null);
   $("app").classList.add("hidden");
   $("signin").classList.remove("hidden");
   setAuthMode(false);
@@ -618,6 +622,268 @@ $("deleteBtn").addEventListener("click", async () => {
 
 $("backToReview").addEventListener("click", () => show("review"));
 $("printBtn").addEventListener("click", () => window.print());
+
+// ---- settings --------------------------------------------------------------
+
+const ACCENTS = [
+  ["Teal", "#0B7A5E"], ["Indigo", "#4F46E5"], ["Rose", "#E11D48"],
+  ["Amber", "#D97706"], ["Slate", "#475569"], ["Violet", "#7C3AED"],
+];
+const BACKGROUNDS = [
+  ["light", "Light", "#F5F6F8"], ["warm", "Warm", "#F7F4EF"], ["cool", "Cool", "#EEF3F9"], ["dark", "Dark", "#0F131B"],
+];
+const DEFAULT_THEME = { accent: "#0B7A5E", background: "light", radius: 12, textSize: 16 };
+let theme = { ...DEFAULT_THEME };
+let avatarVersion = Date.now();
+
+function hexToRgb(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+const rgbToHex = (rgb) => "#" + rgb.map((v) => Math.round(v).toString(16).padStart(2, "0")).join("");
+const mixWhite = (hex, amount) => rgbToHex(hexToRgb(hex).map((v) => v + (255 - v) * amount));
+
+// White or near-black text, whichever reads better on the color.
+function textOn(hex) {
+  const [r, g, b] = hexToRgb(hex).map((v) => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.4 ? "#1A1F2E" : "#ffffff";
+}
+
+function applyTheme(saved) {
+  theme = { ...DEFAULT_THEME, ...(saved || {}) };
+  if (!/^#[0-9a-fA-F]{6}$/.test(theme.accent)) theme.accent = DEFAULT_THEME.accent;
+  if (!BACKGROUNDS.some(([key]) => key === theme.background)) theme.background = DEFAULT_THEME.background;
+  theme.radius = Math.min(24, Math.max(0, Number(theme.radius) || 0));
+  theme.textSize = Math.min(19, Math.max(13, Number(theme.textSize) || DEFAULT_THEME.textSize));
+
+  const root = document.documentElement;
+  // On a dark background the accent is lightened so text in that color stays readable.
+  const primary = theme.background === "dark" ? mixWhite(theme.accent, 0.3) : theme.accent;
+  root.dataset.bg = theme.background;
+  root.style.setProperty("--primary", primary);
+  root.style.setProperty("--primary-foreground", textOn(primary));
+  root.style.setProperty("--radius", `${theme.radius}px`);
+  root.style.setProperty("--radius-lg", `${theme.radius + 4}px`);
+  root.style.setProperty("--text-zoom", theme.textSize / 16);
+}
+
+function avatarNode(target) {
+  target.replaceChildren(user.hasAvatar
+    ? el("img", { src: user.avatarUrl || `/api/account/avatar?v=${avatarVersion}`, alt: "" })
+    : initials(user.name));
+}
+
+function renderUser() {
+  avatarNode($("userInitials"));
+  $("userName").textContent = user.name;
+}
+
+function renderSettings() {
+  avatarNode($("settingsAvatar"));
+  $("avatarRemove").classList.toggle("hidden", !user.hasAvatar);
+  $("profileName").value = user.name;
+  $("profileEmail").value = user.email;
+  $("passwordUser").value = user.email;
+  for (const id of ["profileStatus", "themeStatus", "passwordStatus"]) setStatus($(id), "");
+  renderThemeControls();
+}
+
+function renderThemeControls() {
+  const preset = ACCENTS.find(([, hex]) => hex.toLowerCase() === theme.accent.toLowerCase());
+  $("accentValue").textContent = preset ? preset[0] : theme.accent.toUpperCase();
+  const custom = el("input", { type: "color", value: theme.accent, title: "Pick any color" });
+  custom.addEventListener("input", () => changeTheme({ accent: custom.value }, false));
+  custom.addEventListener("change", () => changeTheme({ accent: custom.value }));
+  $("accentSwatches").replaceChildren(
+    ...ACCENTS.map(([name, hex]) => el("button", {
+      type: "button", className: `swatch${preset && preset[1] === hex ? " active" : ""}`, title: name,
+      style: `background: ${hex}`, onclick: () => changeTheme({ accent: hex }),
+    })),
+    el("label", { className: `swatch custom${preset ? "" : " active"}`, title: "Custom color" }, custom));
+  $("bgOptions").replaceChildren(...BACKGROUNDS.map(([key, name, color]) => el("button", {
+    type: "button", className: `bg-option${theme.background === key ? " active" : ""}`,
+    onclick: () => changeTheme({ background: key }),
+  }, el("span", { className: "swatch-bg", style: `background: ${color}` }, el("i"), el("i")), name)));
+  $("radiusInput").value = theme.radius;
+  $("radiusValue").textContent = `${theme.radius}px`;
+  $("textSizeInput").value = theme.textSize;
+  $("textSizeValue").textContent = theme.textSize === 16 ? "16px (default)" : `${theme.textSize}px`;
+}
+
+// Shows a change right away; saves it to the account shortly after the last change.
+let themeTimer;
+function changeTheme(change, rerender = true) {
+  applyTheme({ ...theme, ...change });
+  if (rerender) renderThemeControls();
+  else $("accentValue").textContent = theme.accent.toUpperCase();
+  clearTimeout(themeTimer);
+  setStatus($("themeStatus"), "Saving…");
+  themeTimer = setTimeout(() => saveTheme(theme), 600);
+}
+
+async function saveTheme(value) {
+  try {
+    user = { ...user, ...(await postJson("/api/account", { theme: value }, "PUT")) };
+    setStatus($("themeStatus"), "Saved to your account.");
+  } catch (err) {
+    setStatus($("themeStatus"), err.message, true);
+  }
+}
+
+$("radiusInput").addEventListener("input", (e) => changeTheme({ radius: Number(e.target.value) }));
+$("textSizeInput").addEventListener("input", (e) => changeTheme({ textSize: Number(e.target.value) }));
+$("themeReset").addEventListener("click", () => {
+  clearTimeout(themeTimer);
+  applyTheme(null);
+  renderThemeControls();
+  saveTheme(null);
+});
+
+$("profileForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    user = await postJson("/api/account", { name: $("profileName").value, email: $("profileEmail").value }, "PUT");
+    renderUser();
+    renderSettings();
+    setStatus($("profileStatus"), "Profile saved.");
+  } catch (err) {
+    setStatus($("profileStatus"), err.message, true);
+  }
+});
+
+$("avatarBtn").addEventListener("click", () => $("avatarInput").click());
+$("avatarInput").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    setStatus($("profileStatus"), "Use a picture smaller than 2 MB.", true);
+    return;
+  }
+  const form = new FormData();
+  form.append("file", file);
+  try {
+    user = await api("/api/account/avatar", { method: "PUT", body: form });
+    avatarVersion = Date.now();
+    renderUser();
+    renderSettings();
+    setStatus($("profileStatus"), "Picture updated.");
+  } catch (err) {
+    setStatus($("profileStatus"), err.message, true);
+  }
+});
+$("avatarRemove").addEventListener("click", async () => {
+  try {
+    user = await api("/api/account/avatar", { method: "DELETE" });
+    renderUser();
+    renderSettings();
+  } catch (err) {
+    setStatus($("profileStatus"), err.message, true);
+  }
+});
+
+$("passwordForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    await postJson("/api/account/password",
+      { currentPassword: $("currentPassword").value, newPassword: $("newPassword").value }, "PUT");
+    $("currentPassword").value = "";
+    $("newPassword").value = "";
+    setStatus($("passwordStatus"), "Password changed.");
+  } catch (err) {
+    setStatus($("passwordStatus"), err.message, true);
+  }
+});
+
+// ---- state format ----------------------------------------------------------
+
+function chosenState() {
+  let code = null;
+  try { code = localStorage.getItem("vaxbridge.state"); } catch { /* storage can be blocked */ }
+  return STATES.find((s) => s.name === code) || STATES.find((s) => s.name === "California");
+}
+
+$("stateSelect").append(...STATES.map((s) => el("option", { value: s.name, textContent: s.name })));
+$("stateSelect").addEventListener("change", () => {
+  try { localStorage.setItem("vaxbridge.state", $("stateSelect").value); } catch { /* not remembered, that's fine */ }
+  renderState();
+});
+
+function renderState() {
+  // The state formats need a checked report that matches the entries.
+  const ready = $("report").classList.contains("open") && current.report;
+  $("state").classList.toggle("open", !!ready);
+  if (!ready) return;
+  const state = chosenState();
+  $("stateSelect").value = state.name;
+  const myIr = state.url.includes("myirmobile.com");
+  $("registryInfo").replaceChildren(
+    el("div", { className: "tile" }, icon("map")),
+    el("div", { className: "grow" },
+      el("p", { className: "strong", textContent: state.registry || `${state.name} immunization registry` }),
+      el("p", { className: "sub", textContent: myIr
+        ? "Families can see their record in MyIR Mobile once a clinic adds the doses."
+        : "Where the state keeps immunization records. Families can ask for a copy here once a clinic adds the doses." }),
+      el("a", { className: "link", href: state.url, target: "_blank", rel: "noopener" }, icon("external"), "State registry page"),
+      el("br"),
+      el("a", { className: "link", href: CDC_DIRECTORY, target: "_blank", rel: "noopener" }, icon("external"), "CDC directory of all state registries")));
+  $("hl7Text").textContent = `The message format state immunization registries accept from clinics. A clinic enrolled with ${
+    state.registry || `the ${state.name} registry`} uploads it as historical doses.`;
+
+  const grid = doseGrid(current.report);
+  const columns = Math.max(5, ...grid.map((g) => g.doses.length));
+  $("gridTitle").textContent = `Doses by vaccine, as ${state.name} school forms list them`;
+  $("doseGrid").replaceChildren(
+    el("thead", {}, el("tr", {}, el("th", { textContent: "Vaccine" }),
+      ...Array.from({ length: columns }, (_, i) => el("th", { textContent: `Dose ${i + 1}` })))),
+    el("tbody", {}, ...grid.map((g) => el("tr", {}, el("td", { textContent: g.name }),
+      ...Array.from({ length: columns }, (_, i) => {
+        const d = g.doses[i];
+        if (!d) return el("td", { className: "none" });
+        return el("td", { className: d.valid ? "" : "bad", textContent: usDate(d.date) + (d.valid ? "" : " ✕"),
+          title: d.valid ? "" : `Doesn't count: ${d.reason}` });
+      })))));
+  setStatus($("exportStatus"), "");
+}
+
+function fileBase() {
+  const name = ($("childName").value || "record").normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase();
+  return `${name || "record"}-${chosenState().code.toLowerCase()}`;
+}
+
+function download(name, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = el("a", { href: url, download: name });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+for (const btn of document.querySelectorAll("[data-export]")) {
+  btn.addEventListener("click", () => {
+    const record = reviewedRecord();
+    const state = chosenState();
+    const kind = btn.dataset.export;
+    if (kind === "hl7") download(`${fileBase()}.hl7`, buildHl7(record, state), "application/hl7-v2");
+    if (kind === "fhir") download(`${fileBase()}.fhir.json`, buildFhir(record), "application/fhir+json");
+    if (kind === "csv") download(`${fileBase()}.csv`, buildCsv(record), "text/csv");
+    setStatus($("exportStatus"), `Downloaded. ${exportDoses(record).length} doses for ${state.name}. Check it against the original before anyone uses it.`);
+  });
+}
+
+$("printStateBtn").addEventListener("click", () => {
+  const page = buildPrintable(reviewedRecord(), current.report, chosenState());
+  const url = URL.createObjectURL(new Blob([page], { type: "text/html" }));
+  const win = window.open(url, "_blank");
+  if (win) win.opener = null;
+  else download(`${fileBase()}-school-record.html`, page, "text/html");
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+});
 
 // ---- start -----------------------------------------------------------------
 

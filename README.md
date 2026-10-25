@@ -23,6 +23,15 @@ every entry and signs off.
 4. **Save.** Signed-in staff can save the reviewed record, with the original photos, to their account.
    The dashboard lists saved children and who has doses due. Opening a saved record re-checks it as of
    today, so due dates stay current.
+5. **State format.** Pick a US state and VaxBridge lays the checked record out the way state school
+   immunization forms and registries expect: a vaccine-by-dose grid with US names and MM/DD/YYYY dates,
+   plus files a clinic can use (HL7 2.5.1 VXU for the state registry, FHIR R4, CSV) with CDC CVX codes.
+   These are transcriptions for a provider to verify and sign. VaxBridge is not a state agency, never
+   sends anything to a state, and does not issue SMART Health Cards (only registered issuers can sign those).
+
+Settings let each user change their name, email, password and profile picture, and the look of the
+app (accent color, light/warm/cool/dark background, corner roundness, text size). They are saved to the
+account, so they follow the user to any device.
 
 The AI only reads the record. All the vaccine logic is ordinary, tested Java code, so anyone can see
 exactly why a dose did or didn't count.
@@ -42,7 +51,8 @@ server/   Spring Boot web server
     ApiController.java    JSON API used by the website (and later a mobile app)
     AuthController.java   accounts: sign up, sign in, sign out (BCrypt password hashes, server session)
     RecordsController.java  saved records and their original photos, per account
-  src/main/resources/static/   the website (index.html, app.js, style.css)
+    AccountController.java  Settings: profile, password, profile picture, appearance
+  src/main/resources/static/   the website (index.html, app.js, style.css, exports.js for state formats)
   src/main/resources/sample-record.json   made-up record for demos
 ```
 
@@ -103,13 +113,17 @@ it sleeps or restarts.
 | PUT | `/api/records/{id}` | replace the reviewed record (files kept) |
 | DELETE | `/api/records/{id}` | delete the record and its files |
 | GET | `/api/records/{id}/files/{fileId}` | an original photo or PDF |
+| PUT | `/api/account` | `{name, email, theme}` (any left out are kept; `theme: null` resets the look) |
+| PUT | `/api/account/password` | `{currentPassword, newPassword}` |
+| GET/PUT/DELETE | `/api/account/avatar` | the profile picture; PUT is multipart `file` (JPEG, PNG, GIF or WebP, up to 2 MB) |
 
 ## Limits (say these out loud in the demo)
 
 - Covers healthy children 0-18 on the routine CDC catch-up schedule. It does not cover high-risk
   conditions, flu, COVID-19, MenB, or travel vaccines.
 - Hib is assumed to be PRP-T (true for nearly all vaccines given outside the US).
-- State school requirements vary; the report follows the CDC schedule.
+- State school requirements vary; the report follows the CDC schedule. State formats are transcriptions:
+  a provider has to verify and sign them, and a clinic enrolled with the state registry submits HL7 files.
 - Results are decision support only. A provider must verify the original record.
 - Accounts are a working demo, not a certified system for children's health records. Real use would need
   HTTPS hosting, encrypted storage and backups, password reset, and a privacy review (FERPA/HIPAA).
