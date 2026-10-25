@@ -81,6 +81,8 @@ hr { border: none; border-top: 1px solid var(--border); margin: 0; }
   display: flex; align-items: center; justify-content: center;
 }
 .logo .i { width: 14px; height: 14px; }
+.logo.xl { width: 56px; height: 56px; border-radius: var(--radius-lg); box-shadow: 0 10px 15px -3px rgba(11, 122, 94, 0.2); }
+.logo.xl .i { width: 28px; height: 28px; }
 .logo.lg { width: 40px; height: 40px; border-radius: var(--radius); }
 .logo.lg .i { width: 20px; height: 20px; }
 .badge {
@@ -117,16 +119,19 @@ nav button {
   font: 500 14px var(--sans); text-align: left; cursor: pointer; transition: background 0.15s, color 0.15s;
 }
 nav button:hover:not(:disabled) { background: var(--muted); color: var(--foreground); }
-nav button.active { background: var(--secondary); color: var(--primary); }
+nav button.active, nav button.active:hover:not(:disabled) { background: var(--secondary); color: var(--primary); }
 nav button:disabled { opacity: 0.45; cursor: default; }
 nav button span { flex: 1; }
 
-.sidebar-foot {
-  display: flex; gap: 8px; align-items: flex-start;
-  padding: 12px 8px 4px; border-top: 1px solid rgba(26, 31, 46, 0.08);
-  font-size: 11px; line-height: 1.4; color: var(--muted-foreground);
+.sidebar-foot { padding-top: 8px; border-top: 1px solid rgba(26, 31, 46, 0.08); }
+.sidebar-foot button {
+  display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 12px;
+  border: none; border-radius: var(--radius); background: none;
+  color: var(--muted-foreground); font: 500 14px var(--sans); cursor: pointer;
 }
-.sidebar-foot .i { width: 12px; height: 12px; margin-top: 1px; color: var(--primary); }
+.sidebar-foot button:hover { background: var(--muted); color: var(--foreground); }
+nav .count { font: 500 11px var(--mono); color: var(--muted-foreground); }
+nav .count:empty { display: none; }
 
 main { flex: 1; min-width: 0; }
 .view { max-width: 1000px; margin: 0 auto; padding: 32px; display: flex; flex-direction: column; gap: 20px; }
@@ -344,6 +349,105 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
 .faq details[open] summary .i { transform: rotate(180deg); }
 .faq details p { padding: 0 20px 16px; font-size: 14px; line-height: 1.6; color: var(--muted-foreground); }
 
+/* ---- sign in ------------------------------------------------------------- */
+
+.auth { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+.auth-box { width: 100%; max-width: 384px; }
+.auth-brand { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 40px; }
+.auth-brand h1 { margin-top: 16px; }
+.auth-brand .sub { margin-top: 4px; }
+.auth-card { padding: 28px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+.auth-card label { font-size: 14px; color: var(--foreground); display: flex; flex-direction: column; gap: 6px; }
+.auth-card input { padding: 10px 14px; }
+.auth-card .status { margin: 0; }
+.auth-switch { text-align: center; margin-top: 24px; font-size: 12px; }
+.auth-switch .link { font-size: 12px; padding: 0; }
+.auth-note { display: flex; gap: 8px; justify-content: center; margin-top: 16px; font-size: 11px; color: var(--muted-foreground); text-align: center; }
+.auth-note .i { width: 12px; height: 12px; margin-top: 2px; color: var(--primary); }
+
+/* ---- dashboard and saved records ------------------------------------------ */
+
+.stat.plain { background: var(--muted); }
+.dash-grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+.card-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.card-row .card-title { margin: 0; }
+button.link.small { font-size: 12px; padding: 0; }
+.mini-list { display: flex; flex-direction: column; gap: 8px; }
+.mini-item {
+  display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; text-align: left;
+  background: none; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer;
+  font: inherit; color: inherit; transition: border-color 0.15s, background 0.15s;
+}
+.mini-item:hover { border-color: rgba(11, 122, 94, 0.3); background: rgba(236, 238, 243, 0.3); }
+.mini-item .tile { width: 32px; height: 32px; border-radius: 8px; }
+.mini-item .tile .i { width: 16px; height: 16px; }
+.mini-item .strong { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini-item .sub { font-size: 11px; }
+.mini-item > .i { color: var(--muted-foreground); }
+.mini-item.DUE { background: var(--due-bg); border-color: var(--due-border); align-items: flex-start; }
+.mini-item.DUE > .i:first-child { color: var(--due); margin-top: 2px; }
+.mini-item.DUE .strong { color: var(--due); }
+.mini-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 24px 0; gap: 4px; }
+.mini-empty .i { width: 32px; height: 32px; color: #10B981; margin-bottom: 4px; }
+
+.row-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.search { position: relative; }
+.search .i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted-foreground); }
+.search input { padding: 10px 16px 10px 40px; background: var(--card); }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; margin-top: -8px; }
+.filters button {
+  padding: 6px 12px; border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--card); color: var(--muted-foreground); font: 500 12px var(--sans);
+}
+.filters button:hover { border-color: rgba(11, 122, 94, 0.4); color: var(--foreground); }
+.filters button.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.record-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.record-card {
+  display: flex; flex-direction: column; gap: 16px; padding: 20px; text-align: left; cursor: pointer;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  font: inherit; color: inherit; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.record-card:hover { border-color: rgba(11, 122, 94, 0.3); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+.record-card .top { display: flex; align-items: flex-start; gap: 12px; }
+.record-card .top > .i { color: var(--muted-foreground); margin-top: 2px; }
+.record-card .strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.record-card .facts { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 4px; font-size: 12px; color: var(--muted-foreground); }
+.record-card .facts span { display: inline-flex; align-items: center; gap: 4px; }
+.record-card .facts .i { width: 12px; height: 12px; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill.plain { background: var(--muted); color: var(--muted-foreground); }
+
+.empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 48px 24px; }
+.empty .tile { margin-bottom: 8px; background: var(--muted); color: var(--muted-foreground); }
+.empty .sub { max-width: 380px; }
+.empty .row { margin-top: 12px; }
+.empty.card { border-style: dashed; }
+.view:not(.open) > .has-record { display: none; }
+.view.open > .no-record { display: none; }
+.has-record { display: flex; flex-direction: column; gap: 20px; }
+
+.report-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+#saveBtn.saved { background: var(--ok-bg); color: var(--ok); border-color: var(--ok-border); box-shadow: none; opacity: 1; }
+.files-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+.file-thumb {
+  display: flex; flex-direction: column; gap: 6px; width: 140px; text-decoration: none; color: var(--foreground);
+  font-size: 12px;
+}
+.file-thumb .frame {
+  height: 110px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--muted);
+  display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--muted-foreground);
+}
+.file-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.file-thumb .frame .i { width: 28px; height: 28px; }
+.file-thumb span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-thumb:hover .frame { border-color: rgba(11, 122, 94, 0.4); }
+.delete-row { display: flex; justify-content: flex-end; }
+button.danger {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: var(--radius);
+  background: var(--card); color: #DC2626; border: 1px solid var(--due-border); font: 500 13px var(--sans);
+}
+button.danger:hover, button.danger.confirm { background: var(--due-bg); }
+
 /* ---- small screens: sidebar becomes a top bar ----------------------------- */
 
 @media (max-width: 860px) {
@@ -353,7 +457,12 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
     flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px;
     padding: 10px 16px; border-right: none; border-bottom: 1px solid rgba(26, 31, 46, 0.08);
   }
-  .child-card, .cta, .alert-strip, .sidebar-foot, .nav-label { display: none !important; }
+  .child-card, .cta, .alert-strip, .nav-label { display: none !important; }
+  .sidebar-foot { margin-left: auto; padding: 0; border: none; order: 1; }
+  .sidebar-foot button { padding: 6px 8px; font-size: 13px; gap: 6px; }
+  .brand { order: 0; }
+  nav { order: 2; }
+  .dash-grid { grid-template-columns: 1fr; }
   .brand { padding: 0; }
   .badge { margin-left: 6px; }
   nav { flex: 1 1 100%; flex-direction: row; gap: 4px; overflow-x: auto; }
@@ -373,7 +482,7 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
   .no-print { display: none !important; }
   .shell { display: block; }
   .view { padding: 0; max-width: none; gap: 14px; }
-  #upload, #review, #help { display: none !important; }
+  #upload, #review, #help, #dashboard, #records { display: none !important; }
   .table-card, .card, .stat { box-shadow: none; }
   .stats { grid-template-columns: repeat(4, 1fr); }
   .series-header, .series-main { grid-template-columns: 1fr 150px 190px; }
@@ -382,6 +491,7 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
 }
 .preview-note { max-width: 1000px; margin: 20px auto -8px; width: calc(100% - 64px); }
 @media (max-width: 860px) { .preview-note { width: calc(100% - 32px); margin-top: 16px; } }
+.preview-note.auth-preview { width: 100%; margin: 0 0 16px; }
 @media print { .preview-note { display: none; } }
 </style>
 </head>
@@ -409,24 +519,54 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
       <symbol id="i-list" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></symbol>
       <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
       <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+      <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+      <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+      <symbol id="i-save" viewBox="0 0 24 24"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></symbol>
+      <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></symbol>
       <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
       <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M9.94 14.06 4 20"/><path d="m14 4 1.5 3.5L19 9l-3.5 1.5L14 14l-1.5-3.5L9 9l3.5-1.5z"/></symbol>
     </defs>
   </svg>
 
-  <div class="shell">
+  <!-- Sign in / create account -->
+  <div id="signin" class="auth hidden">
+    <div class="auth-box">
+      <div class="auth-brand">
+        <div class="logo xl"><svg class="i"><use href="#i-syringe"/></svg></div>
+        <h1>VaxBridge</h1>
+        <p class="sub">Vaccine records from any country, ready for school</p>
+      </div>
+      <div class="note-box preview-note auth-preview"><svg class="i"><use href="#i-info"/></svg><p><b>Preview.</b> This copy runs entirely in your browser. Accounts and saved records are stored only in this browser. Reading your own photos needs the full app running with an API key, so use Try a sample record. Its report was calculated by the real Java rules engine.</p></div>
+      <form id="authForm" class="card auth-card" novalidate>
+        <label id="nameField" class="hidden">Your name <input id="authName" type="text" autocomplete="name" placeholder="Pat Rivera, RN"></label>
+        <label>Email <input id="authEmail" type="email" autocomplete="email" placeholder="you@school.org"></label>
+        <label>Password <input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••"></label>
+        <p id="authStatus" class="status"></p>
+        <button id="authSubmit" class="primary wide" type="submit">Sign in</button>
+      </form>
+      <p class="auth-switch sub"><span id="authSwitchText">Don't have an account?</span>
+        <button id="authSwitch" class="link" type="button">Create one</button></p>
+      <p class="auth-note"><svg class="i"><use href="#i-shield"/></svg>
+        For school nurses and clinic staff. Saved records are visible only to your account.</p>
+    </div>
+  </div>
+
+  <div id="app" class="shell hidden">
     <aside class="sidebar no-print">
       <div class="brand">
         <div class="logo"><svg class="i"><use href="#i-syringe"/></svg></div>
         <span>VaxBridge</span>
-        <span id="dueBadge" class="badge hidden"></span>
+        <span id="dueBadge" class="badge hidden" title="Saved records with doses due now"></span>
       </div>
 
-      <div id="childCard" class="child-card hidden">
-        <div id="childInitials" class="avatar"></div>
+      <div class="child-card">
+        <div id="userInitials" class="avatar"></div>
         <div class="child-text">
-          <p id="childCardName"></p>
-          <p id="childCardMeta" class="sub"></p>
+          <p id="userName"></p>
+          <p id="userMeta" class="sub"></p>
         </div>
       </div>
 
@@ -435,22 +575,80 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
       <div id="alertStrip" class="alert-strip hidden"></div>
 
       <nav id="nav">
-        <p class="nav-label">Workflow</p>
-        <button data-view="upload" class="active"><svg class="i"><use href="#i-upload"/></svg><span>Upload record</span></button>
-        <button data-view="review" disabled><svg class="i"><use href="#i-list"/></svg><span>Review entries</span></button>
-        <button data-view="report" disabled><svg class="i"><use href="#i-file"/></svg><span>Report</span></button>
+        <p class="nav-label">Overview</p>
+        <button data-view="dashboard"><svg class="i"><use href="#i-activity"/></svg><span>Dashboard</span></button>
+        <button data-view="records"><svg class="i"><use href="#i-folder"/></svg><span>Saved records</span><b id="recordCount" class="count"></b></button>
+        <p class="nav-label">Current record</p>
+        <button data-view="upload"><svg class="i"><use href="#i-upload"/></svg><span>Upload record</span></button>
+        <button data-view="review"><svg class="i"><use href="#i-list"/></svg><span>Review entries</span></button>
+        <button data-view="report"><svg class="i"><use href="#i-file"/></svg><span>Report</span></button>
         <p class="nav-label">App</p>
         <button data-view="help"><svg class="i"><use href="#i-help"/></svg><span>Help</span></button>
       </nav>
 
       <div class="sidebar-foot">
-        <svg class="i"><use href="#i-shield"/></svg>
-        <span>A licensed provider makes every decision. VaxBridge only reads and checks.</span>
+        <button id="signOutBtn"><svg class="i"><use href="#i-logout"/></svg><span>Sign out</span></button>
       </div>
     </aside>
 
     <main>
-      <div class="note-box preview-note"><svg class="i"><use href="#i-info"/></svg><p><b>Preview.</b> This copy runs in your browser with a made-up sample record. The results were calculated by the real Java rules engine. Reading your own photos and re-checking edited entries need the full app running with an API key.</p></div>
+      <div class="note-box preview-note"><svg class="i"><use href="#i-info"/></svg><p><b>Preview.</b> This copy runs entirely in your browser. Accounts and saved records are stored only in this browser. Reading your own photos needs the full app running with an API key, so use Try a sample record. Its report was calculated by the real Java rules engine.</p></div>
+      <!-- Dashboard -->
+      <section id="dashboard" class="view hidden">
+        <div class="view-head">
+          <h1>Dashboard</h1>
+          <p id="today" class="sub"></p>
+        </div>
+        <div id="dashStats" class="stats"></div>
+        <div id="dashEmpty" class="empty card hidden">
+          <div class="tile lg"><svg class="i"><use href="#i-upload"/></svg></div>
+          <p class="strong">No saved records yet</p>
+          <p class="sub">Upload a child's vaccine record, check it, and tap Save to records. It will show up here.</p>
+          <button class="primary go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+        </div>
+        <div id="dashGrid" class="dash-grid">
+          <div class="card">
+            <div class="card-row">
+              <p class="card-title">Recent records</p>
+              <button class="link small" data-goto="records">See all</button>
+            </div>
+            <div id="recentList" class="mini-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-row">
+              <p class="card-title">Needs attention</p>
+            </div>
+            <div id="attentionList" class="mini-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Saved records -->
+      <section id="records" class="view hidden">
+        <div class="view-head row-head">
+          <div>
+            <h1>Saved records</h1>
+            <p id="recordsSub" class="sub"></p>
+          </div>
+          <button class="primary go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+        </div>
+        <div class="search">
+          <svg class="i"><use href="#i-search"/></svg>
+          <input id="recordSearch" type="search" placeholder="Search by child's name or country">
+        </div>
+        <div id="recordFilters" class="filters">
+          <button data-filter="all" class="active">All</button>
+          <button data-filter="due">Doses due</button>
+          <button data-filter="ok">Up to date</button>
+        </div>
+        <div id="recordGrid" class="record-grid"></div>
+        <div id="recordsEmpty" class="empty hidden">
+          <div class="tile lg"><svg class="i"><use href="#i-folder"/></svg></div>
+          <p class="strong" id="recordsEmptyTitle">No saved records yet</p>
+          <p class="sub" id="recordsEmptyText">Records you save from the Report page appear here.</p>
+        </div>
+      </section>
+
       <!-- Step 1: upload -->
       <section id="upload" class="view narrow">
         <div class="view-head">
@@ -488,8 +686,9 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
 
           <div class="note-box">
             <svg class="i"><use href="#i-shield"/></svg>
-            <p>VaxBridge reads the record with AI and does not save it. The results are for a school nurse
-              or pediatrician to check against the original. They are not a medical decision.</p>
+            <p>VaxBridge reads the record with AI. Nothing is stored unless you save it to your records.
+              The results are for a school nurse or pediatrician to check against the original. They are not a
+              medical decision.</p>
           </div>
         </div>
 
@@ -503,6 +702,16 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
 
       <!-- Step 2: nurse reviews what the AI read -->
       <section id="review" class="view hidden">
+        <div class="empty card no-record">
+          <div class="tile lg"><svg class="i"><use href="#i-list"/></svg></div>
+          <p class="strong">No record open</p>
+          <p class="sub">Upload a record (or try the sample) to check what was read, or open one of your saved records.</p>
+          <div class="row">
+            <button class="primary go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+            <button class="outline" data-goto="records"><svg class="i"><use href="#i-folder"/></svg> Saved records</button>
+          </div>
+        </div>
+        <div class="has-record">
         <button id="backToUpload" class="back"><svg class="i"><use href="#i-back"/></svg> Back to upload</button>
         <div class="view-head">
           <h1>Check what was read</h1>
@@ -540,10 +749,21 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
           <button id="evaluateBtn" class="primary">Check against US schedule</button>
         </div>
         <p id="reviewStatus" class="status"></p>
+        </div>
       </section>
 
       <!-- Step 3: report to print and sign -->
       <section id="report" class="view hidden">
+        <div class="empty card no-record">
+          <div class="tile lg"><svg class="i"><use href="#i-file"/></svg></div>
+          <p class="strong">No report yet</p>
+          <p id="noReportText" class="sub">Upload a record and check it against the US schedule, or open a saved record.</p>
+          <div class="row">
+            <button id="noReportAction" class="primary go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+            <button class="outline" data-goto="records"><svg class="i"><use href="#i-folder"/></svg> Saved records</button>
+          </div>
+        </div>
+        <div class="has-record">
         <button id="backToReview" class="back no-print"><svg class="i"><use href="#i-back"/></svg> Edit entries</button>
         <div class="report-head">
           <div class="tile"><svg class="i"><use href="#i-file"/></svg></div>
@@ -551,8 +771,12 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
             <h1>Immunization catch-up report</h1>
             <div id="reportMeta" class="meta"></div>
           </div>
-          <button id="printBtn" class="primary no-print"><svg class="i"><use href="#i-print"/></svg> Print / save PDF</button>
+          <div class="report-actions no-print">
+            <button id="saveBtn" class="primary"><svg class="i"><use href="#i-save"/></svg> <span>Save to records</span></button>
+            <button id="printBtn" class="outline"><svg class="i"><use href="#i-print"/></svg> Print</button>
+          </div>
         </div>
+        <p id="saveStatus" class="status no-print"></p>
 
         <div id="summaryCounts" class="stats"></div>
 
@@ -571,6 +795,11 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
         </div>
         <div id="ignoredList"></div>
 
+        <div id="filesCard" class="card no-print hidden">
+          <p class="card-title"><svg class="i"><use href="#i-image"/></svg> Original record</p>
+          <div id="filesList" class="files-grid"></div>
+        </div>
+
         <div class="card signoff">
           <p class="card-title"><svg class="i"><use href="#i-check"/></svg> Provider review</p>
           <div class="sign-grid">
@@ -580,6 +809,11 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
             <div><span>Clinic / school</span><div class="line"></div></div>
           </div>
           <label class="approve"><span class="box"></span> I reviewed the original record and approve this report.</label>
+        </div>
+
+        <div id="deleteRow" class="delete-row no-print hidden">
+          <button id="deleteBtn" class="danger"><svg class="i"><use href="#i-trash"/></svg> Delete this saved record</button>
+        </div>
         </div>
       </section>
 
@@ -622,8 +856,9 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
           </details>
           <details>
             <summary>Is the record saved?<svg class="i"><use href="#i-chevron"/></svg></summary>
-            <p>No. VaxBridge sends the photo to the AI to read it and does not store it. Print or save the report
-              as a PDF to keep it.</p>
+            <p>Only if you tap Save to records on the Report page. The reviewed entries and the original photos are
+              then stored in your account, and only you can see them when signed in. Opening a saved record
+              re-checks it against the schedule as of today, so the due dates stay current.</p>
           </details>
         </div>
       </section>
@@ -642,23 +877,143 @@ table.entries { width: 100%; border-collapse: collapse; min-width: 760px; }
   </template>
 
   <script>
-// Preview only: answers the app's API calls from data captured from the real server.
+// Preview only: stands in for the Java server so this page works on its own (for example on GitHub Pages).
+// Accounts and saved records are kept in this browser's storage. Reports use results captured from the
+// real rules engine for the sample record.
 const PREVIEW = {"sample": {"childName": "Sofía Ejemplo (sample)", "dateOfBirth": "2017-09-14", "country": "Guatemala", "language": "Spanish", "warnings": ["This is a made-up sample record for demonstration."], "entries": [{"originalText": "BCG", "englishName": "BCG (tuberculosis)", "antigens": ["BCG"], "date": "2017-09-14", "dateAsWritten": "14/09/2017", "confidence": "high", "notes": ""}, {"originalText": "Hepatitis B (RN)", "englishName": "Hepatitis B, birth dose", "antigens": ["HepB"], "date": "2017-09-14", "dateAsWritten": "14/09/2017", "confidence": "high", "notes": ""}, {"originalText": "Pentavalente 1a", "englishName": "Pentavalent dose 1 (DTwP-HepB-Hib)", "antigens": ["DTaP", "HepB", "Hib"], "date": "2017-11-14", "dateAsWritten": "14/11/2017", "confidence": "high", "notes": ""}, {"originalText": "IPV 1a", "englishName": "Inactivated polio dose 1", "antigens": ["IPV"], "date": "2017-11-14", "dateAsWritten": "14/11/2017", "confidence": "high", "notes": ""}, {"originalText": "Rotavirus 1a", "englishName": "Rotavirus dose 1", "antigens": ["RV"], "date": "2017-11-14", "dateAsWritten": "14/11/2017", "confidence": "high", "notes": ""}, {"originalText": "Neumococo 1a", "englishName": "Pneumococcal conjugate dose 1", "antigens": ["PCV"], "date": "2017-11-14", "dateAsWritten": "14/11/2017", "confidence": "high", "notes": ""}, {"originalText": "Pentavalente 2a", "englishName": "Pentavalent dose 2", "antigens": ["DTaP", "HepB", "Hib"], "date": "2018-01-15", "dateAsWritten": "15/01/2018", "confidence": "high", "notes": ""}, {"originalText": "bOPV 2a", "englishName": "Oral polio (bivalent) dose 2", "antigens": ["OPV"], "date": "2018-01-15", "dateAsWritten": "15/01/2018", "confidence": "high", "notes": ""}, {"originalText": "Rotavirus 2a", "englishName": "Rotavirus dose 2", "antigens": ["RV"], "date": "2018-01-15", "dateAsWritten": "15/01/2018", "confidence": "high", "notes": ""}, {"originalText": "Neumococo 2a", "englishName": "Pneumococcal conjugate dose 2", "antigens": ["PCV"], "date": "2018-01-15", "dateAsWritten": "15/01/2018", "confidence": "high", "notes": ""}, {"originalText": "Pentavalente 3a", "englishName": "Pentavalent dose 3", "antigens": ["DTaP", "HepB", "Hib"], "date": "2018-03-14", "dateAsWritten": "14/03/2018", "confidence": "high", "notes": ""}, {"originalText": "bOPV 3a", "englishName": "Oral polio (bivalent) dose 3", "antigens": ["OPV"], "date": "2018-03-14", "dateAsWritten": "14/03/2018", "confidence": "high", "notes": ""}, {"originalText": "SPR 1a", "englishName": "MMR dose 1 (sarampión, paperas, rubéola)", "antigens": ["MMR"], "date": "2018-09-20", "dateAsWritten": "20/09/2018", "confidence": "high", "notes": ""}, {"originalText": "Neumococo refuerzo", "englishName": "Pneumococcal booster", "antigens": ["PCV"], "date": "2018-09-20", "dateAsWritten": "20/09/2018", "confidence": "high", "notes": ""}, {"originalText": "DPT 1er refuerzo", "englishName": "DTP booster 1", "antigens": ["DTaP"], "date": "2019-03-18", "dateAsWritten": "18/03/2019", "confidence": "high", "notes": ""}, {"originalText": "bOPV 1er refuerzo", "englishName": "Oral polio booster 1", "antigens": ["OPV"], "date": "2019-03-18", "dateAsWritten": "18/03/2019", "confidence": "high", "notes": ""}, {"originalText": "SPR 2a", "englishName": "MMR dose 2", "antigens": ["MMR"], "date": "2019-03-18", "dateAsWritten": "18/03/2019", "confidence": "high", "notes": ""}, {"originalText": "DPT 2o refuerzo", "englishName": "DTP booster 2", "antigens": ["DTaP"], "date": "2021-09-20", "dateAsWritten": "20/09/2021", "confidence": "low", "notes": "Day could be 20 or 28; ink is smudged."}, {"originalText": "bOPV 2o refuerzo", "englishName": "Oral polio booster 2", "antigens": ["OPV"], "date": "2021-09-20", "dateAsWritten": "20/09/2021", "confidence": "low", "notes": "Same smudged date as the DPT booster."}]}, "antigens": {"HepB": "Hepatitis B", "RV": "Rotavirus", "DTaP": "DTaP / DTP (diphtheria, tetanus, pertussis)", "DT": "DT (diphtheria, tetanus)", "Tdap": "Tdap", "Td": "Td", "Hib": "Hib", "PCV": "Pneumococcal conjugate", "IPV": "Polio, inactivated (IPV)", "OPV": "Polio, oral (OPV)", "MMR": "Measles, mumps, rubella (MMR)", "Measles": "Measles only", "MR": "Measles-rubella (MR)", "VAR": "Varicella (chickenpox)", "HepA": "Hepatitis A", "MenACWY": "Meningococcal ACWY", "HPV": "HPV", "BCG": "BCG (tuberculosis)", "Other": "Other / not used in US schedule"}, "report": {"dateOfBirth": "2017-09-14", "asOf": "2026-10-25", "series": [{"key": "HepB", "name": "Hepatitis B", "status": "COMPLETE", "summary": "Complete: 3 valid dose(s).", "doses": [{"given": "2017-09-14", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Hepatitis B (RN)"}, {"given": "2017-11-14", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}, {"given": "2018-01-15", "antigen": "HepB", "valid": false, "reason": "Given before the minimum age of 24 weeks for the final dose.", "sourceText": "Pentavalente 2a"}, {"given": "2018-03-14", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Pentavalente 3a"}], "nextDoses": [], "notes": []}, {"key": "RV", "name": "Rotavirus", "status": "NOT_NEEDED", "summary": "Not given after 8 months of age.", "doses": [{"given": "2017-11-14", "antigen": "RV", "valid": true, "reason": "", "sourceText": "Rotavirus 1a"}, {"given": "2018-01-15", "antigen": "RV", "valid": true, "reason": "", "sourceText": "Rotavirus 2a"}], "nextDoses": [], "notes": []}, {"key": "DTaP", "name": "Diphtheria, tetanus, pertussis (DTaP / Tdap)", "status": "COMPLETE", "summary": "Complete: 5 valid dose(s).", "doses": [{"given": "2017-11-14", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}, {"given": "2018-01-15", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Pentavalente 2a"}, {"given": "2018-03-14", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Pentavalente 3a"}, {"given": "2019-03-18", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "DPT 1er refuerzo"}, {"given": "2021-09-20", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "DPT 2o refuerzo"}], "nextDoses": [], "notes": ["Adolescent Tdap booster will be due at age 11-12 (on or after Sep 14, 2028)."]}, {"key": "Hib", "name": "Haemophilus influenzae type b (Hib)", "status": "NOT_NEEDED", "summary": "Not routinely needed for healthy children age 5 and older.", "doses": [{"given": "2017-11-14", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}, {"given": "2018-01-15", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Pentavalente 2a"}, {"given": "2018-03-14", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Pentavalente 3a"}], "nextDoses": [], "notes": []}, {"key": "PCV", "name": "Pneumococcal conjugate (PCV)", "status": "COMPLETE", "summary": "Complete: 3 valid dose(s).", "doses": [{"given": "2017-11-14", "antigen": "PCV", "valid": true, "reason": "", "sourceText": "Neumococo 1a"}, {"given": "2018-01-15", "antigen": "PCV", "valid": true, "reason": "", "sourceText": "Neumococo 2a"}, {"given": "2018-09-20", "antigen": "PCV", "valid": true, "reason": "", "sourceText": "Neumococo refuerzo"}], "nextDoses": [], "notes": []}, {"key": "Polio", "name": "Polio (IPV)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [{"given": "2017-11-14", "antigen": "IPV", "valid": true, "reason": "", "sourceText": "IPV 1a"}, {"given": "2018-01-15", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "bOPV 2a"}, {"given": "2018-03-14", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "bOPV 3a"}, {"given": "2019-03-18", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "bOPV 1er refuerzo"}, {"given": "2021-09-20", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "bOPV 2o refuerzo"}], "nextDoses": ["2026-10-25", "2027-04-25"], "notes": []}, {"key": "MMR", "name": "Measles, mumps, rubella (MMR)", "status": "COMPLETE", "summary": "Complete: 2 valid dose(s).", "doses": [{"given": "2018-09-20", "antigen": "MMR", "valid": true, "reason": "", "sourceText": "SPR 1a"}, {"given": "2019-03-18", "antigen": "MMR", "valid": true, "reason": "", "sourceText": "SPR 2a"}], "nextDoses": [], "notes": []}, {"key": "VAR", "name": "Varicella (chickenpox)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-25", "2027-01-25"], "notes": ["If the child has had chickenpox, a provider can document this as evidence of immunity instead of vaccination."]}, {"key": "HepA", "name": "Hepatitis A", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-25", "2027-04-25"], "notes": []}, {"key": "MenACWY", "name": "Meningococcal ACWY", "status": "NOT_NEEDED", "summary": "Not due until age 11-12.", "doses": [], "nextDoses": [], "notes": []}, {"key": "HPV", "name": "Human papillomavirus (HPV)", "status": "NOT_NEEDED", "summary": "Not due until age 11-12 (may start at age 9).", "doses": [], "nextDoses": [], "notes": ["HPV is recommended but is not required for school entry in most states."]}], "ignored": [{"given": "2017-09-14", "antigen": "BCG", "valid": false, "reason": "BCG is not part of the US schedule; no action needed.", "sourceText": "BCG"}]}};
-window.fetch = async (path) => {
-  const ok = (data) => ({ ok: true, status: 200, json: async () => data });
-  if (path === "/api/sample") return ok(PREVIEW.sample);
-  if (path === "/api/antigens") return ok(PREVIEW.antigens);
-  if (path === "/api/evaluate") return ok(PREVIEW.report);
-  return { ok: false, status: 501, json: async () => ({ error:
-    "Reading photos needs the full app running with an API key. Use Try a sample record to see how it works." }) };
+const previewStore = (() => {
+  const memory = {};
+  const get = (k, fallback) => {
+    try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; } catch { return memory[k] ?? fallback; }
+  };
+  const set = (k, v) => {
+    memory[k] = v;
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage full or blocked: keep in memory */ }
+  };
+  return { get, set };
+})();
+
+async function previewHash(text) {
+  const bytes = new TextEncoder().encode("vaxbridge-preview:" + text);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function previewSummary(r) {
+  const counts = { COMPLETE: 0, DUE: 0, UPCOMING: 0, NOT_NEEDED: 0 };
+  const due = [];
+  let next = null;
+  for (const s of PREVIEW.report.series) {
+    counts[s.status]++;
+    if (s.status === "DUE") due.push(s.name);
+    if ((s.status === "DUE" || s.status === "UPCOMING") && s.nextDoses.length && (!next || s.nextDoses[0] < next)) next = s.nextDoses[0];
+  }
+  const rec = r.record;
+  return { id: r.id, childName: rec.childName, dateOfBirth: rec.dateOfBirth, country: rec.country, language: rec.language,
+    savedAt: r.savedAt, updatedAt: r.updatedAt, entryCount: (rec.entries || []).length, fileCount: r.files.length,
+    counts, dueVaccines: due, nextDose: next };
+}
+
+const readAsDataUrl = (file) => new Promise((resolve) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(reader.result);
+  reader.readAsDataURL(file);
+});
+
+window.fetch = async (path, options = {}) => {
+  const method = (options.method || "GET").toUpperCase();
+  const reply = (status, data) => ({ ok: status < 300, status, json: async () => data });
+  const fail = (status, error) => reply(status, { error });
+  const body = () => JSON.parse(options.body || "{}");
+  const users = previewStore.get("vb-users", {});
+  const email = previewStore.get("vb-session", null);
+  const user = email && users[email];
+
+  if (path === "/api/sample") return reply(200, PREVIEW.sample);
+  if (path === "/api/antigens") return reply(200, PREVIEW.antigens);
+  if (path === "/api/evaluate") return reply(200, PREVIEW.report);
+  if (path === "/api/extract") return fail(501,
+    "Reading photos needs the full app running with an API key. Use Try a sample record to see how it works.");
+
+  if (path === "/api/auth/signup") {
+    const { name = "", email: e = "", password = "" } = body();
+    const key = e.trim().toLowerCase();
+    if (!name.trim()) return fail(400, "Enter your name.");
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(key)) return fail(400, "Enter a valid email address.");
+    if (password.length < 8) return fail(400, "Use a password with at least 8 characters.");
+    if (users[key]) return fail(409, "An account with this email already exists. Sign in instead.");
+    users[key] = { id: Date.now(), name: name.trim(), email: key, hash: await previewHash(password) };
+    previewStore.set("vb-users", users);
+    previewStore.set("vb-session", key);
+    return reply(200, { id: users[key].id, name: users[key].name, email: key });
+  }
+  if (path === "/api/auth/login") {
+    const { email: e = "", password = "" } = body();
+    const u = users[e.trim().toLowerCase()];
+    if (!u || u.hash !== await previewHash(password)) return fail(401, "Email or password is incorrect.");
+    previewStore.set("vb-session", u.email);
+    return reply(200, { id: u.id, name: u.name, email: u.email });
+  }
+  if (path === "/api/auth/logout") { previewStore.set("vb-session", null); return reply(204, {}); }
+  if (!user) return fail(401, "Sign in to see saved records.");
+  if (path === "/api/auth/me") return reply(200, { id: user.id, name: user.name, email: user.email });
+
+  const key = "vb-records:" + user.email;
+  const records = previewStore.get(key, []);
+  const m = path.match(/^\/api\/records(?:\/(\d+))?$/);
+  if (!m) return fail(404, "Not found.");
+  const id = m[1] && Number(m[1]);
+  const found = id && records.find((r) => r.id === id);
+  if (id && !found) return fail(404, "Record not found.");
+  const now = new Date().toISOString();
+
+  if (!id && method === "GET") {
+    return reply(200, [...records].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).map(previewSummary));
+  }
+  if (!id && method === "POST") {
+    const record = JSON.parse(await options.body.get("record").text());
+    if (!record.dateOfBirth) return fail(400, "Enter the child's date of birth before saving.");
+    const files = [];
+    let total = 0;
+    for (const f of options.body.getAll("files")) {
+      total += f.size;
+      // Browser storage is small, so the preview keeps only small photos.
+      if (total < 1500000) files.push({ id: files.length + 1, name: f.name, contentType: f.type, size: f.size, url: await readAsDataUrl(f) });
+    }
+    const saved = { id: Date.now(), record, savedAt: now, updatedAt: now, files };
+    previewStore.set(key, [...records, saved]);
+    return reply(200, previewSummary(saved));
+  }
+  if (method === "GET") return reply(200, { summary: previewSummary(found), record: found.record, report: PREVIEW.report, files: found.files });
+  if (method === "PUT") {
+    Object.assign(found, { record: body(), updatedAt: now });
+    previewStore.set(key, records);
+    return reply(200, previewSummary(found));
+  }
+  if (method === "DELETE") {
+    previewStore.set(key, records.filter((r) => r.id !== id));
+    return reply(204, {});
+  }
+  return fail(405, "Not supported in the preview.");
 };
 
-// VaxBridge front end. Talks to the JSON API in ApiController.java.
+// VaxBridge front end. Talks to the JSON API in ApiController.java, AuthController.java and RecordsController.java.
 
 const $ = (id) => document.getElementById(id);
 let antigenNames = {};
 let selectedFiles = [];
-let lastRecord = null;
+let user = null;
+let summaries = [];
+
+// The record being worked on: what was read, the latest report, and whether it is saved.
+const current = {
+  record: null,      // the record as read or as last saved
+  report: null,      // the last report shown
+  savedId: null,     // id in Saved records, or null if not saved yet
+  files: [],         // File objects from this upload (not saved yet)
+  savedFiles: [],    // files stored with the saved record
+  dirty: false,      // entries changed since the last save or report
+};
 
 const STATUS = {
   DUE:        { label: "Due now",                icon: "alert", stat: "Due now",            sub: "catch-up dose needed" },
@@ -670,17 +1025,16 @@ const STATUS = {
 // ---- helpers ---------------------------------------------------------------
 
 function show(view) {
-  for (const id of ["upload", "review", "report", "help"]) {
+  for (const id of ["dashboard", "records", "upload", "review", "report", "help"]) {
     $(id).classList.toggle("hidden", id !== view);
   }
   for (const btn of $("nav").querySelectorAll("button")) {
     btn.classList.toggle("active", btn.dataset.view === view);
   }
+  if (view === "dashboard") renderDashboard();
+  if (view === "records") renderRecords();
+  if (view === "report") updateNoReport();
   window.scrollTo(0, 0);
-}
-
-function enableNav(view, on = true) {
-  $("nav").querySelector(`[data-view="${view}"]`).disabled = !on;
 }
 
 function setStatus(el, text, isError = false) {
@@ -691,14 +1045,24 @@ function setStatus(el, text, isError = false) {
 async function api(path, options) {
   const res = await fetch(path, options);
   const data = await res.json().catch(() => ({}));
+  if (res.status === 401 && user && !path.startsWith("/api/auth/")) {
+    signedOut();
+  }
   if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
   return data;
 }
 
+const postJson = (path, body, method = "POST") =>
+  api(path, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+
 function formatDate(iso) {
   if (!iso) return "";
-  const [y, m, d] = iso.split("-").map(Number);
+  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
   return new Date(y, m - 1, d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function formatInstant(iso) {
+  return iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
 }
 
 function el(tag, attrs = {}, ...children) {
@@ -726,12 +1090,203 @@ function initials(name) {
   return name.trim().split(/\s+/).map((w) => w[0]?.toUpperCase() ?? "").join("").slice(0, 2) || "?";
 }
 
+const plural = (n, word, many = word + "s") => `${n} ${n === 1 ? word : many}`;
+
+// ---- sign in ---------------------------------------------------------------
+
+let creatingAccount = false;
+
+function setAuthMode(create) {
+  creatingAccount = create;
+  $("nameField").classList.toggle("hidden", !create);
+  $("authSubmit").textContent = create ? "Create account" : "Sign in";
+  $("authSwitchText").textContent = create ? "Already have an account?" : "Don't have an account?";
+  $("authSwitch").textContent = create ? "Sign in" : "Create one";
+  $("authPassword").autocomplete = create ? "new-password" : "current-password";
+  setStatus($("authStatus"), "");
+}
+
+$("authSwitch").addEventListener("click", () => setAuthMode(!creatingAccount));
+
+$("authForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const body = { email: $("authEmail").value, password: $("authPassword").value };
+  if (creatingAccount) body.name = $("authName").value;
+  $("authSubmit").disabled = true;
+  try {
+    signedIn(await postJson(creatingAccount ? "/api/auth/signup" : "/api/auth/login", body));
+    $("authPassword").value = "";
+  } catch (err) {
+    setStatus($("authStatus"), err.message, true);
+  } finally {
+    $("authSubmit").disabled = false;
+  }
+});
+
+async function signedIn(u) {
+  user = u;
+  $("signin").classList.add("hidden");
+  $("app").classList.remove("hidden");
+  $("userInitials").textContent = initials(u.name);
+  $("userName").textContent = u.name;
+  await loadSummaries();
+  show("dashboard");
+}
+
+function signedOut() {
+  user = null;
+  summaries = [];
+  Object.assign(current, { record: null, report: null, savedId: null, files: [], savedFiles: [], dirty: false });
+  setFiles([]);
+  $("review").classList.remove("open");
+  $("report").classList.remove("open");
+  $("app").classList.add("hidden");
+  $("signin").classList.remove("hidden");
+  setAuthMode(false);
+}
+
+$("signOutBtn").addEventListener("click", async () => {
+  await api("/api/auth/logout", { method: "POST" }).catch(() => {});
+  signedOut();
+});
+
 // ---- navigation ------------------------------------------------------------
 
 for (const btn of $("nav").querySelectorAll("button")) {
   btn.addEventListener("click", () => show(btn.dataset.view));
 }
-$("newRecordBtn").addEventListener("click", () => { setFiles([]); show("upload"); });
+document.addEventListener("click", (e) => {
+  const target = e.target.closest("[data-goto], .go-upload");
+  if (!target) return;
+  if (target.classList.contains("go-upload")) startNewRecord();
+  else show(target.dataset.goto);
+});
+$("newRecordBtn").addEventListener("click", startNewRecord);
+
+function startNewRecord() {
+  setFiles([]);
+  setStatus($("uploadStatus"), "");
+  show("upload");
+}
+
+// ---- saved records: dashboard and list --------------------------------------
+
+async function loadSummaries() {
+  try {
+    summaries = await api("/api/records");
+  } catch {
+    summaries = [];
+  }
+  const due = summaries.filter((s) => s.counts.DUE > 0).length;
+  $("userMeta").textContent = plural(summaries.length, "saved record");
+  $("recordCount").textContent = summaries.length || "";
+  $("dueBadge").textContent = due;
+  $("dueBadge").classList.toggle("hidden", !due);
+  $("alertStrip").replaceChildren(...(due
+    ? [el("div", { className: "DUE" }, icon("alert"), `${plural(due, "child", "children")} with doses due now`)]
+    : []));
+  $("alertStrip").classList.toggle("hidden", !due);
+}
+
+function stat(kind, value, label, sub) {
+  return el("div", { className: `stat ${kind}` },
+    el("b", { textContent: value }), el("p", { className: "label", textContent: label }), el("p", { className: "sub", textContent: sub }));
+}
+
+function recordFacts(s) {
+  return el("div", { className: "facts" },
+    ...(s.country ? [el("span", {}, icon("globe"), s.country)] : []),
+    el("span", {}, icon("calendar"), `Born ${formatDate(s.dateOfBirth)}`));
+}
+
+function renderDashboard() {
+  $("today").textContent = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const childrenDue = summaries.filter((s) => s.counts.DUE > 0);
+  const dosesDue = summaries.reduce((n, s) => n + s.counts.DUE, 0);
+  const upToDate = summaries.filter((s) => s.counts.DUE === 0).length;
+  $("dashStats").replaceChildren(
+    stat("plain", summaries.length, "Saved records", "children checked"),
+    stat("plain", dosesDue, "Vaccines due now", "across all children"),
+    stat("COMPLETE", upToDate, "Up to date", "nothing due today"),
+    stat("DUE", childrenDue.length, "Need a visit", "children with doses due"),
+  );
+
+  const empty = summaries.length === 0;
+  $("dashEmpty").classList.toggle("hidden", !empty);
+  $("dashGrid").classList.toggle("hidden", empty);
+  if (empty) return;
+
+  $("recentList").replaceChildren(...summaries.slice(0, 5).map((s) =>
+    el("button", { className: "mini-item", onclick: () => openSaved(s.id) },
+      el("div", { className: "tile" }, icon("file")),
+      el("div", { className: "grow" },
+        el("p", { className: "strong", textContent: s.childName || "Unnamed child" }),
+        el("p", { className: "sub", textContent: `${s.country || "Unknown country"} · saved ${formatInstant(s.updatedAt)}` })),
+      s.counts.DUE ? statusPill("DUE") : statusPill(s.counts.UPCOMING ? "UPCOMING" : "COMPLETE"))));
+
+  $("attentionList").replaceChildren(...(childrenDue.length
+    ? childrenDue.map((s) => el("button", { className: "mini-item DUE", onclick: () => openSaved(s.id) },
+        icon("alert"),
+        el("div", { className: "grow" },
+          el("p", { className: "strong", textContent: s.childName || "Unnamed child" }),
+          el("p", { className: "sub", textContent: `${plural(s.counts.DUE, "vaccine")} due: ${s.dueVaccines.join(", ")}` }))))
+    : [el("div", { className: "mini-empty" }, icon("check"),
+        el("p", { className: "strong", textContent: "All caught up" }),
+        el("p", { className: "sub", textContent: "No saved child has a dose due today." }))]));
+}
+
+let recordFilter = "all";
+for (const btn of $("recordFilters").children) {
+  btn.addEventListener("click", () => {
+    recordFilter = btn.dataset.filter;
+    for (const b of $("recordFilters").children) b.classList.toggle("active", b === btn);
+    renderRecords();
+  });
+}
+$("recordSearch").addEventListener("input", renderRecords);
+
+function renderRecords() {
+  const q = $("recordSearch").value.trim().toLowerCase();
+  const shown = summaries
+    .filter((s) => recordFilter === "all" || (recordFilter === "due") === (s.counts.DUE > 0))
+    .filter((s) => !q || `${s.childName} ${s.country}`.toLowerCase().includes(q));
+  $("recordsSub").textContent = plural(summaries.length, "record") + " saved to your account";
+  $("recordGrid").replaceChildren(...shown.map((s) => el("button", { className: "record-card", onclick: () => openSaved(s.id) },
+    el("div", { className: "top" },
+      el("div", { className: "tile" }, icon("file")),
+      el("div", { className: "grow" },
+        el("p", { className: "strong", textContent: s.childName || "Unnamed child" }),
+        recordFacts(s)),
+      icon("right")),
+    el("div", { className: "pills" },
+      el("span", { className: "pill plain", textContent: plural(s.entryCount, "entry", "entries") }),
+      ...(s.counts.DUE ? [el("span", { className: "pill DUE" }, icon("alert"), `${s.counts.DUE} due now`)] : []),
+      ...(s.counts.UPCOMING ? [el("span", { className: "pill UPCOMING" }, icon("clock"), `${s.counts.UPCOMING} later`)] : []),
+      ...(!s.counts.DUE && !s.counts.UPCOMING ? [el("span", { className: "pill COMPLETE" }, icon("check"), "Up to date")] : []),
+      ...(s.fileCount ? [el("span", { className: "pill plain" }, icon("image"), plural(s.fileCount, "photo"))] : [])))));
+  $("recordsEmpty").classList.toggle("hidden", shown.length > 0);
+  $("recordsEmptyTitle").textContent = summaries.length ? "No matching records" : "No saved records yet";
+  $("recordsEmptyText").textContent = summaries.length
+    ? "Try a different name or filter."
+    : "Upload a record, check it, and tap Save to records on the Report page.";
+}
+
+async function openSaved(id) {
+  try {
+    const detail = await api(`/api/records/${id}`);
+    loadRecord(detail.record, { savedId: id, savedFiles: detail.files });
+    showReport(detail.report);
+  } catch (err) {
+    alertStatus(err.message);
+  }
+}
+
+function alertStatus(message) {
+  show("records");
+  $("recordsEmpty").classList.remove("hidden");
+  $("recordsEmptyTitle").textContent = "Couldn't open that record";
+  $("recordsEmptyText").textContent = message;
+}
 
 // ---- step 1: upload --------------------------------------------------------
 
@@ -779,7 +1334,9 @@ $("readBtn").addEventListener("click", async () => {
   setStatus($("uploadStatus"), "");
   processing(true);
   try {
-    showReview(await api("/api/extract", { method: "POST", body: form }));
+    const record = await api("/api/extract", { method: "POST", body: form });
+    loadRecord(record, { files: selectedFiles });
+    show("review");
   } catch (err) {
     setStatus($("uploadStatus"), err.message, true);
   } finally {
@@ -789,7 +1346,8 @@ $("readBtn").addEventListener("click", async () => {
 
 $("sampleBtn").addEventListener("click", async () => {
   try {
-    showReview(await api("/api/sample"));
+    loadRecord(await api("/api/sample"));
+    show("review");
   } catch (err) {
     setStatus($("uploadStatus"), err.message, true);
   }
@@ -797,8 +1355,9 @@ $("sampleBtn").addEventListener("click", async () => {
 
 // ---- step 2: review --------------------------------------------------------
 
-function showReview(record) {
-  lastRecord = record;
+// Fills the Review page with a record and makes it the current one.
+function loadRecord(record, { savedId = null, savedFiles = [], files = [] } = {}) {
+  Object.assign(current, { record, report: null, savedId, savedFiles, files, dirty: false });
   $("childName").value = record.childName || "";
   $("dob").value = record.dateOfBirth || "";
   $("country").value = record.country || "";
@@ -809,20 +1368,8 @@ function showReview(record) {
   $("entryRows").replaceChildren();
   (record.entries || []).forEach(addRow);
   setStatus($("reviewStatus"), "");
-  updateChildCard();
-  setReportAlerts(null);
-  enableNav("review");
-  enableNav("report", false);
-  show("review");
-}
-
-function updateChildCard() {
-  const name = $("childName").value || "Unnamed child";
-  const rows = $("entryRows").children.length;
-  $("childInitials").textContent = initials(name);
-  $("childCardName").textContent = name;
-  $("childCardMeta").textContent = [$("country").value, `${rows} entr${rows === 1 ? "y" : "ies"}`].filter(Boolean).join(" · ");
-  $("childCard").classList.remove("hidden");
+  $("review").classList.add("open");
+  $("report").classList.remove("open");
 }
 
 function addRow(entry = {}) {
@@ -832,10 +1379,13 @@ function addRow(entry = {}) {
   row.querySelector(".date").value = entry.date || "";
   row.querySelector(".as-written").textContent = entry.dateAsWritten ? `Date on record: ${entry.dateAsWritten}` : "";
   row.querySelector(".note").textContent = entry.notes || "";
+  // Kept so a saved record still shows what was on the card and what the reader was unsure about.
+  row.dataset.dateAsWritten = entry.dateAsWritten || "";
+  row.dataset.confidence = entry.confidence || "high";
+  row.dataset.notes = entry.notes || "";
   if (entry.confidence === "low") {
     row.classList.add("low");
-    row.querySelector(".as-written").before(el("span", { className: "pill low" }, icon("alert"), "Check"));
-    row.querySelector(".pill").style.marginTop = "6px";
+    row.querySelector(".as-written").before(el("span", { className: "pill low", style: "margin-top: 6px" }, icon("alert"), "Check"));
   }
 
   const chips = row.querySelector(".chips");
@@ -845,7 +1395,7 @@ function addRow(entry = {}) {
       className: "chip",
       title: `${antigenNames[code] || code} (click to remove)`,
       textContent: code,
-      onclick: (e) => { e.target.remove(); reportStale(); },
+      onclick: (e) => { e.target.remove(); entriesChanged(); },
     }));
     chips.lastChild.dataset.code = code;
   };
@@ -856,7 +1406,7 @@ function addRow(entry = {}) {
     select.append(el("option", { value: code, textContent: `${code}: ${name}` }));
   }
   select.addEventListener("change", () => { addChip(select.value); select.value = ""; });
-  row.querySelector(".remove").addEventListener("click", () => { row.remove(); reportStale(); updateChildCard(); });
+  row.querySelector(".remove").addEventListener("click", () => { row.remove(); entriesChanged(); });
   $("entryRows").append(row);
 }
 
@@ -866,17 +1416,32 @@ function readRows() {
     englishName: row.querySelector(".english").value,
     antigens: [...row.querySelectorAll(".chip")].map((c) => c.dataset.code),
     date: row.querySelector(".date").value || null,
+    dateAsWritten: row.dataset.dateAsWritten,
+    confidence: row.dataset.confidence,
+    notes: row.dataset.notes,
   }));
 }
 
-// Any edit after a report was made means the report no longer matches the entries.
-function reportStale() {
-  enableNav("report", false);
-  setReportAlerts(null);
+// The record as the nurse has reviewed it, in the same shape the server reads.
+function reviewedRecord() {
+  return {
+    childName: $("childName").value,
+    dateOfBirth: $("dob").value,
+    country: $("country").value,
+    language: $("language").value,
+    warnings: current.record?.warnings || [],
+    entries: readRows(),
+  };
 }
-$("review").addEventListener("input", () => { reportStale(); updateChildCard(); });
 
-$("addRow").addEventListener("click", () => { addRow(); reportStale(); updateChildCard(); });
+// Any edit means the report no longer matches the entries until they are checked again.
+function entriesChanged() {
+  current.dirty = true;
+  $("report").classList.remove("open");
+}
+$("review").addEventListener("input", entriesChanged);
+
+$("addRow").addEventListener("click", () => { addRow(); entriesChanged(); });
 $("backToUpload").addEventListener("click", () => show("upload"));
 
 $("evaluateBtn").addEventListener("click", async () => {
@@ -885,15 +1450,8 @@ $("evaluateBtn").addEventListener("click", async () => {
     setStatus($("reviewStatus"), "Enter the child's date of birth first.", true);
     return;
   }
-  const entries = readRows();
-  const missing = entries.filter((e) => !e.date).length;
   try {
-    const report = await api("/api/evaluate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ dateOfBirth: dob, entries }),
-    });
-    showReport(report, entries, missing);
+    showReport(await postJson("/api/evaluate", { dateOfBirth: dob, entries: readRows() }));
   } catch (err) {
     setStatus($("reviewStatus"), err.message, true);
   }
@@ -901,19 +1459,23 @@ $("evaluateBtn").addEventListener("click", async () => {
 
 // ---- step 3: report --------------------------------------------------------
 
-function setReportAlerts(counts) {
-  const due = counts?.DUE || 0;
-  const upcoming = counts?.UPCOMING || 0;
-  $("dueBadge").textContent = due;
-  $("dueBadge").classList.toggle("hidden", !due);
-  $("alertStrip").replaceChildren(
-    ...(due ? [el("div", { className: "DUE" }, icon("alert"), `${due} vaccine${due > 1 ? "s" : ""} due now`)] : []),
-    ...(upcoming ? [el("div", { className: "UPCOMING" }, icon("clock"), `${upcoming} with more doses later`)] : []),
-  );
-  $("alertStrip").classList.toggle("hidden", !due && !upcoming);
+function updateNoReport() {
+  const hasRecord = $("review").classList.contains("open");
+  $("noReportText").textContent = hasRecord
+    ? "The entries changed since the last check. Check them against the US schedule to see the report."
+    : "Upload a record and check it against the US schedule, or open a saved record.";
+  $("noReportAction").replaceChildren(...(hasRecord
+    ? [icon("list"), " Back to review"]
+    : [icon("upload"), " Upload record"]));
+  $("noReportAction").classList.toggle("go-upload", !hasRecord);
+  $("noReportAction").dataset.goto = hasRecord ? "review" : "";
+  if (!hasRecord) delete $("noReportAction").dataset.goto;
 }
 
-function showReport(report, entries, missingDates) {
+function showReport(report) {
+  current.report = report;
+  const entries = readRows();
+  const missingDates = entries.filter((e) => !e.date).length;
   const name = $("childName").value || "Unnamed child";
   const from = [$("country").value, $("language").value].filter(Boolean).join(", ");
   const metaItem = (iconName, text) => el("span", {}, icon(iconName), text);
@@ -927,15 +1489,12 @@ function showReport(report, entries, missingDates) {
 
   const counts = {};
   report.series.forEach((s) => (counts[s.status] = (counts[s.status] || 0) + 1));
-  $("summaryCounts").replaceChildren(...Object.keys(STATUS).map((k) => el("div", { className: `stat ${k}` },
-    el("b", { textContent: counts[k] || 0 }),
-    el("p", { className: "label", textContent: STATUS[k].stat }),
-    el("p", { className: "sub", textContent: STATUS[k].sub }))));
+  $("summaryCounts").replaceChildren(...Object.keys(STATUS).map((k) => stat(k, counts[k] || 0, STATUS[k].stat, STATUS[k].sub)));
+  $("skippedWarning")?.remove();
   if (missingDates) {
     $("summaryCounts").after(el("div", { className: "warning", id: "skippedWarning" }, icon("alert"),
       el("span", { textContent: `${missingDates} entr${missingDates === 1 ? "y was" : "ies were"} skipped because they have no date.` })));
   }
-  $("skippedWarning")?.previousElementSibling !== $("summaryCounts") && $("skippedWarning")?.remove();
 
   // Most urgent first.
   const order = { DUE: 0, UPCOMING: 1, COMPLETE: 2, NOT_NEEDED: 3 };
@@ -950,8 +1509,10 @@ function showReport(report, entries, missingDates) {
         el("li", { textContent: `${d.sourceText || d.antigen} (${formatDate(d.given)}): ${d.reason}` })))));
   }
 
-  setReportAlerts(counts);
-  enableNav("report");
+  renderFiles();
+  renderSaveState();
+  setStatus($("saveStatus"), "");
+  $("report").classList.add("open");
   show("report");
 }
 
@@ -986,12 +1547,81 @@ function seriesRow(s) {
   return row;
 }
 
+// Thumbnails of the original photos, from this upload or from the saved record.
+function renderFiles() {
+  const items = current.savedId
+    ? current.savedFiles.map((f) => ({ name: f.name, type: f.contentType, url: f.url || `/api/records/${current.savedId}/files/${f.id}` }))
+    : current.files.map((f) => ({ name: f.name, type: f.type, url: URL.createObjectURL(f) }));
+  $("filesCard").classList.toggle("hidden", items.length === 0);
+  $("filesList").replaceChildren(...items.map((f) => el("a", { className: "file-thumb", href: f.url, target: "_blank", rel: "noopener" },
+    el("div", { className: "frame" }, f.type?.startsWith("image/") ? el("img", { src: f.url, alt: f.name }) : icon("file")),
+    el("span", { textContent: f.name }))));
+}
+
+function renderSaveState() {
+  const btn = $("saveBtn");
+  const saved = current.savedId && !current.dirty;
+  btn.classList.toggle("saved", !!saved);
+  btn.disabled = !!saved;
+  btn.replaceChildren(icon(saved ? "check" : "save"), " ",
+    el("span", { textContent: saved ? "Saved to records" : current.savedId ? "Save changes" : "Save to records" }));
+  $("deleteRow").classList.toggle("hidden", !current.savedId);
+  $("deleteBtn").classList.remove("confirm");
+  $("deleteBtn").lastChild.textContent = " Delete this saved record";
+}
+
+$("saveBtn").addEventListener("click", async () => {
+  const record = reviewedRecord();
+  $("saveBtn").disabled = true;
+  try {
+    if (current.savedId) {
+      await postJson(`/api/records/${current.savedId}`, record, "PUT");
+    } else {
+      const form = new FormData();
+      form.append("record", new Blob([JSON.stringify(record)], { type: "application/json" }));
+      current.files.forEach((f) => form.append("files", f));
+      const summary = await api("/api/records", { method: "POST", body: form });
+      current.savedId = summary.id;
+      current.savedFiles = (await api(`/api/records/${summary.id}`)).files;
+    }
+    current.record = record;
+    current.dirty = false;
+    await loadSummaries();
+    renderFiles();
+    setStatus($("saveStatus"), "Saved. You can find it any time under Saved records.");
+  } catch (err) {
+    setStatus($("saveStatus"), err.message, true);
+  }
+  renderSaveState();
+});
+
+// Deleting takes two clicks so a record isn't lost by accident.
+$("deleteBtn").addEventListener("click", async () => {
+  const btn = $("deleteBtn");
+  if (!btn.classList.contains("confirm")) {
+    btn.classList.add("confirm");
+    btn.lastChild.textContent = " Click again to delete for good";
+    return;
+  }
+  try {
+    await api(`/api/records/${current.savedId}`, { method: "DELETE" });
+    Object.assign(current, { savedId: null, savedFiles: [], record: null, report: null });
+    $("review").classList.remove("open");
+    $("report").classList.remove("open");
+    await loadSummaries();
+    show("records");
+  } catch (err) {
+    setStatus($("saveStatus"), err.message, true);
+  }
+});
+
 $("backToReview").addEventListener("click", () => show("review"));
 $("printBtn").addEventListener("click", () => window.print());
 
 // ---- start -----------------------------------------------------------------
 
 api("/api/antigens").then((names) => (antigenNames = names)).catch(() => {});
+api("/api/auth/me").then(signedIn).catch(() => signedOut());
 </script>
 </body>
 </html>

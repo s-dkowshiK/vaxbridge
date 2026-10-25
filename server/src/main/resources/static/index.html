@@ -32,23 +32,52 @@
       <symbol id="i-list" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></symbol>
       <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
       <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+      <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+      <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+      <symbol id="i-save" viewBox="0 0 24 24"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></symbol>
+      <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></symbol>
       <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M9.94 14.06 4 20"/><path d="m14 4 1.5 3.5L19 9l-3.5 1.5L14 14l-1.5-3.5L9 9l3.5-1.5z"/></symbol>
     </defs>
   </svg>
 
-  <div class="shell">
+  <!-- Sign in / create account -->
+  <div id="signin" class="auth hidden">
+    <div class="auth-box">
+      <div class="auth-brand">
+        <div class="logo xl"><svg class="i"><use href="#i-syringe"/></svg></div>
+        <h1>VaxBridge</h1>
+        <p class="sub">Vaccine records from any country, ready for school</p>
+      </div>
+      <form id="authForm" class="card auth-card" novalidate>
+        <label id="nameField" class="hidden">Your name <input id="authName" type="text" autocomplete="name" placeholder="Pat Rivera, RN"></label>
+        <label>Email <input id="authEmail" type="email" autocomplete="email" placeholder="you@school.org"></label>
+        <label>Password <input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••"></label>
+        <p id="authStatus" class="status"></p>
+        <button id="authSubmit" class="primary wide" type="submit">Sign in</button>
+      </form>
+      <p class="auth-switch sub"><span id="authSwitchText">Don't have an account?</span>
+        <button id="authSwitch" class="link" type="button">Create one</button></p>
+      <p class="auth-note"><svg class="i"><use href="#i-shield"/></svg>
+        For school nurses and clinic staff. Saved records are visible only to your account.</p>
+    </div>
+  </div>
+
+  <div id="app" class="shell hidden">
     <aside class="sidebar no-print">
       <div class="brand">
         <div class="logo"><svg class="i"><use href="#i-syringe"/></svg></div>
         <span>VaxBridge</span>
-        <span id="dueBadge" class="badge hidden"></span>
+        <span id="dueBadge" class="badge hidden" title="Saved records with doses due now"></span>
       </div>
 
-      <div id="childCard" class="child-card hidden">
-        <div id="childInitials" class="avatar"></div>
+      <div class="child-card">
+        <div id="userInitials" class="avatar"></div>
         <div class="child-text">
-          <p id="childCardName"></p>
-          <p id="childCardMeta" class="sub"></p>
+          <p id="userName"></p>
+          <p id="userMeta" class="sub"></p>
         </div>
       </div>
 
@@ -57,21 +86,79 @@
       <div id="alertStrip" class="alert-strip hidden"></div>
 
       <nav id="nav">
-        <p class="nav-label">Workflow</p>
-        <button data-view="upload" class="active"><svg class="i"><use href="#i-upload"/></svg><span>Upload record</span></button>
-        <button data-view="review" disabled><svg class="i"><use href="#i-list"/></svg><span>Review entries</span></button>
-        <button data-view="report" disabled><svg class="i"><use href="#i-file"/></svg><span>Report</span></button>
+        <p class="nav-label">Overview</p>
+        <button data-view="dashboard"><svg class="i"><use href="#i-activity"/></svg><span>Dashboard</span></button>
+        <button data-view="records"><svg class="i"><use href="#i-folder"/></svg><span>Saved records</span><b id="recordCount" class="count"></b></button>
+        <p class="nav-label">Current record</p>
+        <button data-view="upload"><svg class="i"><use href="#i-upload"/></svg><span>Upload record</span></button>
+        <button data-view="review"><svg class="i"><use href="#i-list"/></svg><span>Review entries</span></button>
+        <button data-view="report"><svg class="i"><use href="#i-file"/></svg><span>Report</span></button>
         <p class="nav-label">App</p>
         <button data-view="help"><svg class="i"><use href="#i-help"/></svg><span>Help</span></button>
       </nav>
 
       <div class="sidebar-foot">
-        <svg class="i"><use href="#i-shield"/></svg>
-        <span>A licensed provider makes every decision. VaxBridge only reads and checks.</span>
+        <button id="signOutBtn"><svg class="i"><use href="#i-logout"/></svg><span>Sign out</span></button>
       </div>
     </aside>
 
     <main>
+      <!-- Dashboard -->
+      <section id="dashboard" class="view hidden">
+        <div class="view-head">
+          <h1>Dashboard</h1>
+          <p id="today" class="sub"></p>
+        </div>
+        <div id="dashStats" class="stats"></div>
+        <div id="dashEmpty" class="empty card hidden">
+          <div class="tile lg"><svg class="i"><use href="#i-upload"/></svg></div>
+          <p class="strong">No saved records yet</p>
+          <p class="sub">Upload a child's vaccine record, check it, and tap Save to records. It will show up here.</p>
+          <button class="primary go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+        </div>
+        <div id="dashGrid" class="dash-grid">
+          <div class="card">
+            <div class="card-row">
+              <p class="card-title">Recent records</p>
+              <button class="link small" data-goto="records">See all</button>
+            </div>
+            <div id="recentList" class="mini-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-row">
+              <p class="card-title">Needs attention</p>
+            </div>
+            <div id="attentionList" class="mini-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Saved records -->
+      <section id="records" class="view hidden">
+        <div class="view-head row-head">
+          <div>
+            <h1>Saved records</h1>
+            <p id="recordsSub" class="sub"></p>
+          </div>
+          <button class="primary go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+        </div>
+        <div class="search">
+          <svg class="i"><use href="#i-search"/></svg>
+          <input id="recordSearch" type="search" placeholder="Search by child's name or country">
+        </div>
+        <div id="recordFilters" class="filters">
+          <button data-filter="all" class="active">All</button>
+          <button data-filter="due">Doses due</button>
+          <button data-filter="ok">Up to date</button>
+        </div>
+        <div id="recordGrid" class="record-grid"></div>
+        <div id="recordsEmpty" class="empty hidden">
+          <div class="tile lg"><svg class="i"><use href="#i-folder"/></svg></div>
+          <p class="strong" id="recordsEmptyTitle">No saved records yet</p>
+          <p class="sub" id="recordsEmptyText">Records you save from the Report page appear here.</p>
+        </div>
+      </section>
+
       <!-- Step 1: upload -->
       <section id="upload" class="view narrow">
         <div class="view-head">
@@ -109,8 +196,9 @@
 
           <div class="note-box">
             <svg class="i"><use href="#i-shield"/></svg>
-            <p>VaxBridge reads the record with AI and does not save it. The results are for a school nurse
-              or pediatrician to check against the original. They are not a medical decision.</p>
+            <p>VaxBridge reads the record with AI. Nothing is stored unless you save it to your records.
+              The results are for a school nurse or pediatrician to check against the original. They are not a
+              medical decision.</p>
           </div>
         </div>
 
@@ -124,6 +212,16 @@
 
       <!-- Step 2: nurse reviews what the AI read -->
       <section id="review" class="view hidden">
+        <div class="empty card no-record">
+          <div class="tile lg"><svg class="i"><use href="#i-list"/></svg></div>
+          <p class="strong">No record open</p>
+          <p class="sub">Upload a record (or try the sample) to check what was read, or open one of your saved records.</p>
+          <div class="row">
+            <button class="primary go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+            <button class="outline" data-goto="records"><svg class="i"><use href="#i-folder"/></svg> Saved records</button>
+          </div>
+        </div>
+        <div class="has-record">
         <button id="backToUpload" class="back"><svg class="i"><use href="#i-back"/></svg> Back to upload</button>
         <div class="view-head">
           <h1>Check what was read</h1>
@@ -161,10 +259,21 @@
           <button id="evaluateBtn" class="primary">Check against US schedule</button>
         </div>
         <p id="reviewStatus" class="status"></p>
+        </div>
       </section>
 
       <!-- Step 3: report to print and sign -->
       <section id="report" class="view hidden">
+        <div class="empty card no-record">
+          <div class="tile lg"><svg class="i"><use href="#i-file"/></svg></div>
+          <p class="strong">No report yet</p>
+          <p id="noReportText" class="sub">Upload a record and check it against the US schedule, or open a saved record.</p>
+          <div class="row">
+            <button id="noReportAction" class="primary go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+            <button class="outline" data-goto="records"><svg class="i"><use href="#i-folder"/></svg> Saved records</button>
+          </div>
+        </div>
+        <div class="has-record">
         <button id="backToReview" class="back no-print"><svg class="i"><use href="#i-back"/></svg> Edit entries</button>
         <div class="report-head">
           <div class="tile"><svg class="i"><use href="#i-file"/></svg></div>
@@ -172,8 +281,12 @@
             <h1>Immunization catch-up report</h1>
             <div id="reportMeta" class="meta"></div>
           </div>
-          <button id="printBtn" class="primary no-print"><svg class="i"><use href="#i-print"/></svg> Print / save PDF</button>
+          <div class="report-actions no-print">
+            <button id="saveBtn" class="primary"><svg class="i"><use href="#i-save"/></svg> <span>Save to records</span></button>
+            <button id="printBtn" class="outline"><svg class="i"><use href="#i-print"/></svg> Print</button>
+          </div>
         </div>
+        <p id="saveStatus" class="status no-print"></p>
 
         <div id="summaryCounts" class="stats"></div>
 
@@ -192,6 +305,11 @@
         </div>
         <div id="ignoredList"></div>
 
+        <div id="filesCard" class="card no-print hidden">
+          <p class="card-title"><svg class="i"><use href="#i-image"/></svg> Original record</p>
+          <div id="filesList" class="files-grid"></div>
+        </div>
+
         <div class="card signoff">
           <p class="card-title"><svg class="i"><use href="#i-check"/></svg> Provider review</p>
           <div class="sign-grid">
@@ -201,6 +319,11 @@
             <div><span>Clinic / school</span><div class="line"></div></div>
           </div>
           <label class="approve"><span class="box"></span> I reviewed the original record and approve this report.</label>
+        </div>
+
+        <div id="deleteRow" class="delete-row no-print hidden">
+          <button id="deleteBtn" class="danger"><svg class="i"><use href="#i-trash"/></svg> Delete this saved record</button>
+        </div>
         </div>
       </section>
 
@@ -243,8 +366,9 @@
           </details>
           <details>
             <summary>Is the record saved?<svg class="i"><use href="#i-chevron"/></svg></summary>
-            <p>No. VaxBridge sends the photo to the AI to read it and does not store it. Print or save the report
-              as a PDF to keep it.</p>
+            <p>Only if you tap Save to records on the Report page. The reviewed entries and the original photos are
+              then stored in your account, and only you can see them when signed in. Opening a saved record
+              re-checks it against the schedule as of today, so the due dates stay current.</p>
           </details>
         </div>
       </section>

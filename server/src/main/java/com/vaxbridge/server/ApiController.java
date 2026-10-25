@@ -77,11 +77,16 @@ public class ApiController {
 
     @PostMapping("/evaluate")
     public Report evaluate(@RequestBody EvaluateRequest request) {
-        if (request.dateOfBirth() == null) {
+        return evaluate(request.dateOfBirth(), request.asOf(), request.entries());
+    }
+
+    /** Runs the rules engine on reviewed entries. Entries without a date are skipped. */
+    static Report evaluate(LocalDate dateOfBirth, LocalDate asOf, List<EntryInput> entries) {
+        if (dateOfBirth == null) {
             throw new IllegalArgumentException("Date of birth is required.");
         }
         List<Dose> doses = new ArrayList<>();
-        for (EntryInput entry : request.entries()) {
+        for (EntryInput entry : entries) {
             if (entry.date() == null || entry.antigens() == null) {
                 continue;
             }
@@ -92,7 +97,7 @@ public class ApiController {
                 }
             }
         }
-        return VaccineRules.evaluate(doses, request.dateOfBirth(), request.asOf());
+        return VaccineRules.evaluate(doses, dateOfBirth, asOf);
     }
 
     private static Antigen parseAntigen(String code) {
