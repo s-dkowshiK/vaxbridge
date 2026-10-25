@@ -510,7 +510,6 @@ a.link .i { width: 14px; height: 14px; }
 .format-card .sub { font-size: 13px; flex: 1; }
 .format-card .tag { font: 500 11px var(--mono); color: var(--muted-foreground); }
 .format-card button { align-self: flex-start; }
-.format-card.main { border-color: color-mix(in srgb, var(--primary) 35%, transparent); background: color-mix(in srgb, var(--secondary) 50%, var(--card)); }
 .dose-grid-wrap { overflow-x: auto; }
 table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font-size: 13px; }
 .dose-grid th, .dose-grid td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; }
@@ -536,6 +535,33 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
 .grid-extra:empty { display: none; }
 .grid-extra { padding: 12px 20px; font-size: 12px; color: var(--muted-foreground); border-top: 1px solid var(--border); }
 
+/* upload: state and format first */
+.setup { display: flex; flex-direction: column; gap: 18px; }
+.step { display: flex; gap: 12px; align-items: flex-start; }
+.step-n {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+  background: var(--primary); color: var(--primary-foreground); font: 600 12px/24px var(--sans); text-align: center;
+}
+.step label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: var(--foreground); }
+.step-label { font-size: 14px; font-weight: 600; margin: 2px 0 8px; }
+.step:last-child .step-label { margin-bottom: 0; }
+.format-choice { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.format-choice button {
+  display: flex; align-items: flex-start; gap: 10px; text-align: left; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--foreground);
+}
+.format-choice button .i { margin-top: 2px; color: var(--muted-foreground); }
+.format-choice b { display: block; font-size: 13px; font-weight: 600; }
+.format-choice small { display: block; font-size: 11px; color: var(--muted-foreground); }
+.format-choice button.active { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); background: color-mix(in srgb, var(--secondary) 50%, var(--card)); }
+.format-choice button.active .i { color: var(--primary); }
+.setup.needs-state select { box-shadow: 0 0 0 2px var(--due); }
+
+/* report: the state section */
+.state-section { display: flex; flex-direction: column; gap: 20px; padding-top: 8px; }
+.section-head { display: flex; gap: 12px; align-items: flex-start; }
+.format-card.chosen { border-color: color-mix(in srgb, var(--primary) 35%, transparent); background: color-mix(in srgb, var(--secondary) 50%, var(--card)); }
+
 /* the state grid header is a single title, not the report's three columns */
 .series-header.state-grid-head { display: block; }
 
@@ -555,7 +581,7 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
   nav { order: 2; }
   .dash-grid, .state-pick, .state-info { grid-template-columns: 1fr; }
   .bg-options { grid-template-columns: repeat(2, 1fr); }
-  .format-grid { grid-template-columns: 1fr; }
+  .format-grid, .format-choice { grid-template-columns: 1fr; }
   .brand { padding: 0; }
   .badge { margin-left: 6px; }
   nav { flex: 1 1 100%; flex-direction: row; gap: 4px; overflow-x: auto; }
@@ -585,7 +611,7 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
   .no-print { display: none !important; }
   .shell { display: block; }
   .view { padding: 0; max-width: none; gap: 14px; }
-  #upload, #review, #help, #dashboard, #records, #settings, #state { display: none !important; }
+  #upload, #review, #help, #dashboard, #records, #settings { display: none !important; }
   .table-card, .card, .stat { box-shadow: none; }
   .stats { grid-template-columns: repeat(4, 1fr); }
   .series-header, .series-main { grid-template-columns: 1fr 150px 190px; }

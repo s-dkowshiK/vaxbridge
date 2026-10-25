@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,9 +38,9 @@ import org.springframework.web.multipart.MultipartFile;
  *
  * <ul>
  *   <li>GET    /api/records                - summaries for the dashboard, newest first</li>
- *   <li>POST   /api/records                - multipart: "record" (reviewed entries as JSON) and optional "files"</li>
+ *   <li>POST   /api/records                - multipart: "record" (reviewed entries as JSON), optional "state" and "files"</li>
  *   <li>GET    /api/records/{id}           - the record, its report as of today, and its files</li>
- *   <li>PUT    /api/records/{id}           - replace the reviewed entries (files are kept)</li>
+ *   <li>PUT    /api/records/{id}?state=... - replace the reviewed entries, and the state if given (files are kept)</li>
  *   <li>DELETE /api/records/{id}</li>
  *   <li>GET    /api/records/{id}/files/{f} - an original photo or PDF</li>
  * </ul>
@@ -64,7 +65,7 @@ public class RecordsController {
     }
 
     /** What the dashboard shows for one saved record. Counts are as of today. */
-    public record Summary(Long id, String childName, String dateOfBirth, String country, String language,
+    public record Summary(Long id, String childName, String dateOfBirth, String country, String language, String state,
                           Instant savedAt, Instant updatedAt, int entryCount, int fileCount,
                           Map<Status, Integer> counts, List<String> dueVaccines, LocalDate nextDose) {
     }
@@ -80,6 +81,7 @@ public class RecordsController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Summary save(@RequestPart("record") ExtractedRecord record,
+                        @RequestPart(value = "state", required = false) String state,
                         @RequestPart(value = "files", required = false) List<MultipartFile> uploads,
                         HttpSession session) throws IOException {
         AppUser user = AuthController.currentUser(session, users);
@@ -89,7 +91,9 @@ public class RecordsController {
                 throw new ApiException(HttpStatus.BAD_REQUEST, "Only photos (JPG, PNG, GIF, WebP) and PDFs can be saved.");
             }
         }
-        SavedRecord saved = records.save(new SavedRecord(user.id, toJson(record)));
+        SavedRecord unsaved = new SavedRecord(user.id, toJson(record));
+        unsaved.state = cleanState(state);
+        SavedRecord saved = records.save(unsaved);
         for (MultipartFile f : uploads == null ? List.<MultipartFile>of() : uploads) {
             files.save(new RecordFile(saved.id, f.getOriginalFilename(), f.getContentType(), f.getBytes()));
         }
@@ -104,10 +108,14 @@ public class RecordsController {
     }
 
     @PutMapping("/{id}")
-    public Summary update(@PathVariable("id") Long id, @RequestBody ExtractedRecord record, HttpSession session) {
+    public Summary update(@PathVariable("id") Long id, @RequestBody ExtractedRecord record,
+                          @RequestParam(value = "state", required = false) String state, HttpSession session) {
         SavedRecord saved = owned(id, session);
         report(record);
         saved.recordJson = toJson(record);
+        if (state != null) {
+            saved.state = cleanState(state);
+        }
         saved.updatedAt = Instant.now();
         return summary(records.save(saved));
     }
@@ -132,6 +140,18 @@ public class RecordsController {
                         .build().toString())
                 .header("X-Content-Type-Options", "nosniff")
                 .body(f.data);
+    }
+
+    /** A state name from the website's list; anything else is dropped. */
+    private static String cleanState(String state) {
+        if (state == null || state.isBlank()) {
+            return null;
+        }
+        String s = state.trim();
+        if (s.length() > 60 || !s.matches("[A-Za-z .()']+")) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Choose a state from the list.");
+        }
+        return s;
     }
 
     private SavedRecord owned(Long id, HttpSession session) {
@@ -160,7 +180,7 @@ public class RecordsController {
             }
         }
         int entries = record.entries() == null ? 0 : record.entries().size();
-        return new Summary(saved.id, record.childName(), record.dateOfBirth(), record.country(), record.language(),
+        return new Summary(saved.id, record.childName(), record.dateOfBirth(), record.country(), record.language(), saved.state,
                 saved.savedAt, saved.updatedAt, entries, files.findInfoByRecordId(saved.id).size(), counts, due, next);
     }
 

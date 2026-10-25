@@ -519,7 +519,6 @@ a.link .i { width: 14px; height: 14px; }
 .format-card .sub { font-size: 13px; flex: 1; }
 .format-card .tag { font: 500 11px var(--mono); color: var(--muted-foreground); }
 .format-card button { align-self: flex-start; }
-.format-card.main { border-color: color-mix(in srgb, var(--primary) 35%, transparent); background: color-mix(in srgb, var(--secondary) 50%, var(--card)); }
 .dose-grid-wrap { overflow-x: auto; }
 table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font-size: 13px; }
 .dose-grid th, .dose-grid td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; }
@@ -545,6 +544,33 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
 .grid-extra:empty { display: none; }
 .grid-extra { padding: 12px 20px; font-size: 12px; color: var(--muted-foreground); border-top: 1px solid var(--border); }
 
+/* upload: state and format first */
+.setup { display: flex; flex-direction: column; gap: 18px; }
+.step { display: flex; gap: 12px; align-items: flex-start; }
+.step-n {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+  background: var(--primary); color: var(--primary-foreground); font: 600 12px/24px var(--sans); text-align: center;
+}
+.step label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: var(--foreground); }
+.step-label { font-size: 14px; font-weight: 600; margin: 2px 0 8px; }
+.step:last-child .step-label { margin-bottom: 0; }
+.format-choice { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.format-choice button {
+  display: flex; align-items: flex-start; gap: 10px; text-align: left; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--foreground);
+}
+.format-choice button .i { margin-top: 2px; color: var(--muted-foreground); }
+.format-choice b { display: block; font-size: 13px; font-weight: 600; }
+.format-choice small { display: block; font-size: 11px; color: var(--muted-foreground); }
+.format-choice button.active { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); background: color-mix(in srgb, var(--secondary) 50%, var(--card)); }
+.format-choice button.active .i { color: var(--primary); }
+.setup.needs-state select { box-shadow: 0 0 0 2px var(--due); }
+
+/* report: the state section */
+.state-section { display: flex; flex-direction: column; gap: 20px; padding-top: 8px; }
+.section-head { display: flex; gap: 12px; align-items: flex-start; }
+.format-card.chosen { border-color: color-mix(in srgb, var(--primary) 35%, transparent); background: color-mix(in srgb, var(--secondary) 50%, var(--card)); }
+
 /* the state grid header is a single title, not the report's three columns */
 .series-header.state-grid-head { display: block; }
 
@@ -564,7 +590,7 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
   nav { order: 2; }
   .dash-grid, .state-pick, .state-info { grid-template-columns: 1fr; }
   .bg-options { grid-template-columns: repeat(2, 1fr); }
-  .format-grid { grid-template-columns: 1fr; }
+  .format-grid, .format-choice { grid-template-columns: 1fr; }
   .brand { padding: 0; }
   .badge { margin-left: 6px; }
   nav { flex: 1 1 100%; flex-direction: row; gap: 4px; overflow-x: auto; }
@@ -594,7 +620,7 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
   .no-print { display: none !important; }
   .shell { display: block; }
   .view { padding: 0; max-width: none; gap: 14px; }
-  #upload, #review, #help, #dashboard, #records, #settings, #state { display: none !important; }
+  #upload, #review, #help, #dashboard, #records, #settings { display: none !important; }
   .table-card, .card, .stat { box-shadow: none; }
   .stats { grid-template-columns: repeat(4, 1fr); }
   .series-header, .series-main { grid-template-columns: 1fr 150px 190px; }
@@ -703,7 +729,6 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
         <button data-view="upload"><svg class="i"><use href="#i-upload"/></svg><span>Upload record</span></button>
         <button data-view="review"><svg class="i"><use href="#i-list"/></svg><span>Review entries</span></button>
         <button data-view="report"><svg class="i"><use href="#i-file"/></svg><span>Report</span></button>
-        <button data-view="state"><svg class="i"><use href="#i-map"/></svg><span>State format</span></button>
         <p class="nav-label">App</p>
         <button data-view="settings"><svg class="i"><use href="#i-settings"/></svg><span>Settings</span></button>
         <button data-view="help"><svg class="i"><use href="#i-help"/></svg><span>Help</span></button>
@@ -776,10 +801,36 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
       <section id="upload" class="view narrow">
         <div class="view-head">
           <h1>Upload record</h1>
-          <p class="sub">A photo or scan of the child's vaccination card, in any language</p>
+          <p class="sub">Pick the state and the format you need, then add a photo or scan of the vaccination card in any language</p>
         </div>
 
         <div id="pickStage">
+          <div class="card setup">
+            <div class="step">
+              <span class="step-n">1</span>
+              <label class="grow">Which state is the child enrolling in?
+                <select id="uploadState"><option value="">Choose a state</option></select>
+              </label>
+            </div>
+            <div class="step">
+              <span class="step-n">2</span>
+              <div class="grow">
+                <p class="step-label">What do you need for that state?</p>
+                <div id="formatChoice" class="format-choice">
+                  <button type="button" data-format="form" class="active"><svg class="i"><use href="#i-print"/></svg>
+                    <span><b>School form</b><small id="formChoiceSub">Printable, in the state's layout</small></span></button>
+                  <button type="button" data-format="hl7"><svg class="i"><use href="#i-code"/></svg>
+                    <span><b>Registry file</b><small>HL7 for the state registry</small></span></button>
+                  <button type="button" data-format="fhir"><svg class="i"><use href="#i-file"/></svg>
+                    <span><b>Health record file</b><small>FHIR, for clinic systems</small></span></button>
+                  <button type="button" data-format="csv"><svg class="i"><use href="#i-table"/></svg>
+                    <span><b>Spreadsheet</b><small>CSV</small></span></button>
+                </div>
+              </div>
+            </div>
+            <div class="step"><span class="step-n">3</span><p class="step-label">Upload the record</p></div>
+          </div>
+
           <div class="dropzone" id="dropzone">
             <input type="file" id="files" class="hidden" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" multiple>
             <input type="file" id="cameraInput" class="hidden" accept="image/*" capture="environment">
@@ -897,7 +948,7 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
           <div class="report-actions no-print">
             <button id="saveBtn" class="primary"><svg class="i"><use href="#i-save"/></svg> <span>Save to records</span></button>
             <button id="printBtn" class="outline"><svg class="i"><use href="#i-print"/></svg> Print</button>
-            <button class="outline" data-goto="state"><svg class="i"><use href="#i-map"/></svg> State format</button>
+            <button id="formActionBtn" class="outline"><svg class="i"><use href="#i-map"/></svg> <span>State form</span></button>
           </div>
         </div>
         <p id="saveStatus" class="status no-print"></p>
@@ -919,47 +970,17 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
         </div>
         <div id="ignoredList"></div>
 
-        <div id="filesCard" class="card no-print hidden">
-          <p class="card-title"><svg class="i"><use href="#i-image"/></svg> Original record</p>
-          <div id="filesList" class="files-grid"></div>
-        </div>
-
-        <div class="card signoff">
-          <p class="card-title"><svg class="i"><use href="#i-check"/></svg> Provider review</p>
-          <div class="sign-grid">
-            <div><span>Reviewed by (name, credentials)</span><div class="line"></div></div>
-            <div><span>Signature</span><div class="line"></div></div>
-            <div><span>Date</span><div class="line"></div></div>
-            <div><span>Clinic / school</span><div class="line"></div></div>
-          </div>
-          <label class="approve"><span class="box"></span> I reviewed the original record and approve this report.</label>
-        </div>
-
-        <div id="deleteRow" class="delete-row no-print hidden">
-          <button id="deleteBtn" class="danger"><svg class="i"><use href="#i-trash"/></svg> Delete this saved record</button>
-        </div>
-        </div>
-      </section>
-
-      <!-- State format: the reviewed record in the layout states use, for a provider to sign -->
-      <section id="state" class="view hidden">
-        <div class="empty card no-record">
-          <div class="tile lg"><svg class="i"><use href="#i-map"/></svg></div>
-          <p class="strong">No report yet</p>
-          <p class="sub">Check a record against the US schedule first, or open a saved record. Then you can get it ready for a state here.</p>
-          <div class="row">
-            <button class="primary go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
-            <button class="outline" data-goto="records"><svg class="i"><use href="#i-folder"/></svg> Saved records</button>
+        <!-- The record in the chosen state's format (the state is picked on the Upload page) -->
+        <div id="stateSection" class="state-section no-print">
+        <div class="section-head">
+          <div class="tile"><svg class="i"><use href="#i-map"/></svg></div>
+          <div>
+            <h2 id="stateHeading">State school form</h2>
+            <p class="sub">The checked record laid out like the state's own school form, plus files for its registry.</p>
           </div>
         </div>
-        <div class="has-record">
-        <div class="view-head">
-          <h1>Get it ready for a state</h1>
-          <p class="sub">Lays the checked record out like the chosen state's own school form, shows what that state requires, and makes files for its registry.</p>
-        </div>
-
         <div class="card state-pick">
-          <label>State
+          <label>Enrolling in
             <select id="stateSelect"></select>
           </label>
           <div id="registryInfo" class="registry"></div>
@@ -990,27 +1011,27 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
         </div>
 
         <div class="format-grid">
-          <div class="card format-card main">
+          <div class="card format-card" data-card="form">
             <div class="top"><div class="tile"><svg class="i"><use href="#i-print"/></svg></div>
               <div><p class="strong">School immunization record</p><p id="printTag" class="tag">Printable, for a provider to sign</p></div></div>
             <p id="printText" class="sub">Every dose laid out the way the state's school form lists them, with MM/DD/YYYY dates.</p>
-            <button id="printStateBtn" class="primary"><svg class="i"><use href="#i-print"/></svg> Open printable record</button>
+            <button id="printStateBtn" class="outline" data-export="form"><svg class="i"><use href="#i-print"/></svg> Open printable record</button>
           </div>
-          <div class="card format-card">
+          <div class="card format-card" data-card="hl7">
             <div class="top"><div class="tile"><svg class="i"><use href="#i-code"/></svg></div>
               <div><p class="strong">State registry file</p><p class="tag">HL7 2.5.1 VXU · .hl7</p></div></div>
             <p id="hl7Text" class="sub">The message format state immunization registries accept from clinics. A clinic enrolled with the
               registry uploads it as historical doses.</p>
             <button class="outline" data-export="hl7"><svg class="i"><use href="#i-download"/></svg> Download .hl7</button>
           </div>
-          <div class="card format-card">
+          <div class="card format-card" data-card="fhir">
             <div class="top"><div class="tile"><svg class="i"><use href="#i-file"/></svg></div>
               <div><p class="strong">Health record file</p><p class="tag">FHIR R4 · .json</p></div></div>
             <p class="sub">The standard most clinic health record systems import. Doses are marked as transcribed from another
               record, not given by the clinic.</p>
             <button class="outline" data-export="fhir"><svg class="i"><use href="#i-download"/></svg> Download .json</button>
           </div>
-          <div class="card format-card">
+          <div class="card format-card" data-card="csv">
             <div class="top"><div class="tile"><svg class="i"><use href="#i-table"/></svg></div>
               <div><p class="strong">Spreadsheet</p><p class="tag">CSV · .csv</p></div></div>
             <p class="sub">One row per dose, with the vaccine code, the US name and the text on the original record.</p>
@@ -1018,6 +1039,27 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
           </div>
         </div>
         <p id="exportStatus" class="status"></p>
+        </div>
+
+        <div id="filesCard" class="card no-print hidden">
+          <p class="card-title"><svg class="i"><use href="#i-image"/></svg> Original record</p>
+          <div id="filesList" class="files-grid"></div>
+        </div>
+
+        <div class="card signoff">
+          <p class="card-title"><svg class="i"><use href="#i-check"/></svg> Provider review</p>
+          <div class="sign-grid">
+            <div><span>Reviewed by (name, credentials)</span><div class="line"></div></div>
+            <div><span>Signature</span><div class="line"></div></div>
+            <div><span>Date</span><div class="line"></div></div>
+            <div><span>Clinic / school</span><div class="line"></div></div>
+          </div>
+          <label class="approve"><span class="box"></span> I reviewed the original record and approve this report.</label>
+        </div>
+
+        <div id="deleteRow" class="delete-row no-print hidden">
+          <button id="deleteBtn" class="danger"><svg class="i"><use href="#i-trash"/></svg> Delete this saved record</button>
+        </div>
         </div>
       </section>
 
@@ -1188,7 +1230,7 @@ function previewSummary(r) {
     if ((s.status === "DUE" || s.status === "UPCOMING") && s.nextDoses.length && (!next || s.nextDoses[0] < next)) next = s.nextDoses[0];
   }
   const rec = r.record;
-  return { id: r.id, childName: rec.childName, dateOfBirth: rec.dateOfBirth, country: rec.country, language: rec.language,
+  return { id: r.id, childName: rec.childName, dateOfBirth: rec.dateOfBirth, country: rec.country, language: rec.language, state: r.state || null,
     savedAt: r.savedAt, updatedAt: r.updatedAt, entryCount: (rec.entries || []).length, fileCount: r.files.length,
     counts, dueVaccines: due, nextDose: next };
 }
@@ -1202,7 +1244,8 @@ const readAsDataUrl = (file) => new Promise((resolve) => {
   reader.readAsDataURL(file);
 });
 
-window.fetch = async (path, options = {}) => {
+window.fetch = async (url, options = {}) => {
+  const [path, query = ""] = url.split("?");
   const method = (options.method || "GET").toUpperCase();
   const reply = (status, data) => ({ ok: status < 300, status, json: async () => data });
   const fail = (status, error) => reply(status, { error });
@@ -1307,13 +1350,14 @@ window.fetch = async (path, options = {}) => {
       // Browser storage is small, so the preview keeps only small photos.
       if (total < 1500000) files.push({ id: files.length + 1, name: f.name, contentType: f.type, size: f.size, url: await readAsDataUrl(f) });
     }
-    const saved = { id: Date.now(), record, savedAt: now, updatedAt: now, files };
+    const saved = { id: Date.now(), record, state: options.body.get("state") || null, savedAt: now, updatedAt: now, files };
     previewStore.set(key, [...records, saved]);
     return reply(200, previewSummary(saved));
   }
   if (method === "GET") return reply(200, { summary: previewSummary(found), record: found.record, report: PREVIEW.report, files: found.files });
   if (method === "PUT") {
-    Object.assign(found, { record: body(), updatedAt: now });
+    const state = new URLSearchParams(query).get("state");
+    Object.assign(found, { record: body(), updatedAt: now }, state !== null ? { state: state || null } : {});
     previewStore.set(key, records);
     return reply(200, previewSummary(found));
   }
@@ -1797,6 +1841,8 @@ const current = {
   files: [],         // File objects from this upload (not saved yet)
   savedFiles: [],    // files stored with the saved record
   dirty: false,      // entries changed since the last save or report
+  state: "",         // the US state the child is enrolling in (picked on the Upload page)
+  format: "form",    // what the nurse needs for that state: form, hl7, fhir or csv
 };
 
 const STATUS = {
@@ -1809,7 +1855,7 @@ const STATUS = {
 // ---- helpers ---------------------------------------------------------------
 
 function show(view) {
-  for (const id of ["dashboard", "records", "upload", "review", "report", "state", "settings", "help"]) {
+  for (const id of ["dashboard", "records", "upload", "review", "report", "settings", "help"]) {
     $(id).classList.toggle("hidden", id !== view);
   }
   for (const btn of $("nav").querySelectorAll("button")) {
@@ -1818,7 +1864,6 @@ function show(view) {
   if (view === "dashboard") renderDashboard();
   if (view === "records") renderRecords();
   if (view === "report") updateNoReport();
-  if (view === "state") renderState();
   if (view === "settings") renderSettings();
   window.scrollTo(0, 0);
 }
@@ -1922,7 +1967,7 @@ async function signedIn(u) {
 function signedOut() {
   user = null;
   summaries = [];
-  Object.assign(current, { record: null, report: null, savedId: null, files: [], savedFiles: [], dirty: false });
+  Object.assign(current, { record: null, report: null, savedId: null, files: [], savedFiles: [], dirty: false, state: "", format: "form" });
   setFiles([]);
   $("review").classList.remove("open");
   $("report").classList.remove("open");
@@ -1952,6 +1997,7 @@ $("newRecordBtn").addEventListener("click", startNewRecord);
 
 function startNewRecord() {
   setFiles([]);
+  setUploadChoice("", "form");
   setStatus($("uploadStatus"), "");
   show("upload");
 }
@@ -2061,7 +2107,7 @@ function renderRecords() {
 async function openSaved(id) {
   try {
     const detail = await api(`/api/records/${id}`);
-    loadRecord(detail.record, { savedId: id, savedFiles: detail.files });
+    loadRecord(detail.record, { savedId: id, savedFiles: detail.files, state: detail.summary.state || "" });
     showReport(detail.report);
   } catch (err) {
     alertStatus(err.message);
@@ -2097,17 +2143,17 @@ function addFiles(list) {
 
 $("files").addEventListener("change", (e) => { addFiles(e.target.files); e.target.value = ""; });
 $("cameraInput").addEventListener("change", (e) => { addFiles(e.target.files); e.target.value = ""; });
-$("browseBtn").addEventListener("click", (e) => { e.stopPropagation(); $("files").click(); });
-$("cameraBtn").addEventListener("click", (e) => { e.stopPropagation(); $("cameraInput").click(); });
+$("browseBtn").addEventListener("click", (e) => { e.stopPropagation(); if (stateChosen()) $("files").click(); });
+$("cameraBtn").addEventListener("click", (e) => { e.stopPropagation(); if (stateChosen()) $("cameraInput").click(); });
 
 const drop = $("dropzone");
-drop.addEventListener("click", () => $("files").click());
+drop.addEventListener("click", () => { if (stateChosen()) $("files").click(); });
 drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("drag"); });
 drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
 drop.addEventListener("drop", (e) => {
   e.preventDefault();
   drop.classList.remove("drag");
-  addFiles(e.dataTransfer.files);
+  if (stateChosen()) addFiles(e.dataTransfer.files);
 });
 
 function processing(on) {
@@ -2116,13 +2162,14 @@ function processing(on) {
 }
 
 $("readBtn").addEventListener("click", async () => {
+  if (!stateChosen()) return;
   const form = new FormData();
   selectedFiles.forEach((f) => form.append("files", f));
   setStatus($("uploadStatus"), "");
   processing(true);
   try {
     const record = await api("/api/extract", { method: "POST", body: form });
-    loadRecord(record, { files: selectedFiles });
+    loadRecord(record, { files: selectedFiles, ...uploadChoice });
     show("review");
   } catch (err) {
     setStatus($("uploadStatus"), err.message, true);
@@ -2132,8 +2179,9 @@ $("readBtn").addEventListener("click", async () => {
 });
 
 $("sampleBtn").addEventListener("click", async () => {
+  if (!stateChosen()) return;
   try {
-    loadRecord(await api("/api/sample"));
+    loadRecord(await api("/api/sample"), { ...uploadChoice });
     show("review");
   } catch (err) {
     setStatus($("uploadStatus"), err.message, true);
@@ -2143,8 +2191,8 @@ $("sampleBtn").addEventListener("click", async () => {
 // ---- step 2: review --------------------------------------------------------
 
 // Fills the Review page with a record and makes it the current one.
-function loadRecord(record, { savedId = null, savedFiles = [], files = [] } = {}) {
-  Object.assign(current, { record, report: null, savedId, savedFiles, files, dirty: false });
+function loadRecord(record, { savedId = null, savedFiles = [], files = [], state = "", format = "form" } = {}) {
+  Object.assign(current, { record, report: null, savedId, savedFiles, files, dirty: false, state, format });
   $("childName").value = record.childName || "";
   $("dob").value = record.dateOfBirth || "";
   $("country").value = record.country || "";
@@ -2300,6 +2348,7 @@ function showReport(report) {
   renderSaveState();
   setStatus($("saveStatus"), "");
   $("report").classList.add("open");
+  renderState();
   show("report");
 }
 
@@ -2362,10 +2411,11 @@ $("saveBtn").addEventListener("click", async () => {
   $("saveBtn").disabled = true;
   try {
     if (current.savedId) {
-      await postJson(`/api/records/${current.savedId}`, record, "PUT");
+      await postJson(`/api/records/${current.savedId}?state=${encodeURIComponent(current.state)}`, record, "PUT");
     } else {
       const form = new FormData();
       form.append("record", new Blob([JSON.stringify(record)], { type: "application/json" }));
+      if (current.state) form.append("state", current.state);
       current.files.forEach((f) => form.append("files", f));
       const summary = await api("/api/records", { method: "POST", body: form });
       current.savedId = summary.id;
@@ -2580,27 +2630,82 @@ $("passwordForm").addEventListener("submit", async (e) => {
   }
 });
 
-// ---- state format ----------------------------------------------------------
+// ---- state and format ------------------------------------------------------
 
-function chosenState() {
-  let code = null;
-  try { code = localStorage.getItem("vaxbridge.state"); } catch { /* storage can be blocked */ }
-  return STATES.find((s) => s.name === code) || STATES.find((s) => s.name === "California");
+// Chosen on the Upload page before the record is read: the state the child is enrolling in, and the
+// format the nurse needs for that state. The Report page then lays the record out for that state.
+const FORMATS = {
+  form: { action: (st) => `Open ${st} school form`, icon: "print" },
+  hl7: { action: () => "Download .hl7", icon: "download" },
+  fhir: { action: () => "Download FHIR .json", icon: "download" },
+  csv: { action: () => "Download .csv", icon: "download" },
+};
+const uploadChoice = { state: "", format: "form" };
+
+const findState = (name) => STATES.find((s) => s.name === name) || null;
+const chosenState = () => findState(current.state);
+const stateOptions = (blank) => [el("option", { value: "", textContent: blank }),
+  ...STATES.map((s) => el("option", { value: s.name, textContent: s.name }))];
+
+$("uploadState").replaceChildren(...stateOptions("Choose a state"));
+$("stateSelect").replaceChildren(...stateOptions("Choose a state"));
+
+function setUploadChoice(state, format) {
+  Object.assign(uploadChoice, { state, format });
+  $("uploadState").value = state;
+  const st = findState(state);
+  const form = st && STATE_FORMS[st.name];
+  for (const b of $("formatChoice").children) {
+    b.classList.toggle("active", b.dataset.format === format);
+    b.disabled = !st;  // the state comes first
+  }
+  $("formChoiceSub").textContent = form ? `${form.number || form.title}, printable` : "Printable, in the state's layout";
+  $(`pickStage`).querySelector(".setup").classList.remove("needs-state");
+  if (st) setStatus($("uploadStatus"), "");
 }
 
-$("stateSelect").append(...STATES.map((s) => el("option", { value: s.name, textContent: s.name })));
-$("stateSelect").addEventListener("change", () => {
-  try { localStorage.setItem("vaxbridge.state", $("stateSelect").value); } catch { /* not remembered, that's fine */ }
+// Reading a record needs the state first, so the right form is ready when the report is.
+function stateChosen() {
+  if (uploadChoice.state) return true;
+  $("pickStage").querySelector(".setup").classList.add("needs-state");
+  setStatus($("uploadStatus"), "Choose the state the child is enrolling in first.", true);
+  $("uploadState").focus();
+  return false;
+}
+
+$("uploadState").addEventListener("change", () => setUploadChoice($("uploadState").value, uploadChoice.format));
+for (const b of $("formatChoice").children) {
+  b.addEventListener("click", () => setUploadChoice(uploadChoice.state, b.dataset.format));
+}
+setUploadChoice("", "form");
+
+// Changing the state on the Report page; a saved record keeps the new state.
+$("stateSelect").addEventListener("change", async () => {
+  current.state = $("stateSelect").value;
   renderState();
+  if (current.savedId && !current.dirty && current.state) {
+    await postJson(`/api/records/${current.savedId}?state=${encodeURIComponent(current.state)}`, reviewedRecord(), "PUT").catch(() => {});
+    loadSummaries();
+  }
 });
 
 function renderState() {
-  // The state formats need a checked report that matches the entries.
-  const ready = $("report").classList.contains("open") && current.report;
-  $("state").classList.toggle("open", !!ready);
-  if (!ready) return;
   const state = chosenState();
-  $("stateSelect").value = state.name;
+  $("stateSelect").value = state ? state.name : "";
+  for (const id of ["registryInfo"]) $(id).classList.toggle("hidden", !state);
+  for (const node of $("stateSection").children) {
+    if (!node.classList.contains("section-head") && !node.classList.contains("state-pick")) node.classList.toggle("hidden", !state);
+  }
+  const action = $("formActionBtn");
+  if (!state) {
+    $("stateHeading").textContent = "State school form";
+    action.replaceChildren(icon("map"), " ", el("span", { textContent: "Choose a state" }));
+    return;
+  }
+  const fmt = FORMATS[current.format] || FORMATS.form;
+  action.replaceChildren(icon(fmt.icon), " ", el("span", { textContent: fmt.action(state.name) }));
+  for (const card of document.querySelectorAll("[data-card]")) card.classList.toggle("chosen", card.dataset.card === current.format);
+  $("stateHeading").textContent = `For ${state.name}`;
   const myIr = state.url.includes("myirmobile.com");
   $("registryInfo").replaceChildren(
     el("div", { className: "tile" }, icon("map")),
@@ -2681,25 +2786,34 @@ function download(name, text, type) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-for (const btn of document.querySelectorAll("[data-export]")) {
-  btn.addEventListener("click", () => {
-    const record = reviewedRecord();
-    const state = chosenState();
-    const kind = btn.dataset.export;
-    if (kind === "hl7") download(`${fileBase()}.hl7`, buildHl7(record, state), "application/hl7-v2");
-    if (kind === "fhir") download(`${fileBase()}.fhir.json`, buildFhir(record), "application/fhir+json");
-    if (kind === "csv") download(`${fileBase()}.csv`, buildCsv(record), "text/csv");
-    setStatus($("exportStatus"), `Downloaded. ${exportDoses(record).length} doses for ${state.name}. Check it against the original before anyone uses it.`);
-  });
+function exportAs(kind) {
+  const state = chosenState();
+  if (!state) {
+    $("stateSelect").focus();
+    return;
+  }
+  const record = reviewedRecord();
+  if (kind === "form") {
+    const page = buildPrintable(record, current.report, state);
+    const url = URL.createObjectURL(new Blob([page], { type: "text/html" }));
+    const win = window.open(url, "_blank");
+    if (win) win.opener = null;
+    else download(`${fileBase()}-school-record.html`, page, "text/html");
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    return;
+  }
+  if (kind === "hl7") download(`${fileBase()}.hl7`, buildHl7(record, state), "application/hl7-v2");
+  if (kind === "fhir") download(`${fileBase()}.fhir.json`, buildFhir(record), "application/fhir+json");
+  if (kind === "csv") download(`${fileBase()}.csv`, buildCsv(record), "text/csv");
+  setStatus($("exportStatus"), `Downloaded. ${exportDoses(record).length} doses for ${state.name}. Check it against the original before anyone uses it.`);
 }
 
-$("printStateBtn").addEventListener("click", () => {
-  const page = buildPrintable(reviewedRecord(), current.report, chosenState());
-  const url = URL.createObjectURL(new Blob([page], { type: "text/html" }));
-  const win = window.open(url, "_blank");
-  if (win) win.opener = null;
-  else download(`${fileBase()}-school-record.html`, page, "text/html");
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
+for (const btn of document.querySelectorAll("[data-export]")) {
+  btn.addEventListener("click", () => exportAs(btn.dataset.export));
+}
+$("formActionBtn").addEventListener("click", () => {
+  if (chosenState()) exportAs(current.format);
+  else $("stateSection").scrollIntoView({ behavior: "smooth" });
 });
 
 // ---- start -----------------------------------------------------------------

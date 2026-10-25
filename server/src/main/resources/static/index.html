@@ -102,7 +102,6 @@
         <button data-view="upload"><svg class="i"><use href="#i-upload"/></svg><span>Upload record</span></button>
         <button data-view="review"><svg class="i"><use href="#i-list"/></svg><span>Review entries</span></button>
         <button data-view="report"><svg class="i"><use href="#i-file"/></svg><span>Report</span></button>
-        <button data-view="state"><svg class="i"><use href="#i-map"/></svg><span>State format</span></button>
         <p class="nav-label">App</p>
         <button data-view="settings"><svg class="i"><use href="#i-settings"/></svg><span>Settings</span></button>
         <button data-view="help"><svg class="i"><use href="#i-help"/></svg><span>Help</span></button>
@@ -174,10 +173,36 @@
       <section id="upload" class="view narrow">
         <div class="view-head">
           <h1>Upload record</h1>
-          <p class="sub">A photo or scan of the child's vaccination card, in any language</p>
+          <p class="sub">Pick the state and the format you need, then add a photo or scan of the vaccination card in any language</p>
         </div>
 
         <div id="pickStage">
+          <div class="card setup">
+            <div class="step">
+              <span class="step-n">1</span>
+              <label class="grow">Which state is the child enrolling in?
+                <select id="uploadState"><option value="">Choose a state</option></select>
+              </label>
+            </div>
+            <div class="step">
+              <span class="step-n">2</span>
+              <div class="grow">
+                <p class="step-label">What do you need for that state?</p>
+                <div id="formatChoice" class="format-choice">
+                  <button type="button" data-format="form" class="active"><svg class="i"><use href="#i-print"/></svg>
+                    <span><b>School form</b><small id="formChoiceSub">Printable, in the state's layout</small></span></button>
+                  <button type="button" data-format="hl7"><svg class="i"><use href="#i-code"/></svg>
+                    <span><b>Registry file</b><small>HL7 for the state registry</small></span></button>
+                  <button type="button" data-format="fhir"><svg class="i"><use href="#i-file"/></svg>
+                    <span><b>Health record file</b><small>FHIR, for clinic systems</small></span></button>
+                  <button type="button" data-format="csv"><svg class="i"><use href="#i-table"/></svg>
+                    <span><b>Spreadsheet</b><small>CSV</small></span></button>
+                </div>
+              </div>
+            </div>
+            <div class="step"><span class="step-n">3</span><p class="step-label">Upload the record</p></div>
+          </div>
+
           <div class="dropzone" id="dropzone">
             <input type="file" id="files" class="hidden" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" multiple>
             <input type="file" id="cameraInput" class="hidden" accept="image/*" capture="environment">
@@ -295,7 +320,7 @@
           <div class="report-actions no-print">
             <button id="saveBtn" class="primary"><svg class="i"><use href="#i-save"/></svg> <span>Save to records</span></button>
             <button id="printBtn" class="outline"><svg class="i"><use href="#i-print"/></svg> Print</button>
-            <button class="outline" data-goto="state"><svg class="i"><use href="#i-map"/></svg> State format</button>
+            <button id="formActionBtn" class="outline"><svg class="i"><use href="#i-map"/></svg> <span>State form</span></button>
           </div>
         </div>
         <p id="saveStatus" class="status no-print"></p>
@@ -317,47 +342,17 @@
         </div>
         <div id="ignoredList"></div>
 
-        <div id="filesCard" class="card no-print hidden">
-          <p class="card-title"><svg class="i"><use href="#i-image"/></svg> Original record</p>
-          <div id="filesList" class="files-grid"></div>
-        </div>
-
-        <div class="card signoff">
-          <p class="card-title"><svg class="i"><use href="#i-check"/></svg> Provider review</p>
-          <div class="sign-grid">
-            <div><span>Reviewed by (name, credentials)</span><div class="line"></div></div>
-            <div><span>Signature</span><div class="line"></div></div>
-            <div><span>Date</span><div class="line"></div></div>
-            <div><span>Clinic / school</span><div class="line"></div></div>
-          </div>
-          <label class="approve"><span class="box"></span> I reviewed the original record and approve this report.</label>
-        </div>
-
-        <div id="deleteRow" class="delete-row no-print hidden">
-          <button id="deleteBtn" class="danger"><svg class="i"><use href="#i-trash"/></svg> Delete this saved record</button>
-        </div>
-        </div>
-      </section>
-
-      <!-- State format: the reviewed record in the layout states use, for a provider to sign -->
-      <section id="state" class="view hidden">
-        <div class="empty card no-record">
-          <div class="tile lg"><svg class="i"><use href="#i-map"/></svg></div>
-          <p class="strong">No report yet</p>
-          <p class="sub">Check a record against the US schedule first, or open a saved record. Then you can get it ready for a state here.</p>
-          <div class="row">
-            <button class="primary go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
-            <button class="outline" data-goto="records"><svg class="i"><use href="#i-folder"/></svg> Saved records</button>
+        <!-- The record in the chosen state's format (the state is picked on the Upload page) -->
+        <div id="stateSection" class="state-section no-print">
+        <div class="section-head">
+          <div class="tile"><svg class="i"><use href="#i-map"/></svg></div>
+          <div>
+            <h2 id="stateHeading">State school form</h2>
+            <p class="sub">The checked record laid out like the state's own school form, plus files for its registry.</p>
           </div>
         </div>
-        <div class="has-record">
-        <div class="view-head">
-          <h1>Get it ready for a state</h1>
-          <p class="sub">Lays the checked record out like the chosen state's own school form, shows what that state requires, and makes files for its registry.</p>
-        </div>
-
         <div class="card state-pick">
-          <label>State
+          <label>Enrolling in
             <select id="stateSelect"></select>
           </label>
           <div id="registryInfo" class="registry"></div>
@@ -388,27 +383,27 @@
         </div>
 
         <div class="format-grid">
-          <div class="card format-card main">
+          <div class="card format-card" data-card="form">
             <div class="top"><div class="tile"><svg class="i"><use href="#i-print"/></svg></div>
               <div><p class="strong">School immunization record</p><p id="printTag" class="tag">Printable, for a provider to sign</p></div></div>
             <p id="printText" class="sub">Every dose laid out the way the state's school form lists them, with MM/DD/YYYY dates.</p>
-            <button id="printStateBtn" class="primary"><svg class="i"><use href="#i-print"/></svg> Open printable record</button>
+            <button id="printStateBtn" class="outline" data-export="form"><svg class="i"><use href="#i-print"/></svg> Open printable record</button>
           </div>
-          <div class="card format-card">
+          <div class="card format-card" data-card="hl7">
             <div class="top"><div class="tile"><svg class="i"><use href="#i-code"/></svg></div>
               <div><p class="strong">State registry file</p><p class="tag">HL7 2.5.1 VXU · .hl7</p></div></div>
             <p id="hl7Text" class="sub">The message format state immunization registries accept from clinics. A clinic enrolled with the
               registry uploads it as historical doses.</p>
             <button class="outline" data-export="hl7"><svg class="i"><use href="#i-download"/></svg> Download .hl7</button>
           </div>
-          <div class="card format-card">
+          <div class="card format-card" data-card="fhir">
             <div class="top"><div class="tile"><svg class="i"><use href="#i-file"/></svg></div>
               <div><p class="strong">Health record file</p><p class="tag">FHIR R4 · .json</p></div></div>
             <p class="sub">The standard most clinic health record systems import. Doses are marked as transcribed from another
               record, not given by the clinic.</p>
             <button class="outline" data-export="fhir"><svg class="i"><use href="#i-download"/></svg> Download .json</button>
           </div>
-          <div class="card format-card">
+          <div class="card format-card" data-card="csv">
             <div class="top"><div class="tile"><svg class="i"><use href="#i-table"/></svg></div>
               <div><p class="strong">Spreadsheet</p><p class="tag">CSV · .csv</p></div></div>
             <p class="sub">One row per dose, with the vaccine code, the US name and the text on the original record.</p>
@@ -416,6 +411,27 @@
           </div>
         </div>
         <p id="exportStatus" class="status"></p>
+        </div>
+
+        <div id="filesCard" class="card no-print hidden">
+          <p class="card-title"><svg class="i"><use href="#i-image"/></svg> Original record</p>
+          <div id="filesList" class="files-grid"></div>
+        </div>
+
+        <div class="card signoff">
+          <p class="card-title"><svg class="i"><use href="#i-check"/></svg> Provider review</p>
+          <div class="sign-grid">
+            <div><span>Reviewed by (name, credentials)</span><div class="line"></div></div>
+            <div><span>Signature</span><div class="line"></div></div>
+            <div><span>Date</span><div class="line"></div></div>
+            <div><span>Clinic / school</span><div class="line"></div></div>
+          </div>
+          <label class="approve"><span class="box"></span> I reviewed the original record and approve this report.</label>
+        </div>
+
+        <div id="deleteRow" class="delete-row no-print hidden">
+          <button id="deleteBtn" class="danger"><svg class="i"><use href="#i-trash"/></svg> Delete this saved record</button>
+        </div>
         </div>
       </section>
 

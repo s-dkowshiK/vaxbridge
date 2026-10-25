@@ -15,6 +15,8 @@ const current = {
   files: [],         // File objects from this upload (not saved yet)
   savedFiles: [],    // files stored with the saved record
   dirty: false,      // entries changed since the last save or report
+  state: "",         // the US state the child is enrolling in (picked on the Upload page)
+  format: "form",    // what the nurse needs for that state: form, hl7, fhir or csv
 };
 
 const STATUS = {
@@ -27,7 +29,7 @@ const STATUS = {
 // ---- helpers ---------------------------------------------------------------
 
 function show(view) {
-  for (const id of ["dashboard", "records", "upload", "review", "report", "state", "settings", "help"]) {
+  for (const id of ["dashboard", "records", "upload", "review", "report", "settings", "help"]) {
     $(id).classList.toggle("hidden", id !== view);
   }
   for (const btn of $("nav").querySelectorAll("button")) {
@@ -36,7 +38,6 @@ function show(view) {
   if (view === "dashboard") renderDashboard();
   if (view === "records") renderRecords();
   if (view === "report") updateNoReport();
-  if (view === "state") renderState();
   if (view === "settings") renderSettings();
   window.scrollTo(0, 0);
 }
@@ -140,7 +141,7 @@ async function signedIn(u) {
 function signedOut() {
   user = null;
   summaries = [];
-  Object.assign(current, { record: null, report: null, savedId: null, files: [], savedFiles: [], dirty: false });
+  Object.assign(current, { record: null, report: null, savedId: null, files: [], savedFiles: [], dirty: false, state: "", format: "form" });
   setFiles([]);
   $("review").classList.remove("open");
   $("report").classList.remove("open");
@@ -170,6 +171,7 @@ $("newRecordBtn").addEventListener("click", startNewRecord);
 
 function startNewRecord() {
   setFiles([]);
+  setUploadChoice("", "form");
   setStatus($("uploadStatus"), "");
   show("upload");
 }
@@ -279,7 +281,7 @@ function renderRecords() {
 async function openSaved(id) {
   try {
     const detail = await api(`/api/records/${id}`);
-    loadRecord(detail.record, { savedId: id, savedFiles: detail.files });
+    loadRecord(detail.record, { savedId: id, savedFiles: detail.files, state: detail.summary.state || "" });
     showReport(detail.report);
   } catch (err) {
     alertStatus(err.message);
@@ -315,17 +317,17 @@ function addFiles(list) {
 
 $("files").addEventListener("change", (e) => { addFiles(e.target.files); e.target.value = ""; });
 $("cameraInput").addEventListener("change", (e) => { addFiles(e.target.files); e.target.value = ""; });
-$("browseBtn").addEventListener("click", (e) => { e.stopPropagation(); $("files").click(); });
-$("cameraBtn").addEventListener("click", (e) => { e.stopPropagation(); $("cameraInput").click(); });
+$("browseBtn").addEventListener("click", (e) => { e.stopPropagation(); if (stateChosen()) $("files").click(); });
+$("cameraBtn").addEventListener("click", (e) => { e.stopPropagation(); if (stateChosen()) $("cameraInput").click(); });
 
 const drop = $("dropzone");
-drop.addEventListener("click", () => $("files").click());
+drop.addEventListener("click", () => { if (stateChosen()) $("files").click(); });
 drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("drag"); });
 drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
 drop.addEventListener("drop", (e) => {
   e.preventDefault();
   drop.classList.remove("drag");
-  addFiles(e.dataTransfer.files);
+  if (stateChosen()) addFiles(e.dataTransfer.files);
 });
 
 function processing(on) {
@@ -334,13 +336,14 @@ function processing(on) {
 }
 
 $("readBtn").addEventListener("click", async () => {
+  if (!stateChosen()) return;
   const form = new FormData();
   selectedFiles.forEach((f) => form.append("files", f));
   setStatus($("uploadStatus"), "");
   processing(true);
   try {
     const record = await api("/api/extract", { method: "POST", body: form });
-    loadRecord(record, { files: selectedFiles });
+    loadRecord(record, { files: selectedFiles, ...uploadChoice });
     show("review");
   } catch (err) {
     setStatus($("uploadStatus"), err.message, true);
@@ -350,8 +353,9 @@ $("readBtn").addEventListener("click", async () => {
 });
 
 $("sampleBtn").addEventListener("click", async () => {
+  if (!stateChosen()) return;
   try {
-    loadRecord(await api("/api/sample"));
+    loadRecord(await api("/api/sample"), { ...uploadChoice });
     show("review");
   } catch (err) {
     setStatus($("uploadStatus"), err.message, true);
@@ -361,8 +365,8 @@ $("sampleBtn").addEventListener("click", async () => {
 // ---- step 2: review --------------------------------------------------------
 
 // Fills the Review page with a record and makes it the current one.
-function loadRecord(record, { savedId = null, savedFiles = [], files = [] } = {}) {
-  Object.assign(current, { record, report: null, savedId, savedFiles, files, dirty: false });
+function loadRecord(record, { savedId = null, savedFiles = [], files = [], state = "", format = "form" } = {}) {
+  Object.assign(current, { record, report: null, savedId, savedFiles, files, dirty: false, state, format });
   $("childName").value = record.childName || "";
   $("dob").value = record.dateOfBirth || "";
   $("country").value = record.country || "";
@@ -518,6 +522,7 @@ function showReport(report) {
   renderSaveState();
   setStatus($("saveStatus"), "");
   $("report").classList.add("open");
+  renderState();
   show("report");
 }
 
@@ -580,10 +585,11 @@ $("saveBtn").addEventListener("click", async () => {
   $("saveBtn").disabled = true;
   try {
     if (current.savedId) {
-      await postJson(`/api/records/${current.savedId}`, record, "PUT");
+      await postJson(`/api/records/${current.savedId}?state=${encodeURIComponent(current.state)}`, record, "PUT");
     } else {
       const form = new FormData();
       form.append("record", new Blob([JSON.stringify(record)], { type: "application/json" }));
+      if (current.state) form.append("state", current.state);
       current.files.forEach((f) => form.append("files", f));
       const summary = await api("/api/records", { method: "POST", body: form });
       current.savedId = summary.id;
@@ -798,27 +804,82 @@ $("passwordForm").addEventListener("submit", async (e) => {
   }
 });
 
-// ---- state format ----------------------------------------------------------
+// ---- state and format ------------------------------------------------------
 
-function chosenState() {
-  let code = null;
-  try { code = localStorage.getItem("vaxbridge.state"); } catch { /* storage can be blocked */ }
-  return STATES.find((s) => s.name === code) || STATES.find((s) => s.name === "California");
+// Chosen on the Upload page before the record is read: the state the child is enrolling in, and the
+// format the nurse needs for that state. The Report page then lays the record out for that state.
+const FORMATS = {
+  form: { action: (st) => `Open ${st} school form`, icon: "print" },
+  hl7: { action: () => "Download .hl7", icon: "download" },
+  fhir: { action: () => "Download FHIR .json", icon: "download" },
+  csv: { action: () => "Download .csv", icon: "download" },
+};
+const uploadChoice = { state: "", format: "form" };
+
+const findState = (name) => STATES.find((s) => s.name === name) || null;
+const chosenState = () => findState(current.state);
+const stateOptions = (blank) => [el("option", { value: "", textContent: blank }),
+  ...STATES.map((s) => el("option", { value: s.name, textContent: s.name }))];
+
+$("uploadState").replaceChildren(...stateOptions("Choose a state"));
+$("stateSelect").replaceChildren(...stateOptions("Choose a state"));
+
+function setUploadChoice(state, format) {
+  Object.assign(uploadChoice, { state, format });
+  $("uploadState").value = state;
+  const st = findState(state);
+  const form = st && STATE_FORMS[st.name];
+  for (const b of $("formatChoice").children) {
+    b.classList.toggle("active", b.dataset.format === format);
+    b.disabled = !st;  // the state comes first
+  }
+  $("formChoiceSub").textContent = form ? `${form.number || form.title}, printable` : "Printable, in the state's layout";
+  $(`pickStage`).querySelector(".setup").classList.remove("needs-state");
+  if (st) setStatus($("uploadStatus"), "");
 }
 
-$("stateSelect").append(...STATES.map((s) => el("option", { value: s.name, textContent: s.name })));
-$("stateSelect").addEventListener("change", () => {
-  try { localStorage.setItem("vaxbridge.state", $("stateSelect").value); } catch { /* not remembered, that's fine */ }
+// Reading a record needs the state first, so the right form is ready when the report is.
+function stateChosen() {
+  if (uploadChoice.state) return true;
+  $("pickStage").querySelector(".setup").classList.add("needs-state");
+  setStatus($("uploadStatus"), "Choose the state the child is enrolling in first.", true);
+  $("uploadState").focus();
+  return false;
+}
+
+$("uploadState").addEventListener("change", () => setUploadChoice($("uploadState").value, uploadChoice.format));
+for (const b of $("formatChoice").children) {
+  b.addEventListener("click", () => setUploadChoice(uploadChoice.state, b.dataset.format));
+}
+setUploadChoice("", "form");
+
+// Changing the state on the Report page; a saved record keeps the new state.
+$("stateSelect").addEventListener("change", async () => {
+  current.state = $("stateSelect").value;
   renderState();
+  if (current.savedId && !current.dirty && current.state) {
+    await postJson(`/api/records/${current.savedId}?state=${encodeURIComponent(current.state)}`, reviewedRecord(), "PUT").catch(() => {});
+    loadSummaries();
+  }
 });
 
 function renderState() {
-  // The state formats need a checked report that matches the entries.
-  const ready = $("report").classList.contains("open") && current.report;
-  $("state").classList.toggle("open", !!ready);
-  if (!ready) return;
   const state = chosenState();
-  $("stateSelect").value = state.name;
+  $("stateSelect").value = state ? state.name : "";
+  for (const id of ["registryInfo"]) $(id).classList.toggle("hidden", !state);
+  for (const node of $("stateSection").children) {
+    if (!node.classList.contains("section-head") && !node.classList.contains("state-pick")) node.classList.toggle("hidden", !state);
+  }
+  const action = $("formActionBtn");
+  if (!state) {
+    $("stateHeading").textContent = "State school form";
+    action.replaceChildren(icon("map"), " ", el("span", { textContent: "Choose a state" }));
+    return;
+  }
+  const fmt = FORMATS[current.format] || FORMATS.form;
+  action.replaceChildren(icon(fmt.icon), " ", el("span", { textContent: fmt.action(state.name) }));
+  for (const card of document.querySelectorAll("[data-card]")) card.classList.toggle("chosen", card.dataset.card === current.format);
+  $("stateHeading").textContent = `For ${state.name}`;
   const myIr = state.url.includes("myirmobile.com");
   $("registryInfo").replaceChildren(
     el("div", { className: "tile" }, icon("map")),
@@ -899,25 +960,34 @@ function download(name, text, type) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-for (const btn of document.querySelectorAll("[data-export]")) {
-  btn.addEventListener("click", () => {
-    const record = reviewedRecord();
-    const state = chosenState();
-    const kind = btn.dataset.export;
-    if (kind === "hl7") download(`${fileBase()}.hl7`, buildHl7(record, state), "application/hl7-v2");
-    if (kind === "fhir") download(`${fileBase()}.fhir.json`, buildFhir(record), "application/fhir+json");
-    if (kind === "csv") download(`${fileBase()}.csv`, buildCsv(record), "text/csv");
-    setStatus($("exportStatus"), `Downloaded. ${exportDoses(record).length} doses for ${state.name}. Check it against the original before anyone uses it.`);
-  });
+function exportAs(kind) {
+  const state = chosenState();
+  if (!state) {
+    $("stateSelect").focus();
+    return;
+  }
+  const record = reviewedRecord();
+  if (kind === "form") {
+    const page = buildPrintable(record, current.report, state);
+    const url = URL.createObjectURL(new Blob([page], { type: "text/html" }));
+    const win = window.open(url, "_blank");
+    if (win) win.opener = null;
+    else download(`${fileBase()}-school-record.html`, page, "text/html");
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    return;
+  }
+  if (kind === "hl7") download(`${fileBase()}.hl7`, buildHl7(record, state), "application/hl7-v2");
+  if (kind === "fhir") download(`${fileBase()}.fhir.json`, buildFhir(record), "application/fhir+json");
+  if (kind === "csv") download(`${fileBase()}.csv`, buildCsv(record), "text/csv");
+  setStatus($("exportStatus"), `Downloaded. ${exportDoses(record).length} doses for ${state.name}. Check it against the original before anyone uses it.`);
 }
 
-$("printStateBtn").addEventListener("click", () => {
-  const page = buildPrintable(reviewedRecord(), current.report, chosenState());
-  const url = URL.createObjectURL(new Blob([page], { type: "text/html" }));
-  const win = window.open(url, "_blank");
-  if (win) win.opener = null;
-  else download(`${fileBase()}-school-record.html`, page, "text/html");
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
+for (const btn of document.querySelectorAll("[data-export]")) {
+  btn.addEventListener("click", () => exportAs(btn.dataset.export));
+}
+$("formActionBtn").addEventListener("click", () => {
+  if (chosenState()) exportAs(current.format);
+  else $("stateSection").scrollIntoView({ behavior: "smooth" });
 });
 
 // ---- start -----------------------------------------------------------------

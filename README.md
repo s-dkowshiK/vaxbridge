@@ -11,7 +11,8 @@ every entry and signs off.
 
 ## How it works
 
-1. **Upload.** A photo or PDF of the record is sent to Claude (Anthropic's AI), which reads and
+1. **Upload.** First pick the US state the child is enrolling in and the format needed for it (the
+   state's school form, an HL7 registry file, FHIR or CSV). Then a photo or PDF of the record is sent to Claude (Anthropic's AI), which reads and
    translates it, splits combination vaccines (like "Pentavalente") into their parts, and converts
    dates to one format. Hard-to-read entries are flagged.
 2. **Review.** The nurse compares each row with the original record and fixes anything wrong.
@@ -23,7 +24,7 @@ every entry and signs off.
 4. **Save.** Signed-in staff can save the reviewed record, with the original photos, to their account.
    The dashboard lists saved children and who has doses due. Opening a saved record re-checks it as of
    today, so due dates stay current.
-5. **State format.** Pick a US state and VaxBridge lays the checked record out like that state's own school
+5. **State format.** On the Report, VaxBridge lays the checked record out like that state's own school
    immunization form (rows, order and dose columns from 21 official state forms, such as California's
    CDPH 286 and Washington's DOH 348-013, with a standard layout for the rest), shows what that state's
    schools require (Immunize.org tables, May 2026) and which of those the record doesn't cover yet,
@@ -110,9 +111,9 @@ it sleeps or restarts.
 | POST | `/api/auth/logout` | signs out |
 | GET | `/api/auth/me` | the signed-in user, or 401 |
 | GET | `/api/records` | saved records with counts as of today (signed in) |
-| POST | `/api/records` | multipart `record` (reviewed record JSON) + optional `files` → saves |
+| POST | `/api/records` | multipart `record` (reviewed record JSON) + optional `state` and `files` → saves |
 | GET | `/api/records/{id}` | the record, its report as of today, and its files |
-| PUT | `/api/records/{id}` | replace the reviewed record (files kept) |
+| PUT | `/api/records/{id}?state=` | replace the reviewed record, and the state if given (files kept) |
 | DELETE | `/api/records/{id}` | delete the record and its files |
 | GET | `/api/records/{id}/files/{fileId}` | an original photo or PDF |
 | PUT | `/api/account` | `{name, email, theme}` (any left out are kept; `theme: null` resets the look) |

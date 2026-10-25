@@ -27,6 +27,9 @@ public class SavedRecord {
     @Column(nullable = false)
     String recordJson;
 
+    /** The US state (or territory) the child is enrolling in, as named in the State list, if chosen. */
+    String state;
+
     Instant savedAt;
     Instant updatedAt;
 

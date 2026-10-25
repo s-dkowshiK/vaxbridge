@@ -57,9 +57,11 @@ class RecordsControllerTest {
         MockHttpSession session = signUp(email());
         MockMultipartFile record = new MockMultipartFile("record", "", "application/json", sampleRecord());
         MockMultipartFile photo = new MockMultipartFile("files", "card.png", "image/png", new byte[] {1, 2, 3});
+        MockMultipartFile state = new MockMultipartFile("state", "", "text/plain", "Washington".getBytes());
 
-        String saved = mvc.perform(multipart("/api/records").file(record).file(photo).session(session))
+        String saved = mvc.perform(multipart("/api/records").file(record).file(photo).file(state).session(session))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.state").value("Washington"))
                 .andExpect(jsonPath("$.childName").value("Sofía Ejemplo (sample)"))
                 .andExpect(jsonPath("$.fileCount").value(1))
                 .andExpect(jsonPath("$.counts.DUE").isNumber())
@@ -84,8 +86,10 @@ class RecordsControllerTest {
                 .andExpect(content().bytes(new byte[] {1, 2, 3}));
 
         String edited = new String(sampleRecord(), "UTF-8").replace("Sofía Ejemplo (sample)", "Sofía E.");
-        mvc.perform(put("/api/records/" + id).session(session).contentType(MediaType.APPLICATION_JSON).content(edited))
+        mvc.perform(put("/api/records/" + id).param("state", "New York City").session(session)
+                        .contentType(MediaType.APPLICATION_JSON).content(edited))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.state").value("New York City"))
                 .andExpect(jsonPath("$.childName").value("Sofía E."))
                 .andExpect(jsonPath("$.fileCount").value(1));
 
