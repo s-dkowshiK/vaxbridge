@@ -29,13 +29,16 @@ public class AppUser {
 
     Instant createdAt;
 
-    /** Profile picture, if the user added one. */
-    @JdbcTypeCode(SqlTypes.LONG32VARBINARY)  // "bytea" in PostgreSQL
+    /** Profile picture, if the user added one (up to 2 MB). */
+    // Plain VARBINARY/VARCHAR rather than the LONG32 types: these are often null, and the PostgreSQL
+    // driver can't send a null of the LONG32 types ("Unknown Types value").
+    @JdbcTypeCode(SqlTypes.VARBINARY)  // "bytea" in PostgreSQL
+    @Column(length = 3 * 1024 * 1024)
     byte[] avatar;
     String avatarType;
 
     /** Appearance settings chosen in Settings, as JSON the website reads (colors, corner radius, text size). */
-    @JdbcTypeCode(SqlTypes.LONG32VARCHAR)  // "text" in PostgreSQL
+    @Column(length = AccountController.THEME_MAX_CHARS)
     String themeJson;
 
     protected AppUser() {
