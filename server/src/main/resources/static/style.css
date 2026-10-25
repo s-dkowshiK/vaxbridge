@@ -520,6 +520,22 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
 .dose-grid td.bad { color: var(--due); }
 .dose-grid td.none { color: var(--muted-foreground); }
 
+/* state form and requirement cards */
+.state-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.state-info .card-title { margin-bottom: 12px; }
+.form-name { font-size: 15px; font-weight: 600; }
+.form-name + .tag, .form-info .tag { font: 500 11px var(--mono); color: var(--muted-foreground); }
+#formInfo > * + * { margin-top: 8px; }
+#formInfo .sub, #stateReqs .sub { font-size: 13px; }
+.req-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.req-list li { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding-bottom: 6px; border-bottom: 1px solid var(--border-soft); }
+.req-list li span:last-child { color: var(--muted-foreground); text-align: right; }
+.req-list li.missing span:first-child { color: var(--due); font-weight: 500; }
+.dose-grid .req { font: 600 10px var(--sans); color: var(--ok); background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 99px; padding: 0 6px; margin-left: 6px; white-space: nowrap; }
+.dose-grid td.off { background: repeating-linear-gradient(135deg, var(--muted) 0 4px, transparent 4px 8px); }
+.grid-extra:empty { display: none; }
+.grid-extra { padding: 12px 20px; font-size: 12px; color: var(--muted-foreground); border-top: 1px solid var(--border); }
+
 /* the state grid header is a single title, not the report's three columns */
 .series-header.state-grid-head { display: block; }
 
@@ -537,7 +553,7 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
   .sidebar-foot button { padding: 6px 8px; font-size: 13px; gap: 6px; }
   .brand { order: 0; }
   nav { order: 2; }
-  .dash-grid, .state-pick { grid-template-columns: 1fr; }
+  .dash-grid, .state-pick, .state-info { grid-template-columns: 1fr; }
   .bg-options { grid-template-columns: repeat(2, 1fr); }
   .format-grid { grid-template-columns: 1fr; }
   .brand { padding: 0; }

@@ -23,8 +23,10 @@ every entry and signs off.
 4. **Save.** Signed-in staff can save the reviewed record, with the original photos, to their account.
    The dashboard lists saved children and who has doses due. Opening a saved record re-checks it as of
    today, so due dates stay current.
-5. **State format.** Pick a US state and VaxBridge lays the checked record out the way state school
-   immunization forms and registries expect: a vaccine-by-dose grid with US names and MM/DD/YYYY dates,
+5. **State format.** Pick a US state and VaxBridge lays the checked record out like that state's own school
+   immunization form (rows, order and dose columns from 21 official state forms, such as California's
+   CDPH 286 and Washington's DOH 348-013, with a standard layout for the rest), shows what that state's
+   schools require (Immunize.org tables, May 2026) and which of those the record doesn't cover yet,
    plus files a clinic can use (HL7 2.5.1 VXU for the state registry, FHIR R4, CSV) with CDC CVX codes.
    These are transcriptions for a provider to verify and sign. VaxBridge is not a state agency, never
    sends anything to a state, and does not issue SMART Health Cards (only registered issuers can sign those).

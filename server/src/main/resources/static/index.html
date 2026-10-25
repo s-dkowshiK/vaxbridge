@@ -353,7 +353,7 @@
         <div class="has-record">
         <div class="view-head">
           <h1>Get it ready for a state</h1>
-          <p class="sub">Puts the reviewed record into the layout state school forms and registries use, with US vaccine names and dates.</p>
+          <p class="sub">Lays the checked record out like the chosen state's own school form, shows what that state requires, and makes files for its registry.</p>
         </div>
 
         <div class="card state-pick">
@@ -361,6 +361,17 @@
             <select id="stateSelect"></select>
           </label>
           <div id="registryInfo" class="registry"></div>
+        </div>
+
+        <div class="state-info">
+          <div class="card">
+            <p class="card-title"><svg class="i"><use href="#i-file"/></svg> State school form</p>
+            <div id="formInfo"></div>
+          </div>
+          <div class="card">
+            <p class="card-title"><svg class="i"><use href="#i-list"/></svg> <span id="reqTitle">What schools require</span></p>
+            <div id="stateReqs"></div>
+          </div>
         </div>
 
         <div class="note-box warn">
@@ -373,14 +384,14 @@
         <div class="table-card">
           <div class="series-header state-grid-head"><span id="gridTitle">Doses by vaccine</span></div>
           <div class="dose-grid-wrap"><table class="dose-grid" id="doseGrid"></table></div>
+          <div id="gridExtra" class="grid-extra"></div>
         </div>
 
         <div class="format-grid">
           <div class="card format-card main">
             <div class="top"><div class="tile"><svg class="i"><use href="#i-print"/></svg></div>
-              <div><p class="strong">School immunization record</p><p class="tag">Printable, for a provider to sign</p></div></div>
-            <p class="sub">Every dose in a vaccine-by-dose grid with MM/DD/YYYY dates, the way state school forms ask for them.
-              Use it to fill in the state's official form, or attach it to the original record.</p>
+              <div><p class="strong">School immunization record</p><p id="printTag" class="tag">Printable, for a provider to sign</p></div></div>
+            <p id="printText" class="sub">Every dose laid out the way the state's school form lists them, with MM/DD/YYYY dates.</p>
             <button id="printStateBtn" class="primary"><svg class="i"><use href="#i-print"/></svg> Open printable record</button>
           </div>
           <div class="card format-card">

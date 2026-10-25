@@ -529,6 +529,22 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
 .dose-grid td.bad { color: var(--due); }
 .dose-grid td.none { color: var(--muted-foreground); }
 
+/* state form and requirement cards */
+.state-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.state-info .card-title { margin-bottom: 12px; }
+.form-name { font-size: 15px; font-weight: 600; }
+.form-name + .tag, .form-info .tag { font: 500 11px var(--mono); color: var(--muted-foreground); }
+#formInfo > * + * { margin-top: 8px; }
+#formInfo .sub, #stateReqs .sub { font-size: 13px; }
+.req-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.req-list li { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding-bottom: 6px; border-bottom: 1px solid var(--border-soft); }
+.req-list li span:last-child { color: var(--muted-foreground); text-align: right; }
+.req-list li.missing span:first-child { color: var(--due); font-weight: 500; }
+.dose-grid .req { font: 600 10px var(--sans); color: var(--ok); background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 99px; padding: 0 6px; margin-left: 6px; white-space: nowrap; }
+.dose-grid td.off { background: repeating-linear-gradient(135deg, var(--muted) 0 4px, transparent 4px 8px); }
+.grid-extra:empty { display: none; }
+.grid-extra { padding: 12px 20px; font-size: 12px; color: var(--muted-foreground); border-top: 1px solid var(--border); }
+
 /* the state grid header is a single title, not the report's three columns */
 .series-header.state-grid-head { display: block; }
 
@@ -546,7 +562,7 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
   .sidebar-foot button { padding: 6px 8px; font-size: 13px; gap: 6px; }
   .brand { order: 0; }
   nav { order: 2; }
-  .dash-grid, .state-pick { grid-template-columns: 1fr; }
+  .dash-grid, .state-pick, .state-info { grid-template-columns: 1fr; }
   .bg-options { grid-template-columns: repeat(2, 1fr); }
   .format-grid { grid-template-columns: 1fr; }
   .brand { padding: 0; }
@@ -939,7 +955,7 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
         <div class="has-record">
         <div class="view-head">
           <h1>Get it ready for a state</h1>
-          <p class="sub">Puts the reviewed record into the layout state school forms and registries use, with US vaccine names and dates.</p>
+          <p class="sub">Lays the checked record out like the chosen state's own school form, shows what that state requires, and makes files for its registry.</p>
         </div>
 
         <div class="card state-pick">
@@ -947,6 +963,17 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
             <select id="stateSelect"></select>
           </label>
           <div id="registryInfo" class="registry"></div>
+        </div>
+
+        <div class="state-info">
+          <div class="card">
+            <p class="card-title"><svg class="i"><use href="#i-file"/></svg> State school form</p>
+            <div id="formInfo"></div>
+          </div>
+          <div class="card">
+            <p class="card-title"><svg class="i"><use href="#i-list"/></svg> <span id="reqTitle">What schools require</span></p>
+            <div id="stateReqs"></div>
+          </div>
         </div>
 
         <div class="note-box warn">
@@ -959,14 +986,14 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
         <div class="table-card">
           <div class="series-header state-grid-head"><span id="gridTitle">Doses by vaccine</span></div>
           <div class="dose-grid-wrap"><table class="dose-grid" id="doseGrid"></table></div>
+          <div id="gridExtra" class="grid-extra"></div>
         </div>
 
         <div class="format-grid">
           <div class="card format-card main">
             <div class="top"><div class="tile"><svg class="i"><use href="#i-print"/></svg></div>
-              <div><p class="strong">School immunization record</p><p class="tag">Printable, for a provider to sign</p></div></div>
-            <p class="sub">Every dose in a vaccine-by-dose grid with MM/DD/YYYY dates, the way state school forms ask for them.
-              Use it to fill in the state's official form, or attach it to the original record.</p>
+              <div><p class="strong">School immunization record</p><p id="printTag" class="tag">Printable, for a provider to sign</p></div></div>
+            <p id="printText" class="sub">Every dose laid out the way the state's school form lists them, with MM/DD/YYYY dates.</p>
             <button id="printStateBtn" class="primary"><svg class="i"><use href="#i-print"/></svg> Open printable record</button>
           </div>
           <div class="card format-card">
@@ -1485,33 +1512,229 @@ function buildCsv(record) {
   return rows.map((r) => r.map(cell).join(",")).join("\r\n") + "\r\n";
 }
 
-// Doses by vaccine for the grid: each US series with its dose dates. Doses that don't count are flagged.
-function doseGrid(report) {
-  return report.series.filter((s) => s.doses.length).map((s) => ({
-    name: s.name,
-    doses: s.doses.map((d) => ({ date: d.given, valid: d.valid, reason: d.reason })),
-  }));
+// ---- state school forms ------------------------------------------------------
+
+// What each state requires for school (K-12), from Immunize.org's state requirement tables as of May 2026
+// (https://www.immunize.org/official-guidance/state-policies/requirements/). DTaP/Tdap, polio, MMR and
+// varicella are required everywhere. Columns: hepatitis B, hepatitis A, Tdap, MenACWY, HPV, varicella.
+const REQUIREMENTS_SOURCE = "https://www.immunize.org/official-guidance/state-policies/requirements/";
+const STATE_REQUIREMENTS = {
+  AL: [null, null, "Gr 6–12", null, null, "K–12, 1–2 doses"],
+  AK: ["K–12", "K–12", "10 years after the last tetanus shot", null, null, "K–6, 2 doses"],
+  AZ: ["K–12", null, "Age 11+", "Gr 6 if age 11+", null, "K–12, 1–2 doses"],
+  AR: ["K–12", "K, Gr 1", "Age 11+", "Gr 7; booster at 16", null, "K–7, 2 doses"],
+  CA: ["K–12", null, "Gr 7", null, null, "K–12, 2 doses"],
+  CO: ["K–12", null, "Gr 7–12", null, null, "K–12, 2 doses"],
+  CT: ["K–12", "K–12", "Gr 7", "Gr 7", null, "K–12, 2 doses"],
+  DE: ["K–12", null, "Gr 9–12", "Gr 9–12", null, "K–12, 2 doses"],
+  DC: ["K–12", "K–12", "Gr 6–12", "Gr 6–12 if age 11+; booster at 16", "Gr 7 and 11", "K–12, 2 doses"],
+  FL: ["K–12", null, "Gr 7–12", null, null, "K–12, 2 doses"],
+  GA: ["K–6", "K–12", "Gr 7–12", "Gr 7; booster Gr 11", null, "K–12, 2 doses"],
+  HI: ["K–12", "K–12", "Gr 7–12", "New students Gr 7–12; booster at 16", "Gr 7–12", "K–12, 2 doses"],
+  ID: ["K–12", "K–12", "Gr 7–12", "Gr 7; booster Gr 12", null, "K–12, 2 doses"],
+  IL: ["Gr 6–12", null, "Gr 6–12", "Gr 6; booster Gr 12", null, "K–12, 2 doses"],
+  IN: ["K–12", "Pre-K–12", "Gr 6–12", "Gr 6–11; booster Gr 12", null, "K–12, 2 doses"],
+  IA: ["K–12", null, "Gr 7–12", "Gr 7–12; booster Gr 12", null, "K–12, 2 doses"],
+  KS: ["K–12", "K–12", "Gr 7", "Gr 7 and 11", null, "K–12, 2 doses"],
+  KY: ["K–12", "K–12", "Gr 6", "Age 11–15; booster at 16+", null, "K–12, 2 doses"],
+  LA: ["K–12", "K", "Gr 6–12", "Gr 6; booster Gr 11", null, "K–12, 2 doses"],
+  ME: [null, null, "Gr 7", "Gr 7; booster Gr 12", null, "K–12, 2 doses"],
+  MD: ["K–12", null, "Gr 7–12", "Gr 7–12", null, "K–12, 2 doses"],
+  MA: ["K–12", null, "Gr 7–12", "Gr 7–12; booster Gr 11–12", null, "K–12, 2 doses"],
+  MI: ["K–12", null, "Gr 7", "Gr 7", null, "K–12, 2 doses"],
+  MN: ["K–12", null, "Gr 7–12", "Gr 7–12; booster Gr 12", null, "K–12, 2 doses"],
+  MS: ["K–12", null, "Gr 7", null, null, "K–6, 2 doses"],
+  MO: ["K–12", null, "Gr 8–12", "Gr 8–11; booster Gr 12", null, "K–12, 2 doses"],
+  MT: [null, null, "Gr 7–12", null, null, "K–12, 2 doses"],
+  NE: ["K–12", null, "Gr 7", null, null, "K–12, 2 doses"],
+  NV: ["K–6", "K–12", "Gr 7", "Gr 7 and 12", null, "K–6, 2 doses"],
+  NH: ["K–12", null, "Age 11", null, null, "K–6, 2 doses"],
+  NJ: ["K–12", null, "Gr 7–12", "Gr 7–12", null, "K–12, 1 dose"],
+  NM: ["K–12", "K–4", "Gr 7–12", "Gr 7–11; booster Gr 12", null, "K–12, 2 doses"],
+  NY: ["K–12", null, "Gr 6–12", "Gr 7 and 12", null, "K–12, 2 doses"],
+  NC: ["K–12", null, "Gr 7 or age 12", "Gr 7; booster Gr 12", null, "K–12, 2 doses"],
+  ND: ["K–12", null, "Gr 7–12", "Gr 7–10; booster Gr 11–12", null, "K–12, 2 doses"],
+  OH: ["K–12", null, "Gr 7–12", "Gr 7–11; booster Gr 12", null, "K–12, 2 doses"],
+  OK: ["K–12", "K–12", "Gr 7–12", null, null, "K–12, 1 dose"],
+  OR: ["K–12", "K–12", "Gr 7–12", null, null, "K–12, 1 dose (2 if first given at 13+)"],
+  PA: ["K, Gr 7, Gr 12", null, "Gr 7", "Gr 7; booster Gr 12", null, "K, Gr 7, Gr 12, 2 doses"],
+  RI: ["K–12", null, "Gr 7", "Gr 7–12; booster Gr 12", "Gr 7", "K–12, 2 doses"],
+  SC: ["K–12", "K–6", "Gr 7", null, null, "K–12, 2 doses"],
+  SD: [null, null, "Gr 6", "Gr 6 if age 11+", null, "K–12, 2 doses"],
+  TN: ["K–12", "K", "Gr 7", null, null, "K–12, 2 doses"],
+  TX: ["K–12", "K–12", "Gr 7–12", "Gr 7–12", null, "K–12, 2 doses"],
+  UT: ["K–12", "K", "Gr 7", "Gr 7", null, "K–12, 2 doses"],
+  VT: ["K–12", null, "Gr 7", "Gr 7–12 (residential schools)", null, "K–12, 2 doses"],
+  VA: ["K–12", "K", "Gr 7", "Gr 7; booster Gr 12", "Gr 7", "K–12, 2 doses"],
+  WA: ["K–12", null, "Gr 7–12", null, null, "K–6, 2 doses"],
+  WV: ["K–12", null, "Gr 7 and 12", "Gr 7 and 12", null, "K–6, 2 doses"],
+  WI: ["K–12", null, "Gr 7", "Gr 7; booster Gr 12", null, "K–12, 2 doses"],
+  WY: ["K–12", null, "Gr 7", null, null, "K–12, 2 doses"]
+};
+
+// Rows a state form can have: label, the report series the doses come from, and (optionally) which
+// vaccines in that series belong on the row. A form that splits DTaP and Tdap gets two rows.
+const FORM_ROWS = {
+  dtapAll: ["DTaP / DTP / DT / Td / Tdap", "DTaP"],
+  dtap: ["DTaP / DTP / DT", "DTaP", ["DTaP", "DT"]],
+  dtapOnly: ["DTaP / DTP", "DTaP", ["DTaP"]],
+  dtTd: ["DT / Td", "DTaP", ["DT", "Td"]],
+  td: ["Td", "DTaP", ["Td"]],
+  tdap: ["Tdap", "DTaP", ["Tdap"]],
+  tdTdap: ["Td / Tdap", "DTaP", ["Td", "Tdap"]],
+  polio: ["Polio (IPV / OPV)", "Polio"],
+  ipv: ["IPV (polio)", "Polio", ["IPV"]],
+  opv: ["OPV (polio)", "Polio", ["OPV"]],
+  hib: ["Hib", "Hib"],
+  hepb: ["Hepatitis B", "HepB"],
+  hepa: ["Hepatitis A", "HepA"],
+  mmr: ["MMR (measles, mumps, rubella)", "MMR"],
+  var: ["Varicella (chickenpox)", "VAR"],
+  pcv: ["Pneumococcal (PCV)", "PCV"],
+  rv: ["Rotavirus", "RV"],
+  men: ["Meningococcal ACWY", "MenACWY"],
+  hpv: ["HPV", "HPV"],
+};
+
+// A layout like most state school forms, for states whose form VaxBridge doesn't have on file.
+const STANDARD_ROWS = [["dtapAll", 5], ["polio", 5], ["mmr", 2], ["hib", 4], ["hepb", 4], ["var", 2], ["hepa", 2], ["pcv", 4], ["rv", 3], ["men", 2], ["hpv", 3]];
+
+// Official school immunization forms, read from each state's own form or instructions (2026).
+// rows: [row, dose columns, label on the form]. by: who the form says may sign or issue it.
+const STATE_FORMS = {
+  Alabama: { title: "Certificate of Immunization (COI)", by: "Printed only from ImmPRINT, the state registry, by an enrolled provider.",
+    url: "https://www.alabamapublichealth.gov/IMMUNIZATION/assets/immprintmanualcoi.pdf",
+    note: "A provider enters these doses in ImmPRINT and prints the COI from there." },
+  Arizona: { title: "Arizona School Immunization Record", number: "ASIR 109R", by: "Signed by the school representative who reviewed it.",
+    url: "https://azdhs.gov/documents/preparedness/epidemiology-disease-control/immunization/school-childcare/asir-109r.pdf" },
+  California: { title: "California Pre-Kindergarten and School Immunization Record (blue card)", number: "CDPH 286",
+    url: "https://www.cdph.ca.gov/Programs/CID/DCDC/Pages/Immunization/School/resources-implementation.aspx",
+    rows: [["polio", 5, "IPV / OPV (polio)"], ["dtapAll", 5, "DTaP / DTP (age 0-6) or Tdap / Td (age 7+)"], ["mmr", 5], ["hib", 5], ["hepb", 5], ["var", 5, "VAR / VZV (varicella)"], ["tdap", 1, "Tdap, 7th grade"]] },
+  Connecticut: { title: "Health Assessment Record", number: "HAR-3", by: "Health care provider (MD, DO, APRN or PA).",
+    rows: [["dtapOnly", 6, "DTP / DTaP"], ["dtTd", 6], ["tdap", 6], ["polio", 6, "IPV / OPV"], ["mmr", 6], ["hib", 6], ["hepa", 6], ["hepb", 6], ["var", 6], ["pcv", 6], ["men", 6], ["hpv", 6]] },
+  "District of Columbia": { title: "Universal Health Certificate", by: "Licensed health care provider, with office stamp.",
+    url: "https://dchealth.dc.gov/sites/default/files/dc/sites/doh/service_content/attachments/2024-03-DCHealth-Universal-Health%20Certificate-English.pdf",
+    rows: [["dtapOnly", 5, "Diphtheria, tetanus, pertussis (DTP, DTaP)"], ["dtTd", 5, "DT (<7 yrs) / Td (>7 yrs)"], ["tdap", 1, "Tdap booster"], ["hib", 4], ["hepb", 4], ["polio", 4], ["mmr", 2], ["var", 2], ["pcv", 4], ["hepa", 2], ["men", 2], ["hpv", 3], ["rv", 3]] },
+  Florida: { title: "Florida Certification of Immunization", number: "DH 680", by: "Issued by a Florida health care provider or county health department, usually from Florida SHOTS.",
+    note: "A Florida provider enters these doses and issues the DH 680." },
+  Georgia: { title: "Certificate of Immunization", number: "Form 3231", by: "Only a Georgia-licensed physician, APRN, PA or health department can issue it.",
+    url: "https://dph.georgia.gov/document/document/3231-ins-rev-72021pdf/download",
+    note: "A Georgia provider or health department enters these doses and issues Form 3231." },
+  Iowa: { title: "Certificate of Immunization", by: "Physician, physician associate, nurse or certified medical assistant.",
+    url: "https://hhs.iowa.gov/media/665/download?inline=", list: true,
+    rows: [["dtapAll", 5, "Diphtheria, tetanus, pertussis (DTaP/DTP/DT/Td/Tdap)"], ["polio", 5], ["mmr", 5], ["hib", 5], ["hepb", 5], ["var", 5], ["pcv", 5], ["men", 5]] },
+  Kansas: { title: "Kansas Certificate of Immunizations (KCI)", by: "Only a physician (MD/DO), health department or school may sign it.",
+    url: "https://www.kdhe.ks.gov/DocumentCenter/View/21273/2023-2024-Blank-KCI-PDF",
+    rows: [["polio", 7], ["hepb", 7], ["var", 7], ["mmr", 7], ["hib", 7], ["pcv", 7], ["hepa", 7], ["dtapAll", 7, "DTaP / Td / Tdap"], ["hpv", 7], ["rv", 7], ["men", 7, "MCV4 (meningococcal ACWY)"]] },
+  Kentucky: { title: "Certificate of Immunization Status", number: "EPID-230", by: "Physician, APRN, PA, pharmacist, health department, or RN/LPN designee.",
+    url: "https://chfs.ky.gov/agencies/dph/dehp/imm/EPID230.pdf",
+    rows: [["hepb", 5], ["dtap", 5, "DTaP / DTP / DT"], ["hib", 5], ["pcv", 5], ["polio", 5], ["mmr", 5], ["var", 5], ["hepa", 5], ["men", 5, "Meningococcal"], ["td", 5], ["tdap", 5], ["rv", 5], ["hpv", 5]] },
+  Maryland: { title: "Immunization Certificate", number: "MDH Form 896", by: "Medical provider, local health department, school official or child care provider.",
+    url: "https://health.maryland.gov/phpa/OIDEOR/IMMUN/Shared Documents/MDH_896_form.pdf",
+    rows: [["dtap", 5, "DTP-DTaP / DT"], ["tdTdap", 5], ["polio", 5], ["hib", 5], ["hepb", 5], ["pcv", 5], ["rv", 5], ["men", 5, "MCV"], ["hpv", 5], ["hepa", 5], ["mmr", 5], ["var", 5]] },
+  Mississippi: { title: "Certificate of Immunization Compliance", number: "Form 121", by: "Issued by a Mississippi provider or county health department (or downloaded from MyIR).",
+    url: "https://msdh.ms.gov/Page/14,25485,71,303.html",
+    note: "A Mississippi provider or county health department enters these doses and issues Form 121." },
+  Montana: { title: "School Certificate of Immunization", number: "HES101-S",
+    url: "https://dphhs.mt.gov/assets/publichealth/Immunization/HES101S.pdf",
+    rows: [["dtapOnly", 6, "DTaP"], ["td", 6], ["tdap", 6], ["hib", 6], ["mmr", 6], ["polio", 6], ["var", 6]] },
+  "North Dakota": { title: "Certificate of Immunization", number: "SFN 16038", by: "Physician, nurse, or local or state health representative.",
+    url: "https://www.hhs.nd.gov/sites/www/files/documents/DOH%20Legacy/Immunization/Certificate%20of%20Immunization%2002-2024.pdf",
+    rows: [["hepb", 5], ["rv", 5], ["hib", 5], ["pcv", 5], ["dtap", 5, "DTP / DTaP / DT"], ["polio", 5, "IPV / OPV"], ["mmr", 5], ["var", 5], ["hepa", 5], ["tdTdap", 5], ["men", 5]] },
+  Oregon: { title: "Oregon Certificate of Immunization Status", number: "53-05A", by: "Parent, student 15 or older, medical provider or county health department.",
+    rows: [["dtap", 5, "DTaP"], ["tdap", 5], ["polio", 5, "Polio (IPV)"], ["var", 2], ["mmr", 5], ["hepb", 5], ["hepa", 5], ["hib", 5]] },
+  "South Carolina": { title: "South Carolina Certificate of Immunization", number: "DHEC 2740", by: "Issued by a health care provider or health department.",
+    url: "https://dph.sc.gov/sites/scdph/files/2025-08/School-Law-Letter-2025-2026_20250819.pdf",
+    note: "A South Carolina provider or health department enters these doses and issues the certificate." },
+  Tennessee: { title: "Certificate of Immunization", number: "PH-4103", by: "Qualified provider (MD, DO, PA, advanced practice nurse) or health department.",
+    url: "https://tn.gov/content/dam/tn/health/documents/TN_Immunization_Certificate_Sample.pdf",
+    rows: [["hib", 4], ["pcv", 4], ["dtap", 5, "DTP / DTaP / DT"], ["polio", 4], ["hepb", 3], ["hepa", 2], ["mmr", 2], ["var", 2], ["tdap", 1]] },
+  Utah: { title: "Utah School Immunization Record (pink card)", by: "School or health staff who checked it against the source record.",
+    rows: [["dtap", 5, "DTaP / DTP / DT / Td"], ["tdap", 5], ["polio", 5], ["hib", 5], ["pcv", 5], ["mmr", 5], ["hepb", 5], ["var", 5], ["hepa", 5], ["men", 5, "Meningococcal conjugate (ACWY)"]] },
+  Virginia: { title: "School Entrance Health Form, Part II: Certification of Immunization", number: "MCH 213G",
+    by: "Physician or designee, registered nurse, or health department official.",
+    url: "https://vdh.virginia.gov/content/uploads/sites/58/2024/09/GREEN-6-2024.-JPTS.-MCH213G_School_Entrance_Fillabl.pdf",
+    rows: [["dtapOnly", 5, "DTP / DTaP"], ["dtTd", 5, "DT, Td or Tdap (after age 7)"], ["tdap", 1, "Tdap booster"], ["polio", 5], ["hib", 4], ["rv", 3], ["pcv", 4], ["var", 2], ["mmr", 2], ["hepb", 4], ["hepa", 2], ["men", 2], ["hpv", 3]] },
+  Washington: { title: "Certificate of Immunization Status (CIS)", number: "DOH 348-013", by: "A health care provider validates a printed record, or school staff verify it against medical records.",
+    url: "https://doh.wa.gov/sites/default/files/2024-11/348-013-CertificateImmunizationStatusFormEN.pdf",
+    rows: [["dtapOnly", 6, "DTaP"], ["tdap", 6, "Tdap (grade 7+)"], ["dtTd", 6], ["hepb", 6], ["hib", 6], ["ipv", 6, "IPV (polio)"], ["opv", 6, "OPV (polio)"], ["mmr", 6], ["pcv", 6], ["var", 6]] },
+  Wisconsin: { title: "Student Immunization Record", number: "F-04020L",
+    url: "https://www.dhs.wisconsin.gov/forms/f04020l.pdf",
+    rows: [["dtapAll", 5, "DTaP / DTP / DT / Td (Tdap or Td booster)"], ["polio", 5], ["hepb", 5], ["mmr", 5], ["var", 5], ["men", 5, "Meningococcal (ACWY)"]] },
+};
+
+// The state's requirements as a list for the screen and the printout.
+function stateRequirements(state) {
+  const r = STATE_REQUIREMENTS[state.code];
+  if (!r || ["GU", "PR", "VI"].includes(state.code)) return null;
+  const [hepb, hepa, tdap, men, hpv, varicella] = r;
+  return [
+    { key: "DTaP", name: "DTaP / DTP", when: "K–12" },
+    { key: "Polio", name: "Polio", when: "K–12" },
+    { key: "MMR", name: "MMR", when: "K–12" },
+    { key: "VAR", name: "Varicella", when: varicella },
+    ...(hepb ? [{ key: "HepB", name: "Hepatitis B", when: hepb }] : []),
+    ...(hepa ? [{ key: "HepA", name: "Hepatitis A", when: hepa }] : []),
+    { key: "Tdap", name: "Tdap booster", when: tdap },
+    ...(men ? [{ key: "MenACWY", name: "MenACWY", when: men }] : []),
+    ...(hpv ? [{ key: "HPV", name: "HPV", when: hpv }] : []),
+  ];
 }
 
-// A self-contained page to print: the record in the vaccine-by-dose layout of state school forms.
+// The record laid out like the chosen state's form: its rows, in its order, with its dose columns.
+// Doses for vaccines the form has no row for are listed separately so nothing is dropped.
+function stateLayout(state, report) {
+  const form = STATE_FORMS[state.name] || null;
+  const spec = form?.rows || STANDARD_ROWS;
+  const required = new Set((stateRequirements(state) || []).map((r) => r.key));
+  const used = new Set();
+  const rows = [];
+  for (const [key, columns, label] of spec) {
+    const [defaultLabel, seriesKey, only] = FORM_ROWS[key];
+    const series = report.series.find((s) => s.key === seriesKey);
+    const doses = (series?.doses || []).filter((d) => !only || only.includes(d.antigen));
+    doses.forEach((d) => used.add(d));
+    // The standard layout leaves out vaccines with nothing on the record and nothing required.
+    if (!form?.rows && !doses.length && !required.has(seriesKey)) continue;
+    rows.push({
+      label: label || defaultLabel,
+      columns: Math.max(columns, doses.length),
+      required: ["tdap", "tdTdap"].includes(key) ? required.has("Tdap") : !["td", "dtTd"].includes(key) && required.has(seriesKey),
+      doses: doses.map((d) => ({ date: d.given, valid: d.valid, reason: d.reason })),
+    });
+  }
+  const extra = report.series.flatMap((s) => s.doses.filter((d) => !used.has(d)).map((d) => ({ ...d, series: s.name })));
+  return { form, rows, extra, requirements: stateRequirements(state) };
+}
+
+// A self-contained page to print, laid out like the chosen state's school form.
 function buildPrintable(record, report, state) {
   const h = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-  const grid = doseGrid(report);
-  const columns = Math.max(5, ...grid.map((g) => g.doses.length));
+  const layout = stateLayout(state, report);
+  const form = layout.form;
+  const columns = Math.max(...layout.rows.map((r) => r.columns), 1);
   const footnotes = [];
-  const rows = grid.map((g) => `<tr><th>${h(g.name)}</th>${Array.from({ length: columns }, (_, i) => {
-    const d = g.doses[i];
-    if (!d) return "<td></td>";
-    if (d.valid) return `<td>${usDate(d.date)}</td>`;
-    footnotes.push(`${g.name}, ${usDate(d.date)}: ${d.reason}`);
-    return `<td class="bad">${usDate(d.date)}<sup>${footnotes.length}</sup></td>`;
-  }).join("")}</tr>`).join("");
+  const cell = (d, row) => {
+    if (d.valid) return usDate(d.date);
+    footnotes.push(`${row.label}, ${usDate(d.date)}: ${d.reason}`);
+    return `<span class="bad">${usDate(d.date)}<sup>${footnotes.length}</sup></span>`;
+  };
+  const rows = layout.rows.map((r) => {
+    const name = `${h(r.label)}${r.required ? ' <span class="req">required</span>' : ""}`;
+    if (form?.list) return `<tr><th>${name}</th><td colspan="${columns}">${r.doses.map((d) => cell(d, r)).join(", ") || ""}</td></tr>`;
+    return `<tr><th>${name}</th>${Array.from({ length: columns }, (_, i) =>
+      i >= r.columns ? '<td class="off"></td>' : `<td>${r.doses[i] ? cell(r.doses[i], r) : ""}</td>`).join("")}</tr>`;
+  }).join("");
+  const head = form?.list ? `<th colspan="${columns}">Dates given</th>` : Array.from({ length: columns }, (_, i) => `<th>Dose ${i + 1}</th>`).join("");
+  const extra = layout.extra.map((d) => `<li>${h(d.sourceText || d.antigen)} (${h(d.series)}), ${usDate(d.given)}</li>`).join("");
   const other = report.ignored.map((d) => `<li>${h(d.sourceText || d.antigen)}, ${usDate(d.given)}: ${h(d.reason)}</li>`).join("");
+  const reqs = layout.requirements;
   const registry = state.registry || `${state.name} immunization registry`;
+  const formName = form ? `${form.title}${form.number ? ` (${form.number})` : ""}` : "School immunization record";
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${h(state.name)} school immunization record: ${h(record.childName || "child")}</title>
 <style>
-  body { font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1A1F2E; margin: 32px auto; max-width: 820px; padding: 0 16px; }
+  body { font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1A1F2E; margin: 32px auto; max-width: 860px; padding: 0 16px; }
   h1 { font-size: 20px; margin: 0; } h2 { font-size: 14px; margin: 24px 0 8px; }
   .stamp { border: 2px solid #B45309; color: #92400E; background: #FFFBEB; padding: 10px 14px; border-radius: 8px; margin: 16px 0; font-weight: 600; }
   .stamp span { display: block; font-weight: 400; margin-top: 2px; }
@@ -1519,7 +1742,9 @@ function buildPrintable(record, report, state) {
   dt { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #6B7280; } dd { margin: 0 0 6px; font-weight: 600; }
   table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #9CA3AF; padding: 6px 8px; text-align: left; }
   thead th { background: #F3F4F6; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
-  tbody th { font-weight: 500; width: 34%; } td { font-family: ui-monospace, Menlo, monospace; font-size: 12px; } td.bad { color: #B91C1C; }
+  tbody th { font-weight: 500; width: 34%; } td { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  td.off { background: repeating-linear-gradient(135deg, #F3F4F6 0 4px, #fff 4px 8px); } .bad { color: #B91C1C; }
+  .req { font: 600 10px system-ui, sans-serif; color: #047857; border: 1px solid #A7F3D0; background: #ECFDF5; border-radius: 99px; padding: 0 6px; margin-left: 4px; }
   ol, ul { padding-left: 20px; margin: 6px 0; } .small { font-size: 11px; color: #4B5563; }
   .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 32px; margin-top: 16px; }
   .sign div { border-bottom: 1px solid #1A1F2E; height: 34px; } .sign span { font-size: 11px; color: #4B5563; }
@@ -1527,21 +1752,27 @@ function buildPrintable(record, report, state) {
   @media print { .bar { display: none; } body { margin: 0 auto; } }
 </style></head><body>
 <div class="bar"><button onclick="window.print()">Print</button></div>
-<h1>School immunization record (transcription)</h1>
+<h1>${h(formName)}: transcription</h1>
 <p class="small">${h(state.name)} · state registry: ${h(registry)} · prepared ${usDate(new Date().toISOString().slice(0, 10))}</p>
 <div class="stamp">Transcribed by VaxBridge from a foreign vaccination record. Not valid until verified and signed by a licensed health care provider.
-<span>Use this to complete ${h(state.name)}'s official school immunization form, or attach it to the original record. Dates are MM/DD/YYYY.</span></div>
+<span>${form
+    ? `Laid out like ${h(state.name)}'s ${h(formName)} so the doses can be copied straight onto the official form. ${form.note ? h(form.note) : ""}`
+    : `VaxBridge doesn't have ${h(state.name)}'s school form on file, so this uses the standard layout. Copy the doses onto the state's official form or attach this to the original record.`}
+Dates are MM/DD/YYYY.</span></div>
 <dl>
   <div><dt>Child</dt><dd>${h(record.childName || "")}</dd></div>
   <div><dt>Date of birth</dt><dd>${usDate(record.dateOfBirth)}</dd></div>
   <div><dt>Record from</dt><dd>${h([record.country, record.language].filter(Boolean).join(", ") || "Not given")}</dd></div>
   <div><dt>Checked against</dt><dd>CDC catch-up schedule, ${usDate(report.asOf)}</dd></div>
 </dl>
-<table><thead><tr><th>Vaccine</th>${Array.from({ length: columns }, (_, i) => `<th>Dose ${i + 1}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table>
+<table><thead><tr><th>Vaccine</th>${head}</tr></thead><tbody>${rows}</tbody></table>
 ${footnotes.length ? `<h2>Doses that don't count toward the US schedule</h2><ol>${footnotes.map((f) => `<li>${h(f)}</li>`).join("")}</ol>` : ""}
+${extra ? `<h2>Doses with no row on this form</h2><ul>${extra}</ul>` : ""}
 ${other ? `<h2>Other vaccines on the record</h2><ul>${other}</ul>` : ""}
+${reqs ? `<h2>What ${h(state.name)} schools require</h2><ul>${reqs.map((r) => `<li>${h(r.name)}: ${h(r.when)}</li>`).join("")}</ul>
+<p class="small">From Immunize.org's state requirement tables (May 2026). Check the state health department for current rules.</p>` : ""}
 <h2>Provider verification</h2>
-<p class="small">I have reviewed the original vaccination record and verified that the doses above were transcribed correctly.</p>
+<p class="small">I have reviewed the original vaccination record and verified that the doses above were transcribed correctly.${form?.by ? ` ${h(state.name)} form: ${h(form.by)}` : ""}</p>
 <div class="sign"><div></div><div></div></div>
 <div class="sign" style="margin-top:4px"><span>Provider name and credentials</span><span>Signature</span></div>
 <div class="sign"><div></div><div></div></div>
@@ -2384,19 +2615,54 @@ function renderState() {
   $("hl7Text").textContent = `The message format state immunization registries accept from clinics. A clinic enrolled with ${
     state.registry || `the ${state.name} registry`} uploads it as historical doses.`;
 
-  const grid = doseGrid(current.report);
-  const columns = Math.max(5, ...grid.map((g) => g.doses.length));
-  $("gridTitle").textContent = `Doses by vaccine, as ${state.name} school forms list them`;
+  const layout = stateLayout(state, current.report);
+  const form = layout.form;
+  const formName = form ? `${form.title}${form.number ? ` (${form.number})` : ""}` : null;
+  $("formInfo").replaceChildren(...(form
+    ? [el("p", { className: "form-name", textContent: form.title }),
+       ...(form.number ? [el("p", { className: "tag", textContent: form.number })] : []),
+       ...(form.by ? [el("p", { className: "sub", textContent: `Who signs: ${form.by}` })] : []),
+       ...(form.note ? [el("p", { className: "sub", textContent: form.note })] : []),
+       ...(form.rows ? [] : [el("p", { className: "sub", textContent: "VaxBridge has the form's name but not its layout, so the grid uses the standard layout." })]),
+       ...(form.url ? [el("a", { className: "link", href: form.url, target: "_blank", rel: "noopener" }, icon("external"), "Official form or instructions")] : [])]
+    : [el("p", { className: "form-name", textContent: "No form on file" }),
+       el("p", { className: "sub", textContent: `VaxBridge doesn't have ${state.name}'s school form yet, so the grid uses the layout most state forms share. Check with the school or the state health department for the form they want.` })]));
+
+  const reqs = layout.requirements;
+  const has = (key) => key === "Tdap"
+    ? current.report.series.some((s) => s.doses.some((d) => d.antigen === "Tdap" && d.valid))
+    : current.report.series.some((s) => s.key === key && s.status === "COMPLETE");
+  $("reqTitle").textContent = `What ${state.name} schools require`;
+  $("stateReqs").replaceChildren(...(reqs
+    ? [el("ul", { className: "req-list" }, ...reqs.map((r) => el("li", { className: has(r.key) ? "" : "missing" },
+         el("span", { textContent: r.name }), el("span", { textContent: r.when })))),
+       el("p", { className: "sub", style: "margin-top: 10px; font-size: 12px" }, "Red means the record doesn't show this series complete yet. From ",
+         el("a", { className: "link", href: REQUIREMENTS_SOURCE, target: "_blank", rel: "noopener", style: "font-size: 12px" }, "Immunize.org (May 2026)"),
+         ". Grades vary, so confirm with the school.")]
+    : [el("p", { className: "sub", textContent: "VaxBridge doesn't have this territory's school requirements. Check with the health department." })]));
+
+  $("printTag").textContent = formName ? `Laid out like ${formName}` : "Standard layout, for a provider to sign";
+  $("printText").textContent = formName
+    ? `Each dose sits in the same row and dose column as on ${state.name}'s form, so it can be copied straight across, with MM/DD/YYYY dates.`
+    : "Every dose in a vaccine-by-dose grid with MM/DD/YYYY dates, the layout most state school forms use.";
+
+  const columns = Math.max(...layout.rows.map((r) => r.columns), 1);
+  $("gridTitle").textContent = form ? `Doses as ${form.number || form.title} lists them` : "Doses by vaccine (standard layout)";
   $("doseGrid").replaceChildren(
     el("thead", {}, el("tr", {}, el("th", { textContent: "Vaccine" }),
-      ...Array.from({ length: columns }, (_, i) => el("th", { textContent: `Dose ${i + 1}` })))),
-    el("tbody", {}, ...grid.map((g) => el("tr", {}, el("td", { textContent: g.name }),
+      ...Array.from({ length: columns }, (_, i) => el("th", { textContent: form?.list ? (i ? "" : "Dates given") : `Dose ${i + 1}` })))),
+    el("tbody", {}, ...layout.rows.map((r) => el("tr", {},
+      el("td", {}, r.label, ...(r.required ? [el("span", { className: "req", textContent: "Required" })] : [])),
       ...Array.from({ length: columns }, (_, i) => {
-        const d = g.doses[i];
+        if (i >= r.columns) return el("td", { className: "off" });
+        const d = r.doses[i];
         if (!d) return el("td", { className: "none" });
         return el("td", { className: d.valid ? "" : "bad", textContent: usDate(d.date) + (d.valid ? "" : " ✕"),
           title: d.valid ? "" : `Doesn't count: ${d.reason}` });
       })))));
+  $("gridExtra").textContent = layout.extra.length
+    ? `Not on this form: ${layout.extra.map((d) => `${d.sourceText || d.antigen} ${usDate(d.given)}`).join(", ")}. They're listed separately on the printout.`
+    : "";
   setStatus($("exportStatus"), "");
 }
 

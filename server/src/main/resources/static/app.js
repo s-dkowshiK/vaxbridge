@@ -833,19 +833,54 @@ function renderState() {
   $("hl7Text").textContent = `The message format state immunization registries accept from clinics. A clinic enrolled with ${
     state.registry || `the ${state.name} registry`} uploads it as historical doses.`;
 
-  const grid = doseGrid(current.report);
-  const columns = Math.max(5, ...grid.map((g) => g.doses.length));
-  $("gridTitle").textContent = `Doses by vaccine, as ${state.name} school forms list them`;
+  const layout = stateLayout(state, current.report);
+  const form = layout.form;
+  const formName = form ? `${form.title}${form.number ? ` (${form.number})` : ""}` : null;
+  $("formInfo").replaceChildren(...(form
+    ? [el("p", { className: "form-name", textContent: form.title }),
+       ...(form.number ? [el("p", { className: "tag", textContent: form.number })] : []),
+       ...(form.by ? [el("p", { className: "sub", textContent: `Who signs: ${form.by}` })] : []),
+       ...(form.note ? [el("p", { className: "sub", textContent: form.note })] : []),
+       ...(form.rows ? [] : [el("p", { className: "sub", textContent: "VaxBridge has the form's name but not its layout, so the grid uses the standard layout." })]),
+       ...(form.url ? [el("a", { className: "link", href: form.url, target: "_blank", rel: "noopener" }, icon("external"), "Official form or instructions")] : [])]
+    : [el("p", { className: "form-name", textContent: "No form on file" }),
+       el("p", { className: "sub", textContent: `VaxBridge doesn't have ${state.name}'s school form yet, so the grid uses the layout most state forms share. Check with the school or the state health department for the form they want.` })]));
+
+  const reqs = layout.requirements;
+  const has = (key) => key === "Tdap"
+    ? current.report.series.some((s) => s.doses.some((d) => d.antigen === "Tdap" && d.valid))
+    : current.report.series.some((s) => s.key === key && s.status === "COMPLETE");
+  $("reqTitle").textContent = `What ${state.name} schools require`;
+  $("stateReqs").replaceChildren(...(reqs
+    ? [el("ul", { className: "req-list" }, ...reqs.map((r) => el("li", { className: has(r.key) ? "" : "missing" },
+         el("span", { textContent: r.name }), el("span", { textContent: r.when })))),
+       el("p", { className: "sub", style: "margin-top: 10px; font-size: 12px" }, "Red means the record doesn't show this series complete yet. From ",
+         el("a", { className: "link", href: REQUIREMENTS_SOURCE, target: "_blank", rel: "noopener", style: "font-size: 12px" }, "Immunize.org (May 2026)"),
+         ". Grades vary, so confirm with the school.")]
+    : [el("p", { className: "sub", textContent: "VaxBridge doesn't have this territory's school requirements. Check with the health department." })]));
+
+  $("printTag").textContent = formName ? `Laid out like ${formName}` : "Standard layout, for a provider to sign";
+  $("printText").textContent = formName
+    ? `Each dose sits in the same row and dose column as on ${state.name}'s form, so it can be copied straight across, with MM/DD/YYYY dates.`
+    : "Every dose in a vaccine-by-dose grid with MM/DD/YYYY dates, the layout most state school forms use.";
+
+  const columns = Math.max(...layout.rows.map((r) => r.columns), 1);
+  $("gridTitle").textContent = form ? `Doses as ${form.number || form.title} lists them` : "Doses by vaccine (standard layout)";
   $("doseGrid").replaceChildren(
     el("thead", {}, el("tr", {}, el("th", { textContent: "Vaccine" }),
-      ...Array.from({ length: columns }, (_, i) => el("th", { textContent: `Dose ${i + 1}` })))),
-    el("tbody", {}, ...grid.map((g) => el("tr", {}, el("td", { textContent: g.name }),
+      ...Array.from({ length: columns }, (_, i) => el("th", { textContent: form?.list ? (i ? "" : "Dates given") : `Dose ${i + 1}` })))),
+    el("tbody", {}, ...layout.rows.map((r) => el("tr", {},
+      el("td", {}, r.label, ...(r.required ? [el("span", { className: "req", textContent: "Required" })] : [])),
       ...Array.from({ length: columns }, (_, i) => {
-        const d = g.doses[i];
+        if (i >= r.columns) return el("td", { className: "off" });
+        const d = r.doses[i];
         if (!d) return el("td", { className: "none" });
         return el("td", { className: d.valid ? "" : "bad", textContent: usDate(d.date) + (d.valid ? "" : " ✕"),
           title: d.valid ? "" : `Doesn't count: ${d.reason}` });
       })))));
+  $("gridExtra").textContent = layout.extra.length
+    ? `Not on this form: ${layout.extra.map((d) => `${d.sourceText || d.antigen} ${usDate(d.given)}`).join(", ")}. They're listed separately on the printout.`
+    : "";
   setStatus($("exportStatus"), "");
 }
 
