@@ -61,6 +61,30 @@ without an API key. Accounts and saved records are kept in a small database file
 where you run the app.
 Get a key at https://console.anthropic.com.
 
+## Putting it online
+
+So saved records follow you to any device, the server runs on [Render](https://render.com) with a free
+[Neon](https://neon.tech) PostgreSQL database. Both are free and sign in with GitHub.
+
+1. **Database (Neon):** create a project, then copy its connection string
+   (`postgresql://user:password@host/dbname?sslmode=require`).
+2. **Server (Render):** New → Blueprint → pick this repository. Render reads `render.yaml`, builds the
+   `Dockerfile`, and asks for:
+   - `DATABASE_URL`: the Neon connection string
+   - `ANTHROPIC_API_KEY`: optional; without it only the sample record can be read
+3. Open the `https://….onrender.com` address Render shows.
+
+On Render's free plan the server sleeps after 15 minutes without visits, so the first visit after that
+takes about a minute. Accounts, records and sign-ins are all kept in the database, so nothing is lost when
+it sleeps or restarts.
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `DATABASE_URL` | local file in `./data` | PostgreSQL connection string |
+| `ANTHROPIC_API_KEY` | none | needed to read real photos |
+| `PORT` | 8080 | port to listen on (set by Render) |
+| `COOKIE_SECURE` | false | `true` when served over HTTPS |
+
 ## API (for a future mobile app)
 
 | Method | Path | What it does |

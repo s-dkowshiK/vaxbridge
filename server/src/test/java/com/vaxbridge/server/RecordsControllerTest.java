@@ -23,7 +23,9 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:records-test")
+// MockMvc keeps sessions itself, so these tests use plain servlet sessions instead of Spring Session.
+@SpringBootTest(properties = {"spring.datasource.url=jdbc:h2:mem:records-test",
+        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.session.SessionAutoConfiguration"})
 @AutoConfigureMockMvc
 class RecordsControllerTest {
     @Autowired

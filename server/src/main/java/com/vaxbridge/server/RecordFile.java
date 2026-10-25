@@ -5,7 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /** An original photo or PDF of a saved record, kept so the nurse can compare against it later. */
 @Entity
@@ -21,7 +22,7 @@ public class RecordFile {
     String contentType;
     long size;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONG32VARBINARY)  // "bytea" in PostgreSQL
     @Column(nullable = false)
     byte[] data;
 

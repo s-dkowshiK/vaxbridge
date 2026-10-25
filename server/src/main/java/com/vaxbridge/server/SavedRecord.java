@@ -5,8 +5,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import java.time.Instant;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * A reviewed vaccine record saved to a user's account. Only the nurse-reviewed entries are stored;
@@ -22,7 +23,7 @@ public class SavedRecord {
     Long ownerId;
 
     /** The {@link ExtractedRecord} after the nurse's review, as JSON. */
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONG32VARCHAR)  // "text" in PostgreSQL
     @Column(nullable = false)
     String recordJson;
 
