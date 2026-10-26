@@ -576,6 +576,245 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
 
 /* ---- small screens: sidebar becomes a top bar ----------------------------- */
 
+/* ---- motion ---------------------------------------------------------------- */
+
+.view:not(.hidden) { animation: view-in 0.28s ease-out; }
+@keyframes view-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.card, .stat, .record-card, .mini-item, .up-item { transition: border-color 0.15s, box-shadow 0.2s, transform 0.2s, background 0.15s; }
+.record-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px -10px rgba(26, 31, 46, 0.25); }
+.stat { position: relative; overflow: hidden; }
+.stat b { font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---- sidebar search -------------------------------------------------------- */
+
+.search-trigger {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px;
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--input-background);
+  color: var(--muted-foreground); font: 500 13px var(--sans); cursor: pointer;
+}
+.search-trigger:hover { border-color: color-mix(in srgb, var(--primary) 40%, transparent); color: var(--foreground); }
+.search-trigger span { flex: 1; text-align: left; }
+kbd {
+  font: 500 10px var(--mono); padding: 2px 6px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--card); color: var(--muted-foreground);
+}
+
+/* ---- dashboard charts ------------------------------------------------------ */
+
+.dash-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
+.dash-charts > * { min-width: 0; }
+.dash-charts > :nth-child(2) { grid-column: 1 / -1; order: 1; }
+.upcoming { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+.dash-charts .card-row .sub { font: 500 11px var(--mono); }
+
+.donut-wrap { display: flex; align-items: center; gap: 20px; }
+.donut-box { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+.donut { width: 100%; height: 100%; transform: rotate(-90deg); }
+.donut-track { fill: none; stroke: var(--muted); stroke-width: 14; }
+.donut-seg { fill: none; stroke-width: 14; cursor: default; animation: donut-in 0.9s ease-out; transition: stroke-width 0.15s; }
+.donut-seg:hover { stroke-width: 18; }
+@keyframes donut-in { from { stroke-dasharray: 0 400; } }
+.donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+.donut-center b { font: 700 22px/1 var(--serif); }
+.donut-center span { font-size: 11px; color: var(--muted-foreground); margin-top: 2px; }
+.legend { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+.legend li { display: flex; align-items: center; gap: 8px; font-size: 13px; white-space: nowrap; }
+.legend i { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.legend b { font: 500 12px var(--mono); }
+
+.up-item {
+  display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 10px; text-align: left;
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--foreground);
+}
+.up-item:hover { border-color: color-mix(in srgb, var(--primary) 30%, transparent); }
+.up-item .cal {
+  width: 38px; flex-shrink: 0; border-radius: 8px; overflow: hidden; text-align: center;
+  border: 1px solid var(--border); background: var(--card);
+}
+.up-item .cal span { display: block; font: 600 9px/16px var(--mono); text-transform: uppercase; background: var(--secondary); color: var(--primary); }
+.up-item .cal b { display: block; font: 700 15px/22px var(--serif); }
+.up-item .strong { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.up-item .sub { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.up-item .when { font: 500 11px var(--mono); color: var(--soon); white-space: nowrap; }
+.up-item.DUE .when { color: var(--due); }
+.up-item.DUE .cal span { background: var(--due-bg); color: var(--due); }
+
+.bars { display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: grid; grid-template-columns: 90px 1fr 24px; align-items: center; gap: 10px; font-size: 13px; }
+.bar-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-row b { font: 500 12px var(--mono); text-align: right; }
+.bar-track { height: 10px; border-radius: 4px; background: var(--muted); overflow: hidden; }
+.bar { height: 100%; width: var(--w); border-radius: 4px; background: var(--primary); animation: grow-x 0.8s ease-out; }
+@keyframes grow-x { from { width: 0; } }
+.chart-tip {
+  position: fixed; left: 0; top: 0; z-index: 60; pointer-events: none; max-width: 280px;
+  padding: 6px 10px; border-radius: 8px; background: var(--foreground); color: var(--background);
+  font: 500 12px/1.4 var(--sans); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+/* ---- saved records: sort + table ------------------------------------------- */
+
+.records-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: -8px; }
+.records-bar .filters { margin-top: 0; }
+.records-tools { display: flex; align-items: center; gap: 10px; }
+.sort { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted-foreground); }
+.sort select { width: auto; padding: 6px 10px; font-size: 13px; background: var(--card); }
+.seg { display: flex; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--card); }
+.seg button { border: none; background: none; padding: 7px 10px; color: var(--muted-foreground); display: flex; }
+.seg button + button { border-left: 1px solid var(--border); }
+.seg button.active { background: var(--secondary); color: var(--primary); }
+.record-table { overflow: hidden; }
+.rt-row {
+  display: grid; grid-template-columns: 1.6fr 1fr 1fr 0.9fr 1fr 1fr; gap: 12px; align-items: center;
+  width: 100%; padding: 12px 20px; border: none; border-bottom: 1px solid var(--border);
+  background: none; color: var(--foreground); text-align: left; font-size: 13px;
+}
+.rt-row:last-child { border-bottom: none; }
+button.rt-row:hover { background: color-mix(in srgb, var(--muted) 50%, transparent); }
+.rt-head { font: 600 10px var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted-foreground); background: color-mix(in srgb, var(--muted) 40%, transparent); }
+.rt-name { display: flex; align-items: center; gap: 10px; font-weight: 600; min-width: 0; }
+.avatar.sm { width: 26px; height: 26px; font-size: 10px; }
+.mono { font-family: var(--mono); font-size: 12px; }
+
+/* ---- report: progress + timeline ------------------------------------------- */
+
+.progress { display: flex; align-items: center; gap: 8px; margin-top: 8px; max-width: 260px; }
+.progress-track { flex: 1; height: 6px; border-radius: 4px; background: var(--muted); overflow: hidden; }
+.progress-fill { height: 100%; width: var(--w); border-radius: 4px; background: var(--ok); animation: grow-x 0.8s ease-out; }
+.progress.DUE .progress-fill { background: var(--due); }
+.progress.UPCOMING .progress-fill { background: var(--soon); }
+.progress span { font: 500 11px var(--mono); color: var(--muted-foreground); white-space: nowrap; }
+
+.timeline-card .card-row { flex-wrap: wrap; gap: 8px 16px; }
+.tl-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted-foreground); }
+.tl-legend li { display: flex; align-items: center; gap: 6px; }
+.tl-legend .mark { position: static; transform: none; }
+.tl { display: flex; flex-direction: column; gap: 2px; }
+.tl-row { display: grid; grid-template-columns: 150px 1fr; gap: 14px; align-items: center; min-height: 26px; }
+.tl-name { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-track { position: relative; height: 26px; }
+.tl-track::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; border-radius: 2px; background: var(--muted); }
+.mark {
+  position: absolute; top: 50%; width: 12px; height: 12px; border-radius: 50%;
+  transform: translate(-50%, -50%); box-shadow: 0 0 0 2px var(--card); cursor: default; display: inline-block;
+  transition: transform 0.15s;
+}
+.tl-track .mark:hover { transform: translate(-50%, -50%) scale(1.35); }
+.mark.given { background: var(--ok); }
+.mark.invalid { background: var(--card); border: 2px solid var(--due); width: 10px; height: 10px; }
+.mark.planned { background: var(--card); border: 2px solid var(--soon); width: 10px; height: 10px; }
+.tl-track .mark.planned { background: var(--soon-bg); }
+.today { position: absolute; top: 2px; bottom: 2px; width: 2px; margin-left: -1px; border-radius: 2px; background: var(--primary); opacity: 0.7; }
+.today-key { width: 2px; height: 12px; border-radius: 2px; background: var(--primary); display: inline-block; }
+.tl-axis { min-height: 18px; }
+.tl-ticks { position: relative; height: 18px; border-top: 1px dashed var(--border); }
+.tick { position: absolute; top: 4px; transform: translateX(-50%); font: 500 10px var(--mono); color: var(--muted-foreground); white-space: nowrap; }
+.tick:first-child { transform: none; }
+
+/* ---- toasts ---------------------------------------------------------------- */
+
+.toasts { position: fixed; right: 20px; bottom: 20px; z-index: 70; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.toast {
+  display: flex; align-items: center; gap: 10px; max-width: 360px; padding: 10px 14px;
+  border-radius: var(--radius); background: var(--card); border: 1px solid var(--ok-border); color: var(--foreground);
+  font-size: 13px; box-shadow: 0 10px 24px -8px rgba(0, 0, 0, 0.25); animation: toast-in 0.25s ease-out;
+}
+.toast .i { color: var(--ok); }
+.toast.error { border-color: var(--due-border); }
+.toast.error .i { color: var(--due); }
+.toast.leaving { opacity: 0; transform: translateY(6px); transition: opacity 0.3s, transform 0.3s; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(10px); } }
+
+/* ---- quick search ---------------------------------------------------------- */
+
+.palette {
+  position: fixed; inset: 0; z-index: 80; display: flex; justify-content: center; align-items: flex-start;
+  padding: 12vh 16px 16px; background: rgba(15, 19, 27, 0.45); backdrop-filter: blur(3px);
+}
+.palette-box {
+  width: 100%; max-width: 560px; background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.35); overflow: hidden;
+  animation: view-in 0.18s ease-out;
+}
+.palette-input { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.palette-input .i { color: var(--muted-foreground); }
+.palette-input input { border: none; background: none; padding: 4px 0; box-shadow: none; font-size: 15px; }
+.palette-input input:focus { outline: none; box-shadow: none; }
+.palette-list { max-height: 360px; overflow-y: auto; padding: 6px; }
+.palette-group { font: 600 10px var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted-foreground); padding: 10px 10px 4px; }
+.palette-item {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border: none; border-radius: 10px;
+  background: none; color: var(--foreground); text-align: left; font-size: 14px;
+}
+.palette-item .i { color: var(--muted-foreground); }
+.palette-item .sub { font-size: 12px; }
+.palette-item.active { background: var(--secondary); }
+.palette-item.active .i { color: var(--primary); }
+.palette-empty { padding: 16px 10px; }
+
+
+/* ---- dashboard banner and depth -------------------------------------------- */
+
+.hero {
+  position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  padding: 28px 32px; border-radius: calc(var(--radius-lg) + 4px); color: #fff;
+  background:
+    radial-gradient(circle at 85% -20%, rgba(255, 255, 255, 0.22), transparent 45%),
+    radial-gradient(circle at 10% 120%, rgba(255, 255, 255, 0.12), transparent 40%),
+    linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 62%, #0B1F3A));
+  box-shadow: 0 18px 40px -22px color-mix(in srgb, var(--primary) 80%, transparent);
+}
+.hero::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.12;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.9) 1px, transparent 1px); background-size: 18px 18px;
+  mask-image: linear-gradient(90deg, transparent 40%, #000);
+}
+.hero > * { position: relative; z-index: 1; }
+.hero-date { font: 500 12px var(--mono); text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.8; }
+.hero h1 { font-size: 30px; margin-top: 6px; }
+.hero-sub { font-size: 15px; opacity: 0.9; margin-top: 6px; max-width: 520px; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.hero-btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: var(--radius);
+  font: 600 14px var(--sans); border: 1px solid rgba(255, 255, 255, 0.35); transition: transform 0.15s, background 0.15s;
+}
+.hero-btn:hover { transform: translateY(-1px); }
+.hero-btn.solid { background: #fff; color: var(--primary); border-color: #fff; }
+.hero-btn.ghost { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.hero-btn.ghost:hover { background: rgba(255, 255, 255, 0.2); }
+.hero-btn kbd { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.3); color: #fff; }
+.hero-next {
+  flex-shrink: 0; min-width: 210px; padding: 16px 18px; border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.25); backdrop-filter: blur(6px);
+}
+.hero-next-label { display: flex; align-items: center; gap: 6px; font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.85; }
+.hero-next-label .i { width: 12px; height: 12px; }
+.hero-next-date { font: 700 24px/1.2 var(--serif); margin-top: 8px; }
+.hero-next-who { font-size: 13px; opacity: 0.9; }
+.hero-next-open {
+  display: inline-flex; align-items: center; gap: 4px; margin-top: 10px; padding: 0; border: none; background: none;
+  color: #fff; font: 600 13px var(--sans); text-decoration: underline; text-underline-offset: 3px;
+}
+.hero-next-open .i { width: 14px; height: 14px; }
+
+.card, .table-card, .stat { box-shadow: 0 1px 2px rgba(26, 31, 46, 0.04), 0 8px 24px -18px rgba(26, 31, 46, 0.25); }
+.stat:hover { transform: translateY(-2px); box-shadow: 0 1px 2px rgba(26, 31, 46, 0.04), 0 14px 28px -18px rgba(26, 31, 46, 0.35); }
+.stat-icon {
+  position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--card) 70%, transparent); color: var(--muted-foreground);
+}
+.stat.DUE .stat-icon { color: var(--due); }
+.stat.UPCOMING .stat-icon { color: var(--soon); }
+.stat.COMPLETE .stat-icon { color: var(--ok); }
+.stat.plain .stat-icon { color: var(--primary); }
+.logo { background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 60%, #0B1F3A)); }
+nav button.active { position: relative; }
+nav button.active::before { content: ""; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 3px; border-radius: 0 3px 3px 0; background: var(--primary); }
+
 @media (max-width: 860px) {
   .shell { flex-direction: column; }
   .sidebar {
@@ -599,6 +838,15 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
   .stats { grid-template-columns: repeat(2, 1fr); }
   .series-header, .series-main { grid-template-columns: 1fr auto; }
   .hide-sm, .series-main .next { display: none; }
+  .dash-charts { grid-template-columns: 1fr; }
+  .search-trigger { display: none; }
+  .hero { flex-direction: column; align-items: stretch; padding: 22px 20px; }
+  .hero h1 { font-size: 24px; }
+  .hero-btn.ghost { display: none; }
+  nav button.active::before { display: none; }
+  .rt-row { grid-template-columns: 1fr auto; }
+  .tl-row { grid-template-columns: 90px 1fr; gap: 10px; }
+  .donut-wrap { justify-content: center; }
 }
 @media (max-width: 600px) {
   .sign-grid { grid-template-columns: 1fr; }
@@ -621,10 +869,13 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
   .shell { display: block; }
   .view { padding: 0; max-width: none; gap: 14px; }
   #upload, #review, #help, #dashboard, #records, #settings { display: none !important; }
-  .table-card, .card, .stat { box-shadow: none; }
+  .table-card, .card, .stat { box-shadow: none !important; }
+  .stat-icon { display: none; }
   .stats { grid-template-columns: repeat(4, 1fr); }
   .series-header, .series-main { grid-template-columns: 1fr 150px 190px; }
   .series-main .next, .hide-sm { display: block; }
+  .view:not(.hidden), .bar, .progress-fill, .donut-seg { animation: none; }
+  .timeline-card { break-inside: avoid; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 .preview-note { max-width: 1000px; margin: 20px auto -8px; width: calc(100% - 64px); }
@@ -686,7 +937,7 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
         <h1>VaxBridge</h1>
         <p class="sub">Vaccine records from any country, ready for school</p>
       </div>
-      <div class="note-box preview-note auth-preview"><svg class="i"><use href="#i-info"/></svg><p><b>Demo copy.</b> Accounts and records here are stored only in this browser. For the real app, where saved records follow you to any device, go to <a href="https://vaxbridge.onrender.com" style="color: var(--primary); font-weight: 600">vaxbridge.onrender.com</a>. Reading your own photos needs the full app running with an API key, so use Try a sample record. Its report was calculated by the real Java rules engine.</p></div>
+      <div class="note-box preview-note auth-preview"><svg class="i"><use href="#i-info"/></svg><p><b>Demo copy.</b> Sign in as <b>demo@vaxbridge.app</b> with any password to see sample children. Accounts and records here are stored only in this browser. For the real app, where saved records follow you to any device, go to <a href="https://vaxbridge.onrender.com" style="color: var(--primary); font-weight: 600">vaxbridge.onrender.com</a>. Reading your own photos needs the full app running with an API key, so use Try a sample record. Its report was calculated by the real Java rules engine.</p></div>
       <form id="authForm" class="card auth-card" novalidate>
         <label id="nameField" class="hidden">Your name <input id="authName" type="text" autocomplete="name" placeholder="Pat Rivera, RN"></label>
         <label>Email <input id="authEmail" type="email" autocomplete="email" placeholder="you@school.org"></label>
@@ -698,6 +949,19 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
         <button id="authSwitch" class="link" type="button">Create one</button></p>
       <p class="auth-note"><svg class="i"><use href="#i-shield"/></svg>
         For school nurses and clinic staff. Saved records are visible only to your account.</p>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts no-print" aria-live="polite"></div>
+
+  <div id="palette" class="palette hidden no-print" role="dialog" aria-label="Search">
+    <div class="palette-box">
+      <div class="palette-input">
+        <svg class="i"><use href="#i-search"/></svg>
+        <input id="paletteInput" type="text" placeholder="Search records or jump to a page" autocomplete="off">
+        <kbd>Esc</kbd>
+      </div>
+      <div id="paletteList" class="palette-list"></div>
     </div>
   </div>
 
@@ -715,6 +979,10 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
           <p id="userName"></p>
           <p id="userMeta" class="sub"></p>
         </div>
+      </button>
+
+      <button id="searchBtn" class="search-trigger" title="Search records and pages">
+        <svg class="i"><use href="#i-search"/></svg><span>Search</span><kbd>Ctrl K</kbd>
       </button>
 
       <button id="newRecordBtn" class="primary cta"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
@@ -743,9 +1011,17 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
       <div class="note-box preview-note"><svg class="i"><use href="#i-info"/></svg><p><b>Demo copy.</b> Accounts and records here are stored only in this browser. For the real app, where saved records follow you to any device, go to <a href="https://vaxbridge.onrender.com" style="color: var(--primary); font-weight: 600">vaxbridge.onrender.com</a>. Reading your own photos needs the full app running with an API key, so use Try a sample record. Its report was calculated by the real Java rules engine.</p></div>
       <!-- Dashboard -->
       <section id="dashboard" class="view hidden">
-        <div class="view-head">
-          <h1>Dashboard</h1>
-          <p id="today" class="sub"></p>
+        <div class="hero">
+          <div class="hero-text">
+            <p id="today" class="hero-date"></p>
+            <h1 id="greeting">Dashboard</h1>
+            <p id="heroSummary" class="hero-sub"></p>
+            <div class="hero-actions">
+              <button class="hero-btn solid go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+              <button class="hero-btn ghost" data-palette><svg class="i"><use href="#i-search"/></svg> Search <kbd>Ctrl K</kbd></button>
+            </div>
+          </div>
+          <div id="heroNext" class="hero-next"></div>
         </div>
         <div id="dashStats" class="stats"></div>
         <div id="dashEmpty" class="empty card hidden">
@@ -753,6 +1029,23 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
           <p class="strong">No saved records yet</p>
           <p class="sub">Upload a child's vaccine record, check it, and tap Save to records. It will show up here.</p>
           <button class="primary go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+        </div>
+        <div id="dashCharts" class="dash-charts">
+          <div class="card">
+            <p class="card-title"><svg class="i"><use href="#i-activity"/></svg> Vaccine status, all children</p>
+            <div id="statusChart" class="donut-wrap"></div>
+          </div>
+          <div class="card">
+            <div class="card-row">
+              <p class="card-title"><svg class="i"><use href="#i-calendar"/></svg> Next catch-up dates</p>
+              <span class="sub small">next 90 days</span>
+            </div>
+            <div id="upcomingList" class="upcoming"></div>
+          </div>
+          <div class="card">
+            <p class="card-title"><svg class="i"><use href="#i-globe"/></svg> Records by country</p>
+            <div id="countryChart" class="bars"></div>
+          </div>
         </div>
         <div id="dashGrid" class="dash-grid">
           <div class="card">
@@ -784,12 +1077,29 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
           <svg class="i"><use href="#i-search"/></svg>
           <input id="recordSearch" type="search" placeholder="Search by child's name or country">
         </div>
-        <div id="recordFilters" class="filters">
-          <button data-filter="all" class="active">All</button>
-          <button data-filter="due">Doses due</button>
-          <button data-filter="ok">Up to date</button>
+        <div class="records-bar">
+          <div id="recordFilters" class="filters">
+            <button data-filter="all" class="active">All</button>
+            <button data-filter="due">Doses due</button>
+            <button data-filter="ok">Up to date</button>
+          </div>
+          <div class="records-tools">
+            <label class="sort">Sort
+              <select id="recordSort">
+                <option value="updated">Newest first</option>
+                <option value="name">Name A to Z</option>
+                <option value="due">Most doses due</option>
+                <option value="next">Next dose date</option>
+              </select>
+            </label>
+            <div id="recordView" class="seg" role="group" aria-label="Layout">
+              <button data-layout="grid" class="active" title="Cards"><svg class="i"><use href="#i-folder"/></svg></button>
+              <button data-layout="table" title="Table"><svg class="i"><use href="#i-table"/></svg></button>
+            </div>
+          </div>
         </div>
         <div id="recordGrid" class="record-grid"></div>
+        <div id="recordTable" class="table-card record-table hidden"></div>
         <div id="recordsEmpty" class="empty hidden">
           <div class="tile lg"><svg class="i"><use href="#i-folder"/></svg></div>
           <p class="strong" id="recordsEmptyTitle">No saved records yet</p>
@@ -961,6 +1271,8 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
             catch-up immunization schedule. It is not a medical decision. A licensed provider must verify the
             original record and approve any vaccines given. State school requirements may differ.</p>
         </div>
+
+        <div id="timeline" class="card timeline-card"></div>
 
         <div class="table-card">
           <div class="series-header">
@@ -1202,6 +1514,7 @@ table.dose-grid { width: 100%; border-collapse: collapse; min-width: 640px; font
 // Accounts and saved records are kept in this browser's storage. Reports use results captured from the
 // real rules engine for the sample record.
 const PREVIEW = {"sample": {"childName": "Sofía Ejemplo (sample)", "dateOfBirth": "2017-09-14", "country": "Guatemala", "language": "Spanish", "warnings": ["This is a made-up sample record for demonstration."], "entries": [{"originalText": "BCG", "englishName": "BCG (tuberculosis)", "antigens": ["BCG"], "date": "2017-09-14", "dateAsWritten": "14/09/2017", "confidence": "high", "notes": ""}, {"originalText": "Hepatitis B (RN)", "englishName": "Hepatitis B, birth dose", "antigens": ["HepB"], "date": "2017-09-14", "dateAsWritten": "14/09/2017", "confidence": "high", "notes": ""}, {"originalText": "Pentavalente 1a", "englishName": "Pentavalent dose 1 (DTwP-HepB-Hib)", "antigens": ["DTaP", "HepB", "Hib"], "date": "2017-11-14", "dateAsWritten": "14/11/2017", "confidence": "high", "notes": ""}, {"originalText": "IPV 1a", "englishName": "Inactivated polio dose 1", "antigens": ["IPV"], "date": "2017-11-14", "dateAsWritten": "14/11/2017", "confidence": "high", "notes": ""}, {"originalText": "Rotavirus 1a", "englishName": "Rotavirus dose 1", "antigens": ["RV"], "date": "2017-11-14", "dateAsWritten": "14/11/2017", "confidence": "high", "notes": ""}, {"originalText": "Neumococo 1a", "englishName": "Pneumococcal conjugate dose 1", "antigens": ["PCV"], "date": "2017-11-14", "dateAsWritten": "14/11/2017", "confidence": "high", "notes": ""}, {"originalText": "Pentavalente 2a", "englishName": "Pentavalent dose 2", "antigens": ["DTaP", "HepB", "Hib"], "date": "2018-01-15", "dateAsWritten": "15/01/2018", "confidence": "high", "notes": ""}, {"originalText": "bOPV 2a", "englishName": "Oral polio (bivalent) dose 2", "antigens": ["OPV"], "date": "2018-01-15", "dateAsWritten": "15/01/2018", "confidence": "high", "notes": ""}, {"originalText": "Rotavirus 2a", "englishName": "Rotavirus dose 2", "antigens": ["RV"], "date": "2018-01-15", "dateAsWritten": "15/01/2018", "confidence": "high", "notes": ""}, {"originalText": "Neumococo 2a", "englishName": "Pneumococcal conjugate dose 2", "antigens": ["PCV"], "date": "2018-01-15", "dateAsWritten": "15/01/2018", "confidence": "high", "notes": ""}, {"originalText": "Pentavalente 3a", "englishName": "Pentavalent dose 3", "antigens": ["DTaP", "HepB", "Hib"], "date": "2018-03-14", "dateAsWritten": "14/03/2018", "confidence": "high", "notes": ""}, {"originalText": "bOPV 3a", "englishName": "Oral polio (bivalent) dose 3", "antigens": ["OPV"], "date": "2018-03-14", "dateAsWritten": "14/03/2018", "confidence": "high", "notes": ""}, {"originalText": "SPR 1a", "englishName": "MMR dose 1 (sarampión, paperas, rubéola)", "antigens": ["MMR"], "date": "2018-09-20", "dateAsWritten": "20/09/2018", "confidence": "high", "notes": ""}, {"originalText": "Neumococo refuerzo", "englishName": "Pneumococcal booster", "antigens": ["PCV"], "date": "2018-09-20", "dateAsWritten": "20/09/2018", "confidence": "high", "notes": ""}, {"originalText": "DPT 1er refuerzo", "englishName": "DTP booster 1", "antigens": ["DTaP"], "date": "2019-03-18", "dateAsWritten": "18/03/2019", "confidence": "high", "notes": ""}, {"originalText": "bOPV 1er refuerzo", "englishName": "Oral polio booster 1", "antigens": ["OPV"], "date": "2019-03-18", "dateAsWritten": "18/03/2019", "confidence": "high", "notes": ""}, {"originalText": "SPR 2a", "englishName": "MMR dose 2", "antigens": ["MMR"], "date": "2019-03-18", "dateAsWritten": "18/03/2019", "confidence": "high", "notes": ""}, {"originalText": "DPT 2o refuerzo", "englishName": "DTP booster 2", "antigens": ["DTaP"], "date": "2021-09-20", "dateAsWritten": "20/09/2021", "confidence": "low", "notes": "Day could be 20 or 28; ink is smudged."}, {"originalText": "bOPV 2o refuerzo", "englishName": "Oral polio booster 2", "antigens": ["OPV"], "date": "2021-09-20", "dateAsWritten": "20/09/2021", "confidence": "low", "notes": "Same smudged date as the DPT booster."}]}, "antigens": {"HepB": "Hepatitis B", "RV": "Rotavirus", "DTaP": "DTaP / DTP (diphtheria, tetanus, pertussis)", "DT": "DT (diphtheria, tetanus)", "Tdap": "Tdap", "Td": "Td", "Hib": "Hib", "PCV": "Pneumococcal conjugate", "IPV": "Polio, inactivated (IPV)", "OPV": "Polio, oral (OPV)", "MMR": "Measles, mumps, rubella (MMR)", "Measles": "Measles only", "MR": "Measles-rubella (MR)", "VAR": "Varicella (chickenpox)", "HepA": "Hepatitis A", "MenACWY": "Meningococcal ACWY", "HPV": "HPV", "BCG": "BCG (tuberculosis)", "Other": "Other / not used in US schedule"}, "report": {"dateOfBirth": "2017-09-14", "asOf": "2026-10-25", "series": [{"key": "HepB", "name": "Hepatitis B", "status": "COMPLETE", "summary": "Complete: 3 valid dose(s).", "doses": [{"given": "2017-09-14", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Hepatitis B (RN)"}, {"given": "2017-11-14", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}, {"given": "2018-01-15", "antigen": "HepB", "valid": false, "reason": "Given before the minimum age of 24 weeks for the final dose.", "sourceText": "Pentavalente 2a"}, {"given": "2018-03-14", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Pentavalente 3a"}], "nextDoses": [], "notes": []}, {"key": "RV", "name": "Rotavirus", "status": "NOT_NEEDED", "summary": "Not given after 8 months of age.", "doses": [{"given": "2017-11-14", "antigen": "RV", "valid": true, "reason": "", "sourceText": "Rotavirus 1a"}, {"given": "2018-01-15", "antigen": "RV", "valid": true, "reason": "", "sourceText": "Rotavirus 2a"}], "nextDoses": [], "notes": []}, {"key": "DTaP", "name": "Diphtheria, tetanus, pertussis (DTaP / Tdap)", "status": "COMPLETE", "summary": "Complete: 5 valid dose(s).", "doses": [{"given": "2017-11-14", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}, {"given": "2018-01-15", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Pentavalente 2a"}, {"given": "2018-03-14", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Pentavalente 3a"}, {"given": "2019-03-18", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "DPT 1er refuerzo"}, {"given": "2021-09-20", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "DPT 2o refuerzo"}], "nextDoses": [], "notes": ["Adolescent Tdap booster will be due at age 11-12 (on or after Sep 14, 2028)."]}, {"key": "Hib", "name": "Haemophilus influenzae type b (Hib)", "status": "NOT_NEEDED", "summary": "Not routinely needed for healthy children age 5 and older.", "doses": [{"given": "2017-11-14", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}, {"given": "2018-01-15", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Pentavalente 2a"}, {"given": "2018-03-14", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Pentavalente 3a"}], "nextDoses": [], "notes": []}, {"key": "PCV", "name": "Pneumococcal conjugate (PCV)", "status": "COMPLETE", "summary": "Complete: 3 valid dose(s).", "doses": [{"given": "2017-11-14", "antigen": "PCV", "valid": true, "reason": "", "sourceText": "Neumococo 1a"}, {"given": "2018-01-15", "antigen": "PCV", "valid": true, "reason": "", "sourceText": "Neumococo 2a"}, {"given": "2018-09-20", "antigen": "PCV", "valid": true, "reason": "", "sourceText": "Neumococo refuerzo"}], "nextDoses": [], "notes": []}, {"key": "Polio", "name": "Polio (IPV)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [{"given": "2017-11-14", "antigen": "IPV", "valid": true, "reason": "", "sourceText": "IPV 1a"}, {"given": "2018-01-15", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "bOPV 2a"}, {"given": "2018-03-14", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "bOPV 3a"}, {"given": "2019-03-18", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "bOPV 1er refuerzo"}, {"given": "2021-09-20", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "bOPV 2o refuerzo"}], "nextDoses": ["2026-10-25", "2027-04-25"], "notes": []}, {"key": "MMR", "name": "Measles, mumps, rubella (MMR)", "status": "COMPLETE", "summary": "Complete: 2 valid dose(s).", "doses": [{"given": "2018-09-20", "antigen": "MMR", "valid": true, "reason": "", "sourceText": "SPR 1a"}, {"given": "2019-03-18", "antigen": "MMR", "valid": true, "reason": "", "sourceText": "SPR 2a"}], "nextDoses": [], "notes": []}, {"key": "VAR", "name": "Varicella (chickenpox)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-25", "2027-01-25"], "notes": ["If the child has had chickenpox, a provider can document this as evidence of immunity instead of vaccination."]}, {"key": "HepA", "name": "Hepatitis A", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-25", "2027-04-25"], "notes": []}, {"key": "MenACWY", "name": "Meningococcal ACWY", "status": "NOT_NEEDED", "summary": "Not due until age 11-12.", "doses": [], "nextDoses": [], "notes": []}, {"key": "HPV", "name": "Human papillomavirus (HPV)", "status": "NOT_NEEDED", "summary": "Not due until age 11-12 (may start at age 9).", "doses": [], "nextDoses": [], "notes": ["HPV is recommended but is not required for school entry in most states."]}], "ignored": [{"given": "2017-09-14", "antigen": "BCG", "valid": false, "reason": "BCG is not part of the US schedule; no action needed.", "sourceText": "BCG"}]}};
+PREVIEW.demo = [{"record": {"childName": "Sofía Morales", "dateOfBirth": "2017-09-14", "country": "Guatemala", "language": "Spanish", "warnings": [], "entries": [{"originalText": "BCG", "englishName": "BCG (tuberculosis)", "antigens": ["BCG"], "date": "2017-09-14", "dateAsWritten": "14/09/2017", "confidence": "high", "notes": ""}, {"originalText": "Hepatitis B (RN)", "englishName": "Hepatitis B, birth dose", "antigens": ["HepB"], "date": "2017-09-14", "dateAsWritten": "14/09/2017", "confidence": "high", "notes": ""}, {"originalText": "Pentavalente 1a", "englishName": "Pentavalent dose 1 (DTwP-HepB-Hib)", "antigens": ["DTaP", "HepB", "Hib"], "date": "2017-11-14", "dateAsWritten": "14/11/2017", "confidence": "high", "notes": ""}, {"originalText": "IPV 1a", "englishName": "Inactivated polio dose 1", "antigens": ["IPV"], "date": "2017-11-14", "dateAsWritten": "14/11/2017", "confidence": "high", "notes": ""}, {"originalText": "Rotavirus 1a", "englishName": "Rotavirus dose 1", "antigens": ["RV"], "date": "2017-11-14", "dateAsWritten": "14/11/2017", "confidence": "high", "notes": ""}, {"originalText": "Neumococo 1a", "englishName": "Pneumococcal conjugate dose 1", "antigens": ["PCV"], "date": "2017-11-14", "dateAsWritten": "14/11/2017", "confidence": "high", "notes": ""}, {"originalText": "Pentavalente 2a", "englishName": "Pentavalent dose 2", "antigens": ["DTaP", "HepB", "Hib"], "date": "2018-01-15", "dateAsWritten": "15/01/2018", "confidence": "high", "notes": ""}, {"originalText": "bOPV 2a", "englishName": "Oral polio (bivalent) dose 2", "antigens": ["OPV"], "date": "2018-01-15", "dateAsWritten": "15/01/2018", "confidence": "high", "notes": ""}, {"originalText": "Rotavirus 2a", "englishName": "Rotavirus dose 2", "antigens": ["RV"], "date": "2018-01-15", "dateAsWritten": "15/01/2018", "confidence": "high", "notes": ""}, {"originalText": "Neumococo 2a", "englishName": "Pneumococcal conjugate dose 2", "antigens": ["PCV"], "date": "2018-01-15", "dateAsWritten": "15/01/2018", "confidence": "high", "notes": ""}, {"originalText": "Pentavalente 3a", "englishName": "Pentavalent dose 3", "antigens": ["DTaP", "HepB", "Hib"], "date": "2018-03-14", "dateAsWritten": "14/03/2018", "confidence": "high", "notes": ""}, {"originalText": "bOPV 3a", "englishName": "Oral polio (bivalent) dose 3", "antigens": ["OPV"], "date": "2018-03-14", "dateAsWritten": "14/03/2018", "confidence": "high", "notes": ""}, {"originalText": "SPR 1a", "englishName": "MMR dose 1 (sarampión, paperas, rubéola)", "antigens": ["MMR"], "date": "2018-09-20", "dateAsWritten": "20/09/2018", "confidence": "high", "notes": ""}, {"originalText": "Neumococo refuerzo", "englishName": "Pneumococcal booster", "antigens": ["PCV"], "date": "2018-09-20", "dateAsWritten": "20/09/2018", "confidence": "high", "notes": ""}, {"originalText": "DPT 1er refuerzo", "englishName": "DTP booster 1", "antigens": ["DTaP"], "date": "2019-03-18", "dateAsWritten": "18/03/2019", "confidence": "high", "notes": ""}, {"originalText": "bOPV 1er refuerzo", "englishName": "Oral polio booster 1", "antigens": ["OPV"], "date": "2019-03-18", "dateAsWritten": "18/03/2019", "confidence": "high", "notes": ""}, {"originalText": "SPR 2a", "englishName": "MMR dose 2", "antigens": ["MMR"], "date": "2019-03-18", "dateAsWritten": "18/03/2019", "confidence": "high", "notes": ""}, {"originalText": "DPT 2o refuerzo", "englishName": "DTP booster 2", "antigens": ["DTaP"], "date": "2021-09-20", "dateAsWritten": "20/09/2021", "confidence": "low", "notes": "Day could be 20 or 28; ink is smudged."}, {"originalText": "bOPV 2o refuerzo", "englishName": "Oral polio booster 2", "antigens": ["OPV"], "date": "2021-09-20", "dateAsWritten": "20/09/2021", "confidence": "low", "notes": "Same smudged date as the DPT booster."}]}, "report": {"dateOfBirth": "2017-09-14", "asOf": "2026-10-26", "series": [{"key": "HepB", "name": "Hepatitis B", "status": "COMPLETE", "summary": "Complete: 3 valid dose(s).", "doses": [{"given": "2017-09-14", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Hepatitis B (RN)"}, {"given": "2017-11-14", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}, {"given": "2018-01-15", "antigen": "HepB", "valid": false, "reason": "Given before the minimum age of 24 weeks for the final dose.", "sourceText": "Pentavalente 2a"}, {"given": "2018-03-14", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Pentavalente 3a"}], "nextDoses": [], "notes": []}, {"key": "RV", "name": "Rotavirus", "status": "NOT_NEEDED", "summary": "Not given after 8 months of age.", "doses": [{"given": "2017-11-14", "antigen": "RV", "valid": true, "reason": "", "sourceText": "Rotavirus 1a"}, {"given": "2018-01-15", "antigen": "RV", "valid": true, "reason": "", "sourceText": "Rotavirus 2a"}], "nextDoses": [], "notes": []}, {"key": "DTaP", "name": "Diphtheria, tetanus, pertussis (DTaP / Tdap)", "status": "COMPLETE", "summary": "Complete: 5 valid dose(s).", "doses": [{"given": "2017-11-14", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}, {"given": "2018-01-15", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Pentavalente 2a"}, {"given": "2018-03-14", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Pentavalente 3a"}, {"given": "2019-03-18", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "DPT 1er refuerzo"}, {"given": "2021-09-20", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "DPT 2o refuerzo"}], "nextDoses": [], "notes": ["Adolescent Tdap booster will be due at age 11-12 (on or after Sep 14, 2028)."]}, {"key": "Hib", "name": "Haemophilus influenzae type b (Hib)", "status": "NOT_NEEDED", "summary": "Not routinely needed for healthy children age 5 and older.", "doses": [{"given": "2017-11-14", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}, {"given": "2018-01-15", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Pentavalente 2a"}, {"given": "2018-03-14", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Pentavalente 3a"}], "nextDoses": [], "notes": []}, {"key": "PCV", "name": "Pneumococcal conjugate (PCV)", "status": "COMPLETE", "summary": "Complete: 3 valid dose(s).", "doses": [{"given": "2017-11-14", "antigen": "PCV", "valid": true, "reason": "", "sourceText": "Neumococo 1a"}, {"given": "2018-01-15", "antigen": "PCV", "valid": true, "reason": "", "sourceText": "Neumococo 2a"}, {"given": "2018-09-20", "antigen": "PCV", "valid": true, "reason": "", "sourceText": "Neumococo refuerzo"}], "nextDoses": [], "notes": []}, {"key": "Polio", "name": "Polio (IPV)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [{"given": "2017-11-14", "antigen": "IPV", "valid": true, "reason": "", "sourceText": "IPV 1a"}, {"given": "2018-01-15", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "bOPV 2a"}, {"given": "2018-03-14", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "bOPV 3a"}, {"given": "2019-03-18", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "bOPV 1er refuerzo"}, {"given": "2021-09-20", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "bOPV 2o refuerzo"}], "nextDoses": ["2026-10-26", "2027-04-26"], "notes": []}, {"key": "MMR", "name": "Measles, mumps, rubella (MMR)", "status": "COMPLETE", "summary": "Complete: 2 valid dose(s).", "doses": [{"given": "2018-09-20", "antigen": "MMR", "valid": true, "reason": "", "sourceText": "SPR 1a"}, {"given": "2019-03-18", "antigen": "MMR", "valid": true, "reason": "", "sourceText": "SPR 2a"}], "nextDoses": [], "notes": []}, {"key": "VAR", "name": "Varicella (chickenpox)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2027-01-26"], "notes": ["If the child has had chickenpox, a provider can document this as evidence of immunity instead of vaccination."]}, {"key": "HepA", "name": "Hepatitis A", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2027-04-26"], "notes": []}, {"key": "MenACWY", "name": "Meningococcal ACWY", "status": "NOT_NEEDED", "summary": "Not due until age 11-12.", "doses": [], "nextDoses": [], "notes": []}, {"key": "HPV", "name": "Human papillomavirus (HPV)", "status": "NOT_NEEDED", "summary": "Not due until age 11-12 (may start at age 9).", "doses": [], "nextDoses": [], "notes": ["HPV is recommended but is not required for school entry in most states."]}], "ignored": [{"given": "2017-09-14", "antigen": "BCG", "valid": false, "reason": "BCG is not part of the US schedule; no action needed.", "sourceText": "BCG"}]}, "state": "CA"}, {"record": {"childName": "Lucía Fernández", "dateOfBirth": "2026-06-01", "country": "Honduras", "language": "Spanish", "warnings": [], "entries": [{"originalText": "Hepatitis B (RN)", "englishName": "Hepatitis B, birth dose", "antigens": ["HepB"], "date": "2026-06-01", "dateAsWritten": "01/06/2026", "confidence": "high", "notes": ""}, {"originalText": "Pentavalente 1a", "englishName": "Pentavalent dose 1", "antigens": ["DTaP", "HepB", "Hib"], "date": "2026-08-01", "dateAsWritten": "01/08/2026", "confidence": "high", "notes": ""}, {"originalText": "IPV 1a", "englishName": "Polio dose 1", "antigens": ["IPV"], "date": "2026-08-01", "dateAsWritten": "01/08/2026", "confidence": "high", "notes": ""}, {"originalText": "Rotavirus 1a", "englishName": "Rotavirus dose 1", "antigens": ["RV"], "date": "2026-08-01", "dateAsWritten": "01/08/2026", "confidence": "high", "notes": ""}, {"originalText": "Neumococo 1a", "englishName": "Pneumococcal dose 1", "antigens": ["PCV"], "date": "2026-08-01", "dateAsWritten": "01/08/2026", "confidence": "high", "notes": ""}, {"originalText": "Pentavalente 2a", "englishName": "Pentavalent dose 2", "antigens": ["DTaP", "Hib"], "date": "2026-10-01", "dateAsWritten": "01/10/2026", "confidence": "high", "notes": ""}, {"originalText": "IPV 2a", "englishName": "Polio dose 2", "antigens": ["IPV"], "date": "2026-10-01", "dateAsWritten": "01/10/2026", "confidence": "high", "notes": ""}, {"originalText": "Rotavirus 2a", "englishName": "Rotavirus dose 2", "antigens": ["RV"], "date": "2026-10-01", "dateAsWritten": "01/10/2026", "confidence": "high", "notes": ""}, {"originalText": "Neumococo 2a", "englishName": "Pneumococcal dose 2", "antigens": ["PCV"], "date": "2026-10-01", "dateAsWritten": "01/10/2026", "confidence": "high", "notes": ""}]}, "report": {"dateOfBirth": "2026-06-01", "asOf": "2026-10-26", "series": [{"key": "HepB", "name": "Hepatitis B", "status": "UPCOMING", "summary": "Up to date for now. Next dose on or after Nov 16, 2026 (1 more dose(s) in total).", "doses": [{"given": "2026-06-01", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Hepatitis B (RN)"}, {"given": "2026-08-01", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}], "nextDoses": ["2026-11-16"], "notes": []}, {"key": "RV", "name": "Rotavirus", "status": "UPCOMING", "summary": "Up to date for now. Next dose on or after Oct 29, 2026 (1 more dose(s) in total).", "doses": [{"given": "2026-08-01", "antigen": "RV", "valid": true, "reason": "", "sourceText": "Rotavirus 1a"}, {"given": "2026-10-01", "antigen": "RV", "valid": true, "reason": "", "sourceText": "Rotavirus 2a"}], "nextDoses": ["2026-10-29"], "notes": ["Brand matters (2 doses for RV1, 3 for RV5); 3 doses assumed. No rotavirus dose may be given after 8 months of age."]}, {"key": "DTaP", "name": "Diphtheria, tetanus, pertussis (DTaP / Tdap)", "status": "UPCOMING", "summary": "Up to date for now. Next dose on or after Oct 29, 2026 (3 more dose(s) in total).", "doses": [{"given": "2026-08-01", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}, {"given": "2026-10-01", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Pentavalente 2a"}], "nextDoses": ["2026-10-29", "2027-06-01", "2030-06-01"], "notes": []}, {"key": "Hib", "name": "Haemophilus influenzae type b (Hib)", "status": "UPCOMING", "summary": "Up to date for now. Next dose on or after Oct 29, 2026 (2 more dose(s) in total).", "doses": [{"given": "2026-08-01", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}, {"given": "2026-10-01", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Pentavalente 2a"}], "nextDoses": ["2026-10-29", "2027-06-01"], "notes": []}, {"key": "PCV", "name": "Pneumococcal conjugate (PCV)", "status": "UPCOMING", "summary": "Up to date for now. Next dose on or after Oct 29, 2026 (2 more dose(s) in total).", "doses": [{"given": "2026-08-01", "antigen": "PCV", "valid": true, "reason": "", "sourceText": "Neumococo 1a"}, {"given": "2026-10-01", "antigen": "PCV", "valid": true, "reason": "", "sourceText": "Neumococo 2a"}], "nextDoses": ["2026-10-29", "2027-06-01"], "notes": []}, {"key": "Polio", "name": "Polio (IPV)", "status": "UPCOMING", "summary": "Up to date for now. Next dose on or after Oct 29, 2026 (2 more dose(s) in total).", "doses": [{"given": "2026-08-01", "antigen": "IPV", "valid": true, "reason": "", "sourceText": "IPV 1a"}, {"given": "2026-10-01", "antigen": "IPV", "valid": true, "reason": "", "sourceText": "IPV 2a"}], "nextDoses": ["2026-10-29", "2030-06-01"], "notes": []}, {"key": "MMR", "name": "Measles, mumps, rubella (MMR)", "status": "UPCOMING", "summary": "Up to date for now. Next dose on or after Jun 1, 2027 (2 more dose(s) in total).", "doses": [], "nextDoses": ["2027-06-01", "2030-06-01"], "notes": []}, {"key": "VAR", "name": "Varicella (chickenpox)", "status": "UPCOMING", "summary": "Up to date for now. Next dose on or after Jun 1, 2027 (2 more dose(s) in total).", "doses": [], "nextDoses": ["2027-06-01", "2030-06-01"], "notes": ["If the child has had chickenpox, a provider can document this as evidence of immunity instead of vaccination."]}, {"key": "HepA", "name": "Hepatitis A", "status": "UPCOMING", "summary": "Up to date for now. Next dose on or after Jun 1, 2027 (2 more dose(s) in total).", "doses": [], "nextDoses": ["2027-06-01", "2027-12-01"], "notes": []}, {"key": "MenACWY", "name": "Meningococcal ACWY", "status": "NOT_NEEDED", "summary": "Not due until age 11-12.", "doses": [], "nextDoses": [], "notes": []}, {"key": "HPV", "name": "Human papillomavirus (HPV)", "status": "NOT_NEEDED", "summary": "Not due until age 11-12 (may start at age 9).", "doses": [], "nextDoses": [], "notes": ["HPV is recommended but is not required for school entry in most states."]}], "ignored": []}, "state": "TX"}, {"record": {"childName": "Mateo Rojas", "dateOfBirth": "2025-02-10", "country": "Guatemala", "language": "Spanish", "warnings": [], "entries": [{"originalText": "BCG", "englishName": "BCG (tuberculosis)", "antigens": ["BCG"], "date": "2025-02-10", "dateAsWritten": "10/02/2025", "confidence": "high", "notes": ""}, {"originalText": "Hepatitis B (RN)", "englishName": "Hepatitis B, birth dose", "antigens": ["HepB"], "date": "2025-02-10", "dateAsWritten": "10/02/2025", "confidence": "high", "notes": ""}, {"originalText": "Pentavalente 1a", "englishName": "Pentavalent dose 1", "antigens": ["DTaP", "HepB", "Hib"], "date": "2025-04-12", "dateAsWritten": "12/04/2025", "confidence": "high", "notes": ""}, {"originalText": "IPV 1a", "englishName": "Polio dose 1", "antigens": ["IPV"], "date": "2025-04-12", "dateAsWritten": "12/04/2025", "confidence": "high", "notes": ""}, {"originalText": "Rotavirus 1a", "englishName": "Rotavirus dose 1", "antigens": ["RV"], "date": "2025-04-12", "dateAsWritten": "12/04/2025", "confidence": "high", "notes": ""}, {"originalText": "Neumococo 1a", "englishName": "Pneumococcal dose 1", "antigens": ["PCV"], "date": "2025-04-12", "dateAsWritten": "12/04/2025", "confidence": "high", "notes": ""}, {"originalText": "Pentavalente 2a", "englishName": "Pentavalent dose 2", "antigens": ["DTaP", "HepB", "Hib"], "date": "2025-06-14", "dateAsWritten": "14/06/2025", "confidence": "high", "notes": ""}, {"originalText": "IPV 2a", "englishName": "Polio dose 2", "antigens": ["IPV"], "date": "2025-06-14", "dateAsWritten": "14/06/2025", "confidence": "high", "notes": ""}, {"originalText": "Rotavirus 2a", "englishName": "Rotavirus dose 2", "antigens": ["RV"], "date": "2025-06-14", "dateAsWritten": "14/06/2025", "confidence": "high", "notes": ""}, {"originalText": "Neumococo 2a", "englishName": "Pneumococcal dose 2", "antigens": ["PCV"], "date": "2025-06-14", "dateAsWritten": "14/06/2025", "confidence": "high", "notes": ""}, {"originalText": "Pentavalente 3a", "englishName": "Pentavalent dose 3", "antigens": ["DTaP", "HepB", "Hib"], "date": "2025-08-16", "dateAsWritten": "16/08/2025", "confidence": "high", "notes": ""}, {"originalText": "bOPV 3a", "englishName": "Oral polio dose 3", "antigens": ["OPV"], "date": "2025-08-16", "dateAsWritten": "16/08/2025", "confidence": "high", "notes": ""}, {"originalText": "SPR 1a", "englishName": "MMR dose 1", "antigens": ["MMR"], "date": "2026-02-20", "dateAsWritten": "20/02/2026", "confidence": "high", "notes": ""}, {"originalText": "Neumococo refuerzo", "englishName": "Pneumococcal booster", "antigens": ["PCV"], "date": "2026-02-20", "dateAsWritten": "20/02/2026", "confidence": "high", "notes": ""}]}, "report": {"dateOfBirth": "2025-02-10", "asOf": "2026-10-26", "series": [{"key": "HepB", "name": "Hepatitis B", "status": "COMPLETE", "summary": "Complete: 3 valid dose(s).", "doses": [{"given": "2025-02-10", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Hepatitis B (RN)"}, {"given": "2025-04-12", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}, {"given": "2025-06-14", "antigen": "HepB", "valid": false, "reason": "Given before the minimum age of 24 weeks for the final dose.", "sourceText": "Pentavalente 2a"}, {"given": "2025-08-16", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Pentavalente 3a"}], "nextDoses": [], "notes": []}, {"key": "RV", "name": "Rotavirus", "status": "NOT_NEEDED", "summary": "Not given after 8 months of age.", "doses": [{"given": "2025-04-12", "antigen": "RV", "valid": true, "reason": "", "sourceText": "Rotavirus 1a"}, {"given": "2025-06-14", "antigen": "RV", "valid": true, "reason": "", "sourceText": "Rotavirus 2a"}], "nextDoses": [], "notes": []}, {"key": "DTaP", "name": "Diphtheria, tetanus, pertussis (DTaP / Tdap)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [{"given": "2025-04-12", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}, {"given": "2025-06-14", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Pentavalente 2a"}, {"given": "2025-08-16", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Pentavalente 3a"}], "nextDoses": ["2026-10-26", "2029-02-10"], "notes": []}, {"key": "Hib", "name": "Haemophilus influenzae type b (Hib)", "status": "DUE", "summary": "Needs 1 more dose(s). Next dose is due now.", "doses": [{"given": "2025-04-12", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Pentavalente 1a"}, {"given": "2025-06-14", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Pentavalente 2a"}, {"given": "2025-08-16", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Pentavalente 3a"}], "nextDoses": ["2026-10-26"], "notes": []}, {"key": "PCV", "name": "Pneumococcal conjugate (PCV)", "status": "COMPLETE", "summary": "Complete: 3 valid dose(s).", "doses": [{"given": "2025-04-12", "antigen": "PCV", "valid": true, "reason": "", "sourceText": "Neumococo 1a"}, {"given": "2025-06-14", "antigen": "PCV", "valid": true, "reason": "", "sourceText": "Neumococo 2a"}, {"given": "2026-02-20", "antigen": "PCV", "valid": true, "reason": "", "sourceText": "Neumococo refuerzo"}], "nextDoses": [], "notes": []}, {"key": "Polio", "name": "Polio (IPV)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [{"given": "2025-04-12", "antigen": "IPV", "valid": true, "reason": "", "sourceText": "IPV 1a"}, {"given": "2025-06-14", "antigen": "IPV", "valid": true, "reason": "", "sourceText": "IPV 2a"}, {"given": "2025-08-16", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "bOPV 3a"}], "nextDoses": ["2026-10-26", "2029-02-10"], "notes": []}, {"key": "MMR", "name": "Measles, mumps, rubella (MMR)", "status": "UPCOMING", "summary": "Up to date for now. Next dose on or after Feb 10, 2029 (1 more dose(s) in total).", "doses": [{"given": "2026-02-20", "antigen": "MMR", "valid": true, "reason": "", "sourceText": "SPR 1a"}], "nextDoses": ["2029-02-10"], "notes": []}, {"key": "VAR", "name": "Varicella (chickenpox)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2029-02-10"], "notes": ["If the child has had chickenpox, a provider can document this as evidence of immunity instead of vaccination."]}, {"key": "HepA", "name": "Hepatitis A", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2027-04-26"], "notes": []}, {"key": "MenACWY", "name": "Meningococcal ACWY", "status": "NOT_NEEDED", "summary": "Not due until age 11-12.", "doses": [], "nextDoses": [], "notes": []}, {"key": "HPV", "name": "Human papillomavirus (HPV)", "status": "NOT_NEEDED", "summary": "Not due until age 11-12 (may start at age 9).", "doses": [], "nextDoses": [], "notes": ["HPV is recommended but is not required for school entry in most states."]}], "ignored": [{"given": "2025-02-10", "antigen": "BCG", "valid": false, "reason": "BCG is not part of the US schedule; no action needed.", "sourceText": "BCG"}]}, "state": "CA"}, {"record": {"childName": "Amira Haddad", "dateOfBirth": "2015-03-02", "country": "Syria", "language": "Arabic", "warnings": [], "entries": [{"originalText": "لقاح السل", "englishName": "BCG", "antigens": ["BCG"], "date": "2015-03-02", "dateAsWritten": "02/03/2015", "confidence": "high", "notes": ""}, {"originalText": "التهاب الكبد ب", "englishName": "Hepatitis B birth", "antigens": ["HepB"], "date": "2015-03-02", "dateAsWritten": "02/03/2015", "confidence": "high", "notes": ""}, {"originalText": "الخماسي 1", "englishName": "Pentavalent 1", "antigens": ["DTaP", "HepB", "Hib"], "date": "2015-05-04", "dateAsWritten": "04/05/2015", "confidence": "high", "notes": ""}, {"originalText": "شلل الأطفال المعطل 1", "englishName": "IPV 1", "antigens": ["IPV"], "date": "2015-05-04", "dateAsWritten": "04/05/2015", "confidence": "high", "notes": ""}, {"originalText": "الخماسي 2", "englishName": "Pentavalent 2", "antigens": ["DTaP", "HepB", "Hib"], "date": "2015-07-06", "dateAsWritten": "06/07/2015", "confidence": "high", "notes": ""}, {"originalText": "شلل الأطفال المعطل 2", "englishName": "IPV 2", "antigens": ["IPV"], "date": "2015-07-06", "dateAsWritten": "06/07/2015", "confidence": "high", "notes": ""}, {"originalText": "الخماسي 3", "englishName": "Pentavalent 3", "antigens": ["DTaP", "HepB", "Hib"], "date": "2015-09-07", "dateAsWritten": "07/09/2015", "confidence": "high", "notes": ""}, {"originalText": "شلل الأطفال المعطل 3", "englishName": "IPV 3", "antigens": ["IPV"], "date": "2015-09-07", "dateAsWritten": "07/09/2015", "confidence": "high", "notes": ""}, {"originalText": "الحصبة والنكاف والحصبة الألمانية 1", "englishName": "MMR 1", "antigens": ["MMR"], "date": "2016-03-05", "dateAsWritten": "05/03/2016", "confidence": "high", "notes": ""}, {"originalText": "الحصبة والنكاف والحصبة الألمانية 2", "englishName": "MMR 2", "antigens": ["MMR"], "date": "2016-09-10", "dateAsWritten": "10/09/2016", "confidence": "high", "notes": ""}, {"originalText": "الثلاثي معزز", "englishName": "DTP booster", "antigens": ["DTaP"], "date": "2016-09-10", "dateAsWritten": "10/09/2016", "confidence": "high", "notes": ""}, {"originalText": "شلل الأطفال معزز", "englishName": "IPV booster", "antigens": ["IPV"], "date": "2019-03-11", "dateAsWritten": "11/03/2019", "confidence": "high", "notes": ""}, {"originalText": "الثلاثي معزز 2", "englishName": "DTP booster 2", "antigens": ["DTaP"], "date": "2019-03-11", "dateAsWritten": "11/03/2019", "confidence": "low", "notes": "Year is hard to read."}, {"originalText": "جدري الماء", "englishName": "Varicella 1", "antigens": ["VAR"], "date": "2016-03-05", "dateAsWritten": "05/03/2016", "confidence": "high", "notes": ""}]}, "report": {"dateOfBirth": "2015-03-02", "asOf": "2026-10-26", "series": [{"key": "HepB", "name": "Hepatitis B", "status": "COMPLETE", "summary": "Complete: 3 valid dose(s).", "doses": [{"given": "2015-03-02", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "التهاب الكبد ب"}, {"given": "2015-05-04", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "الخماسي 1"}, {"given": "2015-07-06", "antigen": "HepB", "valid": false, "reason": "Given before the minimum age of 24 weeks for the final dose.", "sourceText": "الخماسي 2"}, {"given": "2015-09-07", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "الخماسي 3"}], "nextDoses": [], "notes": []}, {"key": "RV", "name": "Rotavirus", "status": "NOT_NEEDED", "summary": "Not given after 8 months of age.", "doses": [], "nextDoses": [], "notes": []}, {"key": "DTaP", "name": "Diphtheria, tetanus, pertussis (DTaP / Tdap)", "status": "DUE", "summary": "Needs 1 more dose(s). Next dose is due now.", "doses": [{"given": "2015-05-04", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "الخماسي 1"}, {"given": "2015-07-06", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "الخماسي 2"}, {"given": "2015-09-07", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "الخماسي 3"}, {"given": "2016-09-10", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "الثلاثي معزز"}, {"given": "2019-03-11", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "الثلاثي معزز 2"}], "nextDoses": ["2026-10-26"], "notes": ["At age 7+, catch-up doses are Tdap or Td (not DTaP). The first catch-up dose should be Tdap."]}, {"key": "Hib", "name": "Haemophilus influenzae type b (Hib)", "status": "NOT_NEEDED", "summary": "Not routinely needed for healthy children age 5 and older.", "doses": [{"given": "2015-05-04", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "الخماسي 1"}, {"given": "2015-07-06", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "الخماسي 2"}, {"given": "2015-09-07", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "الخماسي 3"}], "nextDoses": [], "notes": []}, {"key": "PCV", "name": "Pneumococcal conjugate (PCV)", "status": "NOT_NEEDED", "summary": "Not routinely needed for healthy children age 5 and older.", "doses": [], "nextDoses": [], "notes": []}, {"key": "Polio", "name": "Polio (IPV)", "status": "COMPLETE", "summary": "Complete: 4 valid dose(s).", "doses": [{"given": "2015-05-04", "antigen": "IPV", "valid": true, "reason": "", "sourceText": "شلل الأطفال المعطل 1"}, {"given": "2015-07-06", "antigen": "IPV", "valid": true, "reason": "", "sourceText": "شلل الأطفال المعطل 2"}, {"given": "2015-09-07", "antigen": "IPV", "valid": true, "reason": "", "sourceText": "شلل الأطفال المعطل 3"}, {"given": "2019-03-11", "antigen": "IPV", "valid": true, "reason": "", "sourceText": "شلل الأطفال معزز"}], "nextDoses": [], "notes": []}, {"key": "MMR", "name": "Measles, mumps, rubella (MMR)", "status": "COMPLETE", "summary": "Complete: 2 valid dose(s).", "doses": [{"given": "2016-03-05", "antigen": "MMR", "valid": true, "reason": "", "sourceText": "الحصبة والنكاف والحصبة الألمانية 1"}, {"given": "2016-09-10", "antigen": "MMR", "valid": true, "reason": "", "sourceText": "الحصبة والنكاف والحصبة الألمانية 2"}], "nextDoses": [], "notes": []}, {"key": "VAR", "name": "Varicella (chickenpox)", "status": "DUE", "summary": "Needs 1 more dose(s). Next dose is due now.", "doses": [{"given": "2016-03-05", "antigen": "VAR", "valid": true, "reason": "", "sourceText": "جدري الماء"}], "nextDoses": ["2026-10-26"], "notes": ["If the child has had chickenpox, a provider can document this as evidence of immunity instead of vaccination."]}, {"key": "HepA", "name": "Hepatitis A", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2027-04-26"], "notes": []}, {"key": "MenACWY", "name": "Meningococcal ACWY", "status": "DUE", "summary": "Needs 1 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2031-03-02"], "notes": ["A booster dose is also due at age 16."]}, {"key": "HPV", "name": "Human papillomavirus (HPV)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2027-04-26"], "notes": ["HPV is recommended but is not required for school entry in most states."]}], "ignored": [{"given": "2015-03-02", "antigen": "BCG", "valid": false, "reason": "BCG is not part of the US schedule; no action needed.", "sourceText": "لقاح السل"}]}, "state": "CA"}, {"record": {"childName": "Dmytro Kovalenko", "dateOfBirth": "2019-06-20", "country": "Ukraine", "language": "Ukrainian", "warnings": [], "entries": [{"originalText": "Гепатит В", "englishName": "Hepatitis B birth", "antigens": ["HepB"], "date": "2019-06-20", "dateAsWritten": "20/06/2019", "confidence": "high", "notes": ""}, {"originalText": "БЦЖ", "englishName": "BCG", "antigens": ["BCG"], "date": "2019-06-23", "dateAsWritten": "23/06/2019", "confidence": "high", "notes": ""}, {"originalText": "АКДП 1", "englishName": "DTP 1", "antigens": ["DTaP"], "date": "2019-08-21", "dateAsWritten": "21/08/2019", "confidence": "high", "notes": ""}, {"originalText": "ІПВ 1", "englishName": "IPV 1", "antigens": ["IPV"], "date": "2019-08-21", "dateAsWritten": "21/08/2019", "confidence": "high", "notes": ""}, {"originalText": "Хіб 1", "englishName": "Hib 1", "antigens": ["Hib"], "date": "2019-08-21", "dateAsWritten": "21/08/2019", "confidence": "high", "notes": ""}, {"originalText": "АКДП 2", "englishName": "DTP 2", "antigens": ["DTaP"], "date": "2019-10-22", "dateAsWritten": "22/10/2019", "confidence": "high", "notes": ""}, {"originalText": "ІПВ 2", "englishName": "IPV 2", "antigens": ["IPV"], "date": "2019-10-22", "dateAsWritten": "22/10/2019", "confidence": "high", "notes": ""}, {"originalText": "Гепатит В 2", "englishName": "Hepatitis B 2", "antigens": ["HepB"], "date": "2019-10-22", "dateAsWritten": "22/10/2019", "confidence": "high", "notes": ""}, {"originalText": "АКДП 3", "englishName": "DTP 3", "antigens": ["DTaP"], "date": "2020-01-20", "dateAsWritten": "20/01/2020", "confidence": "high", "notes": ""}, {"originalText": "ОПВ 3", "englishName": "OPV 3", "antigens": ["OPV"], "date": "2020-01-20", "dateAsWritten": "20/01/2020", "confidence": "high", "notes": ""}, {"originalText": "КПК 1", "englishName": "MMR 1", "antigens": ["MMR"], "date": "2020-06-25", "dateAsWritten": "25/06/2020", "confidence": "high", "notes": ""}, {"originalText": "Гепатит В 3", "englishName": "Hepatitis B 3", "antigens": ["HepB"], "date": "2020-06-25", "dateAsWritten": "25/06/2020", "confidence": "high", "notes": ""}]}, "report": {"dateOfBirth": "2019-06-20", "asOf": "2026-10-26", "series": [{"key": "HepB", "name": "Hepatitis B", "status": "COMPLETE", "summary": "Complete: 3 valid dose(s).", "doses": [{"given": "2019-06-20", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Гепатит В"}, {"given": "2019-10-22", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Гепатит В 2"}, {"given": "2020-06-25", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Гепатит В 3"}], "nextDoses": [], "notes": []}, {"key": "RV", "name": "Rotavirus", "status": "NOT_NEEDED", "summary": "Not given after 8 months of age.", "doses": [], "nextDoses": [], "notes": []}, {"key": "DTaP", "name": "Diphtheria, tetanus, pertussis (DTaP / Tdap)", "status": "DUE", "summary": "Needs 1 more dose(s). Next dose is due now.", "doses": [{"given": "2019-08-21", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "АКДП 1"}, {"given": "2019-10-22", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "АКДП 2"}, {"given": "2020-01-20", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "АКДП 3"}], "nextDoses": ["2026-10-26"], "notes": ["At age 7+, catch-up doses are Tdap or Td (not DTaP). The first catch-up dose should be Tdap."]}, {"key": "Hib", "name": "Haemophilus influenzae type b (Hib)", "status": "NOT_NEEDED", "summary": "Not routinely needed for healthy children age 5 and older.", "doses": [{"given": "2019-08-21", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Хіб 1"}], "nextDoses": [], "notes": []}, {"key": "PCV", "name": "Pneumococcal conjugate (PCV)", "status": "NOT_NEEDED", "summary": "Not routinely needed for healthy children age 5 and older.", "doses": [], "nextDoses": [], "notes": []}, {"key": "Polio", "name": "Polio (IPV)", "status": "DUE", "summary": "Needs 1 more dose(s). Next dose is due now.", "doses": [{"given": "2019-08-21", "antigen": "IPV", "valid": true, "reason": "", "sourceText": "ІПВ 1"}, {"given": "2019-10-22", "antigen": "IPV", "valid": true, "reason": "", "sourceText": "ІПВ 2"}, {"given": "2020-01-20", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "ОПВ 3"}], "nextDoses": ["2026-10-26"], "notes": []}, {"key": "MMR", "name": "Measles, mumps, rubella (MMR)", "status": "DUE", "summary": "Needs 1 more dose(s). Next dose is due now.", "doses": [{"given": "2020-06-25", "antigen": "MMR", "valid": true, "reason": "", "sourceText": "КПК 1"}], "nextDoses": ["2026-10-26"], "notes": []}, {"key": "VAR", "name": "Varicella (chickenpox)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2027-01-26"], "notes": ["If the child has had chickenpox, a provider can document this as evidence of immunity instead of vaccination."]}, {"key": "HepA", "name": "Hepatitis A", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2027-04-26"], "notes": []}, {"key": "MenACWY", "name": "Meningococcal ACWY", "status": "NOT_NEEDED", "summary": "Not due until age 11-12.", "doses": [], "nextDoses": [], "notes": []}, {"key": "HPV", "name": "Human papillomavirus (HPV)", "status": "NOT_NEEDED", "summary": "Not due until age 11-12 (may start at age 9).", "doses": [], "nextDoses": [], "notes": ["HPV is recommended but is not required for school entry in most states."]}], "ignored": [{"given": "2019-06-23", "antigen": "BCG", "valid": false, "reason": "BCG is not part of the US schedule; no action needed.", "sourceText": "БЦЖ"}]}, "state": "NY"}, {"record": {"childName": "Nguyen Thi Lan", "dateOfBirth": "2012-11-05", "country": "Vietnam", "language": "Vietnamese", "warnings": [], "entries": [{"originalText": "Viêm gan B sơ sinh", "englishName": "Hepatitis B birth", "antigens": ["HepB"], "date": "2012-11-05", "dateAsWritten": "05/11/2012", "confidence": "high", "notes": ""}, {"originalText": "Lao", "englishName": "BCG", "antigens": ["BCG"], "date": "2012-11-07", "dateAsWritten": "07/11/2012", "confidence": "high", "notes": ""}, {"originalText": "Quinvaxem 1", "englishName": "Pentavalent 1", "antigens": ["DTaP", "HepB", "Hib"], "date": "2013-01-07", "dateAsWritten": "07/01/2013", "confidence": "high", "notes": ""}, {"originalText": "Quinvaxem 2", "englishName": "Pentavalent 2", "antigens": ["DTaP", "HepB", "Hib"], "date": "2013-02-07", "dateAsWritten": "07/02/2013", "confidence": "high", "notes": ""}, {"originalText": "Quinvaxem 3", "englishName": "Pentavalent 3", "antigens": ["DTaP", "HepB", "Hib"], "date": "2013-03-08", "dateAsWritten": "08/03/2013", "confidence": "high", "notes": ""}, {"originalText": "Sởi 1", "englishName": "Measles 1", "antigens": ["Measles"], "date": "2013-08-05", "dateAsWritten": "05/08/2013", "confidence": "high", "notes": ""}, {"originalText": "Sởi-Rubella", "englishName": "MR", "antigens": ["MR"], "date": "2014-05-06", "dateAsWritten": "06/05/2014", "confidence": "high", "notes": ""}, {"originalText": "DPT nhắc lại", "englishName": "DTP booster", "antigens": ["DTaP"], "date": "2014-05-06", "dateAsWritten": "06/05/2014", "confidence": "high", "notes": ""}, {"originalText": "IPV", "englishName": "IPV", "antigens": ["IPV"], "date": "2013-03-08", "dateAsWritten": "08/03/2013", "confidence": "high", "notes": ""}]}, "report": {"dateOfBirth": "2012-11-05", "asOf": "2026-10-26", "series": [{"key": "HepB", "name": "Hepatitis B", "status": "DUE", "summary": "Needs 1 more dose(s). Next dose is due now.", "doses": [{"given": "2012-11-05", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Viêm gan B sơ sinh"}, {"given": "2013-01-07", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "Quinvaxem 1"}, {"given": "2013-02-07", "antigen": "HepB", "valid": false, "reason": "Too soon after the previous dose (Jan 7, 2013); needs at least 8 weeks.", "sourceText": "Quinvaxem 2"}, {"given": "2013-03-08", "antigen": "HepB", "valid": false, "reason": "Given before the minimum age of 24 weeks for the final dose.", "sourceText": "Quinvaxem 3"}], "nextDoses": ["2026-10-26"], "notes": []}, {"key": "RV", "name": "Rotavirus", "status": "NOT_NEEDED", "summary": "Not given after 8 months of age.", "doses": [], "nextDoses": [], "notes": []}, {"key": "DTaP", "name": "Diphtheria, tetanus, pertussis (DTaP / Tdap)", "status": "DUE", "summary": "Needs 1 more dose(s). Next dose is due now.", "doses": [{"given": "2013-01-07", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Quinvaxem 1"}, {"given": "2013-02-07", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Quinvaxem 2"}, {"given": "2013-03-08", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "Quinvaxem 3"}, {"given": "2014-05-06", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "DPT nhắc lại"}], "nextDoses": ["2026-10-26"], "notes": ["At age 7+, catch-up doses are Tdap or Td (not DTaP). The first catch-up dose should be Tdap."]}, {"key": "Hib", "name": "Haemophilus influenzae type b (Hib)", "status": "NOT_NEEDED", "summary": "Not routinely needed for healthy children age 5 and older.", "doses": [{"given": "2013-01-07", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Quinvaxem 1"}, {"given": "2013-02-07", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Quinvaxem 2"}, {"given": "2013-03-08", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "Quinvaxem 3"}], "nextDoses": [], "notes": []}, {"key": "PCV", "name": "Pneumococcal conjugate (PCV)", "status": "NOT_NEEDED", "summary": "Not routinely needed for healthy children age 5 and older.", "doses": [], "nextDoses": [], "notes": []}, {"key": "Polio", "name": "Polio (IPV)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [{"given": "2013-03-08", "antigen": "IPV", "valid": true, "reason": "", "sourceText": "IPV"}], "nextDoses": ["2026-10-26", "2027-04-26"], "notes": []}, {"key": "MMR", "name": "Measles, mumps, rubella (MMR)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [{"given": "2013-08-05", "antigen": "Measles", "valid": false, "reason": "Measles-only or measles-rubella vaccine. The US requires MMR, so this dose is not counted; provider may consider it for measles immunity.", "sourceText": "Sởi 1"}, {"given": "2014-05-06", "antigen": "MR", "valid": false, "reason": "Measles-only or measles-rubella vaccine. The US requires MMR, so this dose is not counted; provider may consider it for measles immunity.", "sourceText": "Sởi-Rubella"}], "nextDoses": ["2026-10-26", "2026-11-23"], "notes": []}, {"key": "VAR", "name": "Varicella (chickenpox)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2026-11-23"], "notes": ["If the child has had chickenpox, a provider can document this as evidence of immunity instead of vaccination."]}, {"key": "HepA", "name": "Hepatitis A", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2027-04-26"], "notes": []}, {"key": "MenACWY", "name": "Meningococcal ACWY", "status": "DUE", "summary": "Needs 1 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2028-11-05"], "notes": ["A booster dose is also due at age 16."]}, {"key": "HPV", "name": "Human papillomavirus (HPV)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2027-04-26"], "notes": ["HPV is recommended but is not required for school entry in most states."]}], "ignored": [{"given": "2012-11-07", "antigen": "BCG", "valid": false, "reason": "BCG is not part of the US schedule; no action needed.", "sourceText": "Lao"}]}, "state": "CA"}, {"record": {"childName": "Ahmad Karimi", "dateOfBirth": "2020-08-12", "country": "Afghanistan", "language": "Dari", "warnings": [], "entries": [{"originalText": "بی سی جی", "englishName": "BCG", "antigens": ["BCG"], "date": "2020-08-12", "dateAsWritten": "12/08/2020", "confidence": "high", "notes": ""}, {"originalText": "پولیو دهنی صفر", "englishName": "OPV birth", "antigens": ["OPV"], "date": "2020-08-12", "dateAsWritten": "12/08/2020", "confidence": "high", "notes": ""}, {"originalText": "پنتا ۱", "englishName": "Pentavalent 1", "antigens": ["DTaP", "HepB", "Hib"], "date": "2020-09-26", "dateAsWritten": "26/09/2020", "confidence": "high", "notes": ""}, {"originalText": "پنتا ۲", "englishName": "Pentavalent 2", "antigens": ["DTaP", "HepB", "Hib"], "date": "2020-10-27", "dateAsWritten": "27/10/2020", "confidence": "low", "notes": "Month could be 10 or 11."}, {"originalText": "سرخکان ۱", "englishName": "Measles 1", "antigens": ["Measles"], "date": "2021-05-15", "dateAsWritten": "15/05/2021", "confidence": "high", "notes": ""}]}, "report": {"dateOfBirth": "2020-08-12", "asOf": "2026-10-26", "series": [{"key": "HepB", "name": "Hepatitis B", "status": "DUE", "summary": "Needs 1 more dose(s). Next dose is due now.", "doses": [{"given": "2020-09-26", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "پنتا ۱"}, {"given": "2020-10-27", "antigen": "HepB", "valid": true, "reason": "", "sourceText": "پنتا ۲"}], "nextDoses": ["2026-10-26"], "notes": []}, {"key": "RV", "name": "Rotavirus", "status": "NOT_NEEDED", "summary": "Not given after 8 months of age.", "doses": [], "nextDoses": [], "notes": []}, {"key": "DTaP", "name": "Diphtheria, tetanus, pertussis (DTaP / Tdap)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [{"given": "2020-09-26", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "پنتا ۱"}, {"given": "2020-10-27", "antigen": "DTaP", "valid": true, "reason": "", "sourceText": "پنتا ۲"}], "nextDoses": ["2026-10-26", "2027-04-26"], "notes": []}, {"key": "Hib", "name": "Haemophilus influenzae type b (Hib)", "status": "NOT_NEEDED", "summary": "Not routinely needed for healthy children age 5 and older.", "doses": [{"given": "2020-09-26", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "پنتا ۱"}, {"given": "2020-10-27", "antigen": "Hib", "valid": true, "reason": "", "sourceText": "پنتا ۲"}], "nextDoses": [], "notes": []}, {"key": "PCV", "name": "Pneumococcal conjugate (PCV)", "status": "NOT_NEEDED", "summary": "Not routinely needed for healthy children age 5 and older.", "doses": [], "nextDoses": [], "notes": []}, {"key": "Polio", "name": "Polio (IPV)", "status": "DUE", "summary": "Needs 3 more dose(s). Next dose is due now.", "doses": [{"given": "2020-08-12", "antigen": "OPV", "valid": false, "reason": "Oral polio given on or after April 1, 2016 was bivalent OPV and does not count toward the US polio series.", "sourceText": "پولیو دهنی صفر"}], "nextDoses": ["2026-10-26", "2026-11-23", "2027-05-23"], "notes": []}, {"key": "MMR", "name": "Measles, mumps, rubella (MMR)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [{"given": "2021-05-15", "antigen": "Measles", "valid": false, "reason": "Measles-only or measles-rubella vaccine. The US requires MMR, so this dose is not counted; provider may consider it for measles immunity.", "sourceText": "سرخکان ۱"}], "nextDoses": ["2026-10-26", "2026-11-23"], "notes": []}, {"key": "VAR", "name": "Varicella (chickenpox)", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2027-01-26"], "notes": ["If the child has had chickenpox, a provider can document this as evidence of immunity instead of vaccination."]}, {"key": "HepA", "name": "Hepatitis A", "status": "DUE", "summary": "Needs 2 more dose(s). Next dose is due now.", "doses": [], "nextDoses": ["2026-10-26", "2027-04-26"], "notes": []}, {"key": "MenACWY", "name": "Meningococcal ACWY", "status": "NOT_NEEDED", "summary": "Not due until age 11-12.", "doses": [], "nextDoses": [], "notes": []}, {"key": "HPV", "name": "Human papillomavirus (HPV)", "status": "NOT_NEEDED", "summary": "Not due until age 11-12 (may start at age 9).", "doses": [], "nextDoses": [], "notes": ["HPV is recommended but is not required for school entry in most states."]}], "ignored": [{"given": "2020-08-12", "antigen": "BCG", "valid": false, "reason": "BCG is not part of the US schedule; no action needed.", "sourceText": "بی سی جی"}]}, "state": "CA"}];
 const previewStore = (() => {
   const memory = {};
   const get = (k, fallback) => {
@@ -1214,6 +1527,22 @@ const previewStore = (() => {
   return { get, set };
 })();
 
+// First visit: a demo account with sample children already saved, so every chart has something to show.
+(() => {
+  if (previewStore.get("vb-demo-v2", false)) return;
+  previewStore.set("vb-demo-v2", true);
+  const users = previewStore.get("vb-users", {});
+  const email = "demo@vaxbridge.app";
+  users[email] = { id: 1, name: "Pat Rivera, RN", email, hash: "", demo: true };
+  previewStore.set("vb-users", users);
+  const start = Date.now();
+  previewStore.set("vb-records:" + email, PREVIEW.demo.map((d, i) => {
+    const at = new Date(start - i * 86400000 * 3).toISOString();
+    return { id: start - i, record: d.record, report: d.report, state: d.state, savedAt: at, updatedAt: at, files: [] };
+  }));
+  previewStore.set("vb-session", email);
+})();
+
 async function previewHash(text) {
   const bytes = new TextEncoder().encode("vaxbridge-preview:" + text);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
@@ -1224,7 +1553,7 @@ function previewSummary(r) {
   const counts = { COMPLETE: 0, DUE: 0, UPCOMING: 0, NOT_NEEDED: 0 };
   const due = [];
   let next = null;
-  for (const s of PREVIEW.report.series) {
+  for (const s of (r.report || PREVIEW.report).series) {
     counts[s.status]++;
     if (s.status === "DUE") due.push(s.name);
     if ((s.status === "DUE" || s.status === "UPCOMING") && s.nextDoses.length && (!next || s.nextDoses[0] < next)) next = s.nextDoses[0];
@@ -1256,7 +1585,7 @@ window.fetch = async (url, options = {}) => {
 
   if (path === "/api/sample") return reply(200, PREVIEW.sample);
   if (path === "/api/antigens") return reply(200, PREVIEW.antigens);
-  if (path === "/api/evaluate") return reply(200, PREVIEW.report);
+  if (path === "/api/evaluate") return reply(200, (PREVIEW.demo.find((x) => x.record.dateOfBirth === body().dateOfBirth) || PREVIEW).report);
   if (path === "/api/extract") return fail(501,
     "Reading photos needs the full app running with an API key. Use Try a sample record to see how it works.");
 
@@ -1275,7 +1604,7 @@ window.fetch = async (url, options = {}) => {
   if (path === "/api/auth/login") {
     const { email: e = "", password = "" } = body();
     const u = users[e.trim().toLowerCase()];
-    if (!u || u.hash !== await previewHash(password)) return fail(401, "Email or password is incorrect.");
+    if (!u || (!u.demo && u.hash !== await previewHash(password))) return fail(401, "Email or password is incorrect.");
     previewStore.set("vb-session", u.email);
     return reply(200, previewInfo(u));
   }
@@ -1354,7 +1683,7 @@ window.fetch = async (url, options = {}) => {
     previewStore.set(key, [...records, saved]);
     return reply(200, previewSummary(saved));
   }
-  if (method === "GET") return reply(200, { summary: previewSummary(found), record: found.record, report: PREVIEW.report, files: found.files });
+  if (method === "GET") return reply(200, { summary: previewSummary(found), record: found.record, report: found.report || PREVIEW.report, files: found.files });
   if (method === "PUT") {
     const state = new URLSearchParams(query).get("state");
     Object.assign(found, { record: body(), updatedAt: now }, state !== null ? { state: state || null } : {});
@@ -1923,6 +2252,57 @@ function initials(name) {
 
 const plural = (n, word, many = word + "s") => `${n} ${n === 1 ? word : many}`;
 
+const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// Counts a number up from 0 when a page opens.
+function countUp(node, value) {
+  if (typeof value !== "number" || value === 0 || reducedMotion()) {
+    node.textContent = value;
+    return;
+  }
+  const start = performance.now();
+  const step = (now) => {
+    const t = Math.min(1, (now - start) / 700);
+    node.textContent = Math.round(value * (1 - Math.pow(1 - t, 3)));
+    if (t < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+// A short message in the corner that goes away by itself.
+function toast(text, kind = "ok") {
+  const node = el("div", { className: `toast ${kind}` }, icon(kind === "error" ? "alert" : "check"), el("span", { textContent: text }));
+  $("toasts").append(node);
+  setTimeout(() => node.classList.add("leaving"), 3200);
+  setTimeout(() => node.remove(), 3600);
+}
+
+// One tooltip for every chart mark with a data-tip attribute.
+const tip = el("div", { className: "chart-tip hidden" });
+document.body.append(tip);
+document.addEventListener("mouseover", (e) => {
+  const target = e.target.closest?.("[data-tip]");
+  if (!target) return tip.classList.add("hidden");
+  tip.textContent = target.dataset.tip;
+  tip.classList.remove("hidden");
+});
+document.addEventListener("mousemove", (e) => {
+  if (tip.classList.contains("hidden")) return;
+  const x = Math.min(e.clientX + 14, window.innerWidth - tip.offsetWidth - 8);
+  tip.style.transform = `translate(${x}px, ${e.clientY + 14}px)`;
+});
+
+function parseIso(iso) {
+  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function daysFromToday(iso) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((parseIso(iso) - today) / 86400000);
+}
+
 // ---- sign in ---------------------------------------------------------------
 
 let creatingAccount = false;
@@ -2021,9 +2401,14 @@ async function loadSummaries() {
   $("alertStrip").classList.toggle("hidden", !due);
 }
 
-function stat(kind, value, label, sub) {
+const STAT_ICON = { plain: "folder", DUE: "alert", UPCOMING: "clock", COMPLETE: "check", NOT_NEEDED: "minus" };
+
+function stat(kind, value, label, sub, iconName = STAT_ICON[kind]) {
+  const number = el("b");
+  countUp(number, value);
   return el("div", { className: `stat ${kind}` },
-    el("b", { textContent: value }), el("p", { className: "label", textContent: label }), el("p", { className: "sub", textContent: sub }));
+    el("span", { className: "stat-icon" }, icon(iconName)),
+    number, el("p", { className: "label", textContent: label }), el("p", { className: "sub", textContent: sub }));
 }
 
 function recordFacts(s) {
@@ -2034,12 +2419,13 @@ function recordFacts(s) {
 
 function renderDashboard() {
   $("today").textContent = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  renderHero();
   const childrenDue = summaries.filter((s) => s.counts.DUE > 0);
   const dosesDue = summaries.reduce((n, s) => n + s.counts.DUE, 0);
   const upToDate = summaries.filter((s) => s.counts.DUE === 0).length;
   $("dashStats").replaceChildren(
-    stat("plain", summaries.length, "Saved records", "children checked"),
-    stat("plain", dosesDue, "Vaccines due now", "across all children"),
+    stat("plain", summaries.length, "Saved records", "children checked", "folder"),
+    stat("plain", dosesDue, "Vaccines due now", "across all children", "syringe"),
     stat("COMPLETE", upToDate, "Up to date", "nothing due today"),
     stat("DUE", childrenDue.length, "Need a visit", "children with doses due"),
   );
@@ -2047,7 +2433,11 @@ function renderDashboard() {
   const empty = summaries.length === 0;
   $("dashEmpty").classList.toggle("hidden", !empty);
   $("dashGrid").classList.toggle("hidden", empty);
+  $("dashCharts").classList.toggle("hidden", empty);
   if (empty) return;
+  renderStatusChart();
+  renderUpcoming();
+  renderCountryChart();
 
   $("recentList").replaceChildren(...summaries.slice(0, 5).map((s) =>
     el("button", { className: "mini-item", onclick: () => openSaved(s.id) },
@@ -2068,6 +2458,101 @@ function renderDashboard() {
         el("p", { className: "sub", textContent: "No saved child has a dose due today." }))]));
 }
 
+// The banner at the top of the dashboard: a greeting, a one-line summary and the next catch-up date.
+function renderHero() {
+  const hour = new Date().getHours();
+  const part = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const first = (user?.name || "").split(/[\s,]+/)[0];
+  $("greeting").textContent = first ? `${part}, ${first}` : part;
+  const dueKids = summaries.filter((s) => s.counts.DUE > 0).length;
+  $("heroSummary").textContent = summaries.length
+    ? `${plural(summaries.length, "child", "children")} saved. ${dueKids ? `${plural(dueKids, "child", "children")} need a catch-up visit.` : "Everyone is caught up for now."}`
+    : "Upload a child's vaccine record from any country to get a catch-up report a provider can check.";
+  const next = summaries.filter((s) => s.nextDose).sort((a, b) => a.nextDose.localeCompare(b.nextDose))[0];
+  $("heroNext").classList.toggle("hidden", !next);
+  if (!next) return;
+  const days = daysFromToday(next.nextDose);
+  $("heroNext").replaceChildren(
+    el("p", { className: "hero-next-label" }, icon("calendar"), "Next catch-up"),
+    el("p", { className: "hero-next-date", textContent: days <= 0 ? "Due now" : formatDate(next.nextDose) }),
+    el("p", { className: "hero-next-who", textContent: next.childName || "Unnamed child" }),
+    el("button", { className: "hero-next-open", onclick: () => openSaved(next.id) }, "Open report ", icon("right")));
+}
+
+// Ring chart: every vaccine for every saved child, by status.
+const STATUS_COLOR = { DUE: "var(--due)", UPCOMING: "var(--soon)", COMPLETE: "var(--ok)", NOT_NEEDED: "var(--off)" };
+
+function renderStatusChart() {
+  const totals = Object.fromEntries(Object.keys(STATUS).map((k) => [k, summaries.reduce((n, s) => n + (s.counts[k] || 0), 0)]));
+  const all = Object.values(totals).reduce((a, b) => a + b, 0);
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 120 120");
+  svg.setAttribute("class", "donut");
+  const r = 48, length = 2 * Math.PI * r, gap = all > 1 ? 2 : 0;
+  let offset = 0;
+  const track = document.createElementNS(ns, "circle");
+  Object.entries({ cx: 60, cy: 60, r, class: "donut-track" }).forEach(([k, v]) => track.setAttribute(k, v));
+  svg.append(track);
+  for (const [k, n] of Object.entries(totals)) {
+    if (!n) continue;
+    const arc = document.createElementNS(ns, "circle");
+    const size = (n / all) * length;
+    Object.entries({ cx: 60, cy: 60, r, class: "donut-seg", stroke: STATUS_COLOR[k],
+      "stroke-dasharray": `${Math.max(size - gap, 0.5)} ${length}`, "stroke-dashoffset": -offset })
+      .forEach(([a, v]) => arc.setAttribute(a, v));
+    arc.dataset.tip = `${STATUS[k].stat}: ${plural(n, "vaccine")} (${Math.round((n / all) * 100)}%)`;
+    svg.append(arc);
+    offset += size;
+  }
+  const onTrack = all ? Math.round(((all - totals.DUE) / all) * 100) : 0;
+  const center = el("div", { className: "donut-center" }, el("b", { textContent: `${onTrack}%` }), el("span", { textContent: "on track" }));
+  const legend = el("ul", { className: "legend" }, ...Object.keys(STATUS).map((k) => el("li", {},
+    el("i", { style: `background: ${STATUS_COLOR[k]}` }),
+    el("span", { className: "grow", textContent: STATUS[k].stat }),
+    el("b", { textContent: totals[k] }))));
+  $("statusChart").replaceChildren(el("div", { className: "donut-box" }, svg, center), legend);
+}
+
+// The earliest catch-up date for each child, soonest first.
+function renderUpcoming() {
+  const soon = summaries.filter((s) => s.nextDose && daysFromToday(s.nextDose) <= 90)
+    .sort((a, b) => a.nextDose.localeCompare(b.nextDose)).slice(0, 6);
+  $("upcomingList").replaceChildren(...(soon.length
+    ? soon.map((s) => {
+        const days = daysFromToday(s.nextDose);
+        const when = days <= 0 ? "Due now" : days === 1 ? "Tomorrow" : `In ${days} days`;
+        const date = parseIso(s.nextDose);
+        return el("button", { className: `up-item ${days <= 0 ? "DUE" : ""}`, onclick: () => openSaved(s.id) },
+          el("div", { className: "cal" },
+            el("span", { textContent: date.toLocaleDateString("en-US", { month: "short" }) }),
+            el("b", { textContent: date.getDate() })),
+          el("div", { className: "grow" },
+            el("p", { className: "strong", textContent: s.childName || "Unnamed child" }),
+            el("p", { className: "sub", textContent: s.dueVaccines.length ? s.dueVaccines.join(", ") : "Next dose in the series" })),
+          el("span", { className: "when", textContent: when }));
+      })
+    : [el("div", { className: "mini-empty" }, icon("check"),
+        el("p", { className: "strong", textContent: "Nothing in the next 90 days" }),
+        el("p", { className: "sub", textContent: "No saved child has a catch-up date coming up soon." }))]));
+}
+
+// Bar chart: how many saved records come from each country.
+function renderCountryChart() {
+  const byCountry = {};
+  summaries.forEach((s) => { const c = s.country || "Unknown"; byCountry[c] = (byCountry[c] || 0) + 1; });
+  let rows = Object.entries(byCountry).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  if (rows.length > 6) rows = [...rows.slice(0, 5), ["Other", rows.slice(5).reduce((n, r) => n + r[1], 0)]];
+  const max = Math.max(...rows.map((r) => r[1]));
+  $("countryChart").replaceChildren(...rows.map(([c, n]) => el("div", { className: "bar-row" },
+    el("span", { className: "bar-label", textContent: c }),
+    el("div", { className: "bar-track" }, Object.assign(el("div", { className: "bar" }), { style: `--w: ${(n / max) * 100}%` })),
+    el("b", { textContent: n }))));
+  for (const [i, row] of [...$("countryChart").children].entries()) {
+    row.dataset.tip = `${rows[i][0]}: ${plural(rows[i][1], "record")}`;
+  }
+}
+
 let recordFilter = "all";
 for (const btn of $("recordFilters").children) {
   btn.addEventListener("click", () => {
@@ -2077,12 +2562,49 @@ for (const btn of $("recordFilters").children) {
   });
 }
 $("recordSearch").addEventListener("input", renderRecords);
+$("recordSort").addEventListener("change", renderRecords);
+
+let recordLayout = "grid";
+try { recordLayout = localStorage.getItem("vaxbridge.layout") || "grid"; } catch {}
+for (const btn of $("recordView").children) {
+  btn.addEventListener("click", () => {
+    recordLayout = btn.dataset.layout;
+    try { localStorage.setItem("vaxbridge.layout", recordLayout); } catch {}
+    renderRecords();
+  });
+}
+
+const SORTS = {
+  updated: (a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""),
+  name: (a, b) => (a.childName || "").localeCompare(b.childName || ""),
+  due: (a, b) => b.counts.DUE - a.counts.DUE || (a.childName || "").localeCompare(b.childName || ""),
+  next: (a, b) => (a.nextDose || "9999").localeCompare(b.nextDose || "9999"),
+};
+
+function recordTable(rows) {
+  const cell = (text, className = "") => el("span", { className, textContent: text });
+  return [el("div", { className: "rt-row rt-head" },
+      cell("Child"), cell("Country", "hide-sm"), cell("Born", "hide-sm"), cell("Due now"), cell("Next dose", "hide-sm"), cell("Saved", "hide-sm")),
+    ...rows.map((s) => el("button", { className: "rt-row", onclick: () => openSaved(s.id) },
+      el("span", { className: "rt-name" }, el("span", { className: "avatar sm", textContent: initials(s.childName || "?") }), s.childName || "Unnamed child"),
+      cell(s.country || "—", "hide-sm"),
+      cell(formatDate(s.dateOfBirth), "hide-sm mono"),
+      s.counts.DUE ? el("span", {}, el("span", { className: "pill DUE" }, icon("alert"), `${s.counts.DUE} due`))
+        : el("span", {}, el("span", { className: "pill COMPLETE" }, icon("check"), "None")),
+      cell(s.nextDose ? formatDate(s.nextDose) : "—", "hide-sm mono"),
+      cell(formatInstant(s.updatedAt), "hide-sm mono")))];
+}
 
 function renderRecords() {
   const q = $("recordSearch").value.trim().toLowerCase();
   const shown = summaries
     .filter((s) => recordFilter === "all" || (recordFilter === "due") === (s.counts.DUE > 0))
-    .filter((s) => !q || `${s.childName} ${s.country}`.toLowerCase().includes(q));
+    .filter((s) => !q || `${s.childName} ${s.country}`.toLowerCase().includes(q))
+    .sort(SORTS[$("recordSort").value]);
+  for (const b of $("recordView").children) b.classList.toggle("active", b.dataset.layout === recordLayout);
+  $("recordGrid").classList.toggle("hidden", recordLayout !== "grid");
+  $("recordTable").classList.toggle("hidden", recordLayout !== "table" || !shown.length);
+  $("recordTable").replaceChildren(...(recordLayout === "table" ? recordTable(shown) : []));
   $("recordsSub").textContent = plural(summaries.length, "record") + " saved to your account";
   $("recordGrid").replaceChildren(...shown.map((s) => el("button", { className: "record-card", onclick: () => openSaved(s.id) },
     el("div", { className: "top" },
@@ -2335,6 +2857,7 @@ function showReport(report) {
   const order = { DUE: 0, UPCOMING: 1, COMPLETE: 2, NOT_NEEDED: 3 };
   const sorted = [...report.series].sort((a, b) => order[a.status] - order[b.status]);
   $("seriesList").replaceChildren(...sorted.map(seriesRow));
+  renderTimeline(report, sorted);
 
   $("ignoredList").replaceChildren();
   if (report.ignored.length) {
@@ -2363,7 +2886,7 @@ function seriesRow(s) {
   }
 
   const row = el("div", { className: "series" }, el("div", { className: "series-main" },
-    el("div", {}, el("h3", { textContent: s.name }), el("p", { className: "summary", textContent: s.summary })),
+    el("div", {}, el("h3", { textContent: s.name }), el("p", { className: "summary", textContent: s.summary }), seriesProgress(s)),
     next,
     el("div", {}, statusPill(s.status))));
 
@@ -2381,6 +2904,65 @@ function seriesRow(s) {
     row.append(el("ul", { className: "notes" }, ...s.notes.map((n) => el("li", { textContent: n }))));
   }
   return row;
+}
+
+// "2 of 4 doses": valid doses on the record against valid doses plus the doses still planned.
+function seriesProgress(s) {
+  const valid = s.doses.filter((d) => d.valid).length;
+  const total = valid + (s.status === "COMPLETE" ? 0 : s.nextDoses.length);
+  if (!total || s.status === "NOT_NEEDED") return "";
+  return el("div", { className: `progress ${s.status}` },
+    el("div", { className: "progress-track" }, Object.assign(el("div", { className: "progress-fill" }), { style: `--w: ${(valid / total) * 100}%` })),
+    el("span", { textContent: `${valid} of ${plural(total, "dose")}` }));
+}
+
+// Every dose on the record and every catch-up dose still planned, on one line per vaccine from birth onward.
+function renderTimeline(report, series) {
+  const rows = series.filter((s) => s.doses.length || (s.status !== "COMPLETE" && s.nextDoses.length));
+  const box = $("timeline");
+  box.classList.toggle("hidden", !rows.length || !report.dateOfBirth);
+  if (!rows.length || !report.dateOfBirth) return box.replaceChildren();
+
+  const birth = parseIso(report.dateOfBirth);
+  const asOf = parseIso(report.asOf);
+  const dates = rows.flatMap((s) => [...s.doses.map((d) => d.given), ...(s.status === "COMPLETE" ? [] : s.nextDoses)]).filter(Boolean).map(parseIso);
+  const end = new Date(Math.max(asOf, ...dates));
+  end.setMonth(end.getMonth() + 3);
+  const span = end - birth || 1;
+  const at = (date) => `${Math.min(100, Math.max(0, ((date - birth) / span) * 100))}%`;
+
+  // Age marks along the bottom: every year, or every few years for older children.
+  const years = span / (365.25 * 86400000);
+  const every = years <= 8 ? 1 : years <= 16 ? 2 : 4;
+  const ticks = [];
+  for (let y = 0; y <= years; y += every) {
+    const d = new Date(birth);
+    d.setFullYear(birth.getFullYear() + y);
+    ticks.push(el("span", { className: "tick", style: `left: ${at(d)}`, textContent: y === 0 ? "Birth" : `${y}y` }));
+  }
+
+  const mark = (kind, iso, label) => {
+    const node = el("span", { className: `mark ${kind}`, style: `left: ${at(parseIso(iso))}` });
+    node.dataset.tip = label;
+    return node;
+  };
+  const lines = rows.map((s) => el("div", { className: "tl-row" },
+    el("span", { className: "tl-name", textContent: s.name }),
+    el("div", { className: "tl-track" },
+      el("span", { className: "today", style: `left: ${at(asOf)}` }),
+      ...s.doses.map((d) => mark(d.valid ? "given" : "invalid", d.given,
+        `${s.name}: ${d.sourceText || d.antigen}, ${formatDate(d.given)}${d.valid ? "" : ` (doesn't count: ${d.reason})`}`)),
+      ...(s.status === "COMPLETE" ? [] : s.nextDoses.map((d, i) => mark("planned", d, `${s.name}: catch-up dose ${i + 1}, on or after ${formatDate(d)}`))))));
+
+  box.replaceChildren(
+    el("div", { className: "card-row" },
+      el("p", { className: "card-title" }, icon("activity"), "Vaccine timeline"),
+      el("ul", { className: "tl-legend" },
+        el("li", {}, el("span", { className: "mark given" }), "Dose on record"),
+        el("li", {}, el("span", { className: "mark invalid" }), "Doesn't count"),
+        el("li", {}, el("span", { className: "mark planned" }), "Catch-up (earliest)"),
+        el("li", {}, el("span", { className: "today-key" }), "Today"))),
+    el("div", { className: "tl" }, ...lines, el("div", { className: "tl-row tl-axis" }, el("span"), el("div", { className: "tl-ticks" }, ...ticks))));
 }
 
 // Thumbnails of the original photos, from this upload or from the saved record.
@@ -2425,7 +3007,8 @@ $("saveBtn").addEventListener("click", async () => {
     current.dirty = false;
     await loadSummaries();
     renderFiles();
-    setStatus($("saveStatus"), "Saved. You can find it any time under Saved records.");
+    setStatus($("saveStatus"), "");
+    toast("Saved. You can find it any time under Saved records.");
   } catch (err) {
     setStatus($("saveStatus"), err.message, true);
   }
@@ -2447,6 +3030,7 @@ $("deleteBtn").addEventListener("click", async () => {
     $("report").classList.remove("open");
     await loadSummaries();
     show("records");
+    toast("Record deleted.");
   } catch (err) {
     setStatus($("saveStatus"), err.message, true);
   }
@@ -2580,7 +3164,7 @@ $("profileForm").addEventListener("submit", async (e) => {
     user = await postJson("/api/account", { name: $("profileName").value, email: $("profileEmail").value }, "PUT");
     renderUser();
     renderSettings();
-    setStatus($("profileStatus"), "Profile saved.");
+    toast("Profile saved.");
   } catch (err) {
     setStatus($("profileStatus"), err.message, true);
   }
@@ -2602,7 +3186,7 @@ $("avatarInput").addEventListener("change", async (e) => {
     avatarVersion = Date.now();
     renderUser();
     renderSettings();
-    setStatus($("profileStatus"), "Picture updated.");
+    toast("Picture updated.");
   } catch (err) {
     setStatus($("profileStatus"), err.message, true);
   }
@@ -2624,7 +3208,8 @@ $("passwordForm").addEventListener("submit", async (e) => {
       { currentPassword: $("currentPassword").value, newPassword: $("newPassword").value }, "PUT");
     $("currentPassword").value = "";
     $("newPassword").value = "";
-    setStatus($("passwordStatus"), "Password changed.");
+    setStatus($("passwordStatus"), "");
+    toast("Password changed.");
   } catch (err) {
     setStatus($("passwordStatus"), err.message, true);
   }
@@ -2805,6 +3390,7 @@ function exportAs(kind) {
   if (kind === "hl7") download(`${fileBase()}.hl7`, buildHl7(record, state), "application/hl7-v2");
   if (kind === "fhir") download(`${fileBase()}.fhir.json`, buildFhir(record), "application/fhir+json");
   if (kind === "csv") download(`${fileBase()}.csv`, buildCsv(record), "text/csv");
+  toast(`Downloaded the ${state.name} ${kind === "form" ? "school form" : kind.toUpperCase()} file.`);
   setStatus($("exportStatus"), `Downloaded. ${exportDoses(record).length} doses for ${state.name}. Check it against the original before anyone uses it.`);
 }
 
@@ -2814,6 +3400,84 @@ for (const btn of document.querySelectorAll("[data-export]")) {
 $("formActionBtn").addEventListener("click", () => {
   if (chosenState()) exportAs(current.format);
   else $("stateSection").scrollIntoView({ behavior: "smooth" });
+});
+
+// ---- quick search (Ctrl+K) -------------------------------------------------
+
+const PAGES = [
+  ["dashboard", "Dashboard", "activity"], ["records", "Saved records", "folder"], ["upload", "Upload record", "upload"],
+  ["review", "Review entries", "list"], ["report", "Report", "file"], ["settings", "Settings", "settings"], ["help", "Help", "help"],
+];
+let paletteItems = [];
+let paletteIndex = 0;
+
+function openPalette() {
+  if (!user) return;
+  $("palette").classList.remove("hidden");
+  $("paletteInput").value = "";
+  renderPalette();
+  $("paletteInput").focus();
+}
+
+function closePalette() {
+  $("palette").classList.add("hidden");
+}
+
+function renderPalette() {
+  const q = $("paletteInput").value.trim().toLowerCase();
+  const records = summaries.filter((s) => !q || `${s.childName} ${s.country}`.toLowerCase().includes(q)).slice(0, 6)
+    .map((s) => ({ group: "Records", label: s.childName || "Unnamed child", sub: [s.country, s.counts.DUE ? `${s.counts.DUE} due now` : "up to date"].filter(Boolean).join(" · "),
+      icon: s.counts.DUE ? "alert" : "file", run: () => openSaved(s.id) }));
+  const pages = PAGES.filter(([, label]) => !q || label.toLowerCase().includes(q))
+    .map(([view, label, ic]) => ({ group: "Pages", label, sub: "", icon: ic, run: () => (view === "upload" ? startNewRecord() : show(view)) }));
+  const actions = [{ group: "Actions", label: "Upload a new record", sub: "", icon: "plus", run: startNewRecord }]
+    .filter((a) => !q || a.label.toLowerCase().includes(q));
+  paletteItems = [...records, ...pages, ...actions];
+  paletteIndex = Math.min(paletteIndex, Math.max(paletteItems.length - 1, 0));
+  let group = "";
+  const nodes = [];
+  paletteItems.forEach((item, i) => {
+    if (item.group !== group) nodes.push(el("p", { className: "palette-group", textContent: (group = item.group) }));
+    nodes.push(el("button", { className: `palette-item ${i === paletteIndex ? "active" : ""}`, onmouseenter: () => { paletteIndex = i; highlightPalette(); },
+      onclick: () => runPalette(i) },
+      icon(item.icon), el("span", { className: "grow", textContent: item.label }), el("span", { className: "sub", textContent: item.sub })));
+  });
+  if (!nodes.length) nodes.push(el("p", { className: "palette-empty sub", textContent: "Nothing matches." }));
+  $("paletteList").replaceChildren(...nodes);
+}
+
+function highlightPalette() {
+  [...$("paletteList").querySelectorAll(".palette-item")].forEach((b, i) => {
+    b.classList.toggle("active", i === paletteIndex);
+    if (i === paletteIndex) b.scrollIntoView({ block: "nearest" });
+  });
+}
+
+function runPalette(i) {
+  const item = paletteItems[i];
+  closePalette();
+  item?.run();
+}
+
+$("searchBtn").addEventListener("click", openPalette);
+document.addEventListener("click", (e) => { if (e.target.closest("[data-palette]")) openPalette(); });
+$("paletteInput").addEventListener("input", () => { paletteIndex = 0; renderPalette(); });
+$("palette").addEventListener("click", (e) => { if (e.target === $("palette")) closePalette(); });
+document.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+    e.preventDefault();
+    $("palette").classList.contains("hidden") ? openPalette() : closePalette();
+    return;
+  }
+  if ($("palette").classList.contains("hidden")) return;
+  if (e.key === "Escape") closePalette();
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    const n = paletteItems.length;
+    if (n) paletteIndex = (paletteIndex + (e.key === "ArrowDown" ? 1 : n - 1)) % n;
+    highlightPalette();
+  }
+  if (e.key === "Enter") { e.preventDefault(); runPalette(paletteIndex); }
 });
 
 // ---- start -----------------------------------------------------------------

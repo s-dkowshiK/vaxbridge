@@ -97,6 +97,57 @@ function initials(name) {
 
 const plural = (n, word, many = word + "s") => `${n} ${n === 1 ? word : many}`;
 
+const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// Counts a number up from 0 when a page opens.
+function countUp(node, value) {
+  if (typeof value !== "number" || value === 0 || reducedMotion()) {
+    node.textContent = value;
+    return;
+  }
+  const start = performance.now();
+  const step = (now) => {
+    const t = Math.min(1, (now - start) / 700);
+    node.textContent = Math.round(value * (1 - Math.pow(1 - t, 3)));
+    if (t < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+// A short message in the corner that goes away by itself.
+function toast(text, kind = "ok") {
+  const node = el("div", { className: `toast ${kind}` }, icon(kind === "error" ? "alert" : "check"), el("span", { textContent: text }));
+  $("toasts").append(node);
+  setTimeout(() => node.classList.add("leaving"), 3200);
+  setTimeout(() => node.remove(), 3600);
+}
+
+// One tooltip for every chart mark with a data-tip attribute.
+const tip = el("div", { className: "chart-tip hidden" });
+document.body.append(tip);
+document.addEventListener("mouseover", (e) => {
+  const target = e.target.closest?.("[data-tip]");
+  if (!target) return tip.classList.add("hidden");
+  tip.textContent = target.dataset.tip;
+  tip.classList.remove("hidden");
+});
+document.addEventListener("mousemove", (e) => {
+  if (tip.classList.contains("hidden")) return;
+  const x = Math.min(e.clientX + 14, window.innerWidth - tip.offsetWidth - 8);
+  tip.style.transform = `translate(${x}px, ${e.clientY + 14}px)`;
+});
+
+function parseIso(iso) {
+  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function daysFromToday(iso) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((parseIso(iso) - today) / 86400000);
+}
+
 // ---- sign in ---------------------------------------------------------------
 
 let creatingAccount = false;
@@ -195,9 +246,14 @@ async function loadSummaries() {
   $("alertStrip").classList.toggle("hidden", !due);
 }
 
-function stat(kind, value, label, sub) {
+const STAT_ICON = { plain: "folder", DUE: "alert", UPCOMING: "clock", COMPLETE: "check", NOT_NEEDED: "minus" };
+
+function stat(kind, value, label, sub, iconName = STAT_ICON[kind]) {
+  const number = el("b");
+  countUp(number, value);
   return el("div", { className: `stat ${kind}` },
-    el("b", { textContent: value }), el("p", { className: "label", textContent: label }), el("p", { className: "sub", textContent: sub }));
+    el("span", { className: "stat-icon" }, icon(iconName)),
+    number, el("p", { className: "label", textContent: label }), el("p", { className: "sub", textContent: sub }));
 }
 
 function recordFacts(s) {
@@ -208,12 +264,13 @@ function recordFacts(s) {
 
 function renderDashboard() {
   $("today").textContent = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  renderHero();
   const childrenDue = summaries.filter((s) => s.counts.DUE > 0);
   const dosesDue = summaries.reduce((n, s) => n + s.counts.DUE, 0);
   const upToDate = summaries.filter((s) => s.counts.DUE === 0).length;
   $("dashStats").replaceChildren(
-    stat("plain", summaries.length, "Saved records", "children checked"),
-    stat("plain", dosesDue, "Vaccines due now", "across all children"),
+    stat("plain", summaries.length, "Saved records", "children checked", "folder"),
+    stat("plain", dosesDue, "Vaccines due now", "across all children", "syringe"),
     stat("COMPLETE", upToDate, "Up to date", "nothing due today"),
     stat("DUE", childrenDue.length, "Need a visit", "children with doses due"),
   );
@@ -221,7 +278,11 @@ function renderDashboard() {
   const empty = summaries.length === 0;
   $("dashEmpty").classList.toggle("hidden", !empty);
   $("dashGrid").classList.toggle("hidden", empty);
+  $("dashCharts").classList.toggle("hidden", empty);
   if (empty) return;
+  renderStatusChart();
+  renderUpcoming();
+  renderCountryChart();
 
   $("recentList").replaceChildren(...summaries.slice(0, 5).map((s) =>
     el("button", { className: "mini-item", onclick: () => openSaved(s.id) },
@@ -242,6 +303,101 @@ function renderDashboard() {
         el("p", { className: "sub", textContent: "No saved child has a dose due today." }))]));
 }
 
+// The banner at the top of the dashboard: a greeting, a one-line summary and the next catch-up date.
+function renderHero() {
+  const hour = new Date().getHours();
+  const part = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const first = (user?.name || "").split(/[\s,]+/)[0];
+  $("greeting").textContent = first ? `${part}, ${first}` : part;
+  const dueKids = summaries.filter((s) => s.counts.DUE > 0).length;
+  $("heroSummary").textContent = summaries.length
+    ? `${plural(summaries.length, "child", "children")} saved. ${dueKids ? `${plural(dueKids, "child", "children")} need a catch-up visit.` : "Everyone is caught up for now."}`
+    : "Upload a child's vaccine record from any country to get a catch-up report a provider can check.";
+  const next = summaries.filter((s) => s.nextDose).sort((a, b) => a.nextDose.localeCompare(b.nextDose))[0];
+  $("heroNext").classList.toggle("hidden", !next);
+  if (!next) return;
+  const days = daysFromToday(next.nextDose);
+  $("heroNext").replaceChildren(
+    el("p", { className: "hero-next-label" }, icon("calendar"), "Next catch-up"),
+    el("p", { className: "hero-next-date", textContent: days <= 0 ? "Due now" : formatDate(next.nextDose) }),
+    el("p", { className: "hero-next-who", textContent: next.childName || "Unnamed child" }),
+    el("button", { className: "hero-next-open", onclick: () => openSaved(next.id) }, "Open report ", icon("right")));
+}
+
+// Ring chart: every vaccine for every saved child, by status.
+const STATUS_COLOR = { DUE: "var(--due)", UPCOMING: "var(--soon)", COMPLETE: "var(--ok)", NOT_NEEDED: "var(--off)" };
+
+function renderStatusChart() {
+  const totals = Object.fromEntries(Object.keys(STATUS).map((k) => [k, summaries.reduce((n, s) => n + (s.counts[k] || 0), 0)]));
+  const all = Object.values(totals).reduce((a, b) => a + b, 0);
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 120 120");
+  svg.setAttribute("class", "donut");
+  const r = 48, length = 2 * Math.PI * r, gap = all > 1 ? 2 : 0;
+  let offset = 0;
+  const track = document.createElementNS(ns, "circle");
+  Object.entries({ cx: 60, cy: 60, r, class: "donut-track" }).forEach(([k, v]) => track.setAttribute(k, v));
+  svg.append(track);
+  for (const [k, n] of Object.entries(totals)) {
+    if (!n) continue;
+    const arc = document.createElementNS(ns, "circle");
+    const size = (n / all) * length;
+    Object.entries({ cx: 60, cy: 60, r, class: "donut-seg", stroke: STATUS_COLOR[k],
+      "stroke-dasharray": `${Math.max(size - gap, 0.5)} ${length}`, "stroke-dashoffset": -offset })
+      .forEach(([a, v]) => arc.setAttribute(a, v));
+    arc.dataset.tip = `${STATUS[k].stat}: ${plural(n, "vaccine")} (${Math.round((n / all) * 100)}%)`;
+    svg.append(arc);
+    offset += size;
+  }
+  const onTrack = all ? Math.round(((all - totals.DUE) / all) * 100) : 0;
+  const center = el("div", { className: "donut-center" }, el("b", { textContent: `${onTrack}%` }), el("span", { textContent: "on track" }));
+  const legend = el("ul", { className: "legend" }, ...Object.keys(STATUS).map((k) => el("li", {},
+    el("i", { style: `background: ${STATUS_COLOR[k]}` }),
+    el("span", { className: "grow", textContent: STATUS[k].stat }),
+    el("b", { textContent: totals[k] }))));
+  $("statusChart").replaceChildren(el("div", { className: "donut-box" }, svg, center), legend);
+}
+
+// The earliest catch-up date for each child, soonest first.
+function renderUpcoming() {
+  const soon = summaries.filter((s) => s.nextDose && daysFromToday(s.nextDose) <= 90)
+    .sort((a, b) => a.nextDose.localeCompare(b.nextDose)).slice(0, 6);
+  $("upcomingList").replaceChildren(...(soon.length
+    ? soon.map((s) => {
+        const days = daysFromToday(s.nextDose);
+        const when = days <= 0 ? "Due now" : days === 1 ? "Tomorrow" : `In ${days} days`;
+        const date = parseIso(s.nextDose);
+        return el("button", { className: `up-item ${days <= 0 ? "DUE" : ""}`, onclick: () => openSaved(s.id) },
+          el("div", { className: "cal" },
+            el("span", { textContent: date.toLocaleDateString("en-US", { month: "short" }) }),
+            el("b", { textContent: date.getDate() })),
+          el("div", { className: "grow" },
+            el("p", { className: "strong", textContent: s.childName || "Unnamed child" }),
+            el("p", { className: "sub", textContent: s.dueVaccines.length ? s.dueVaccines.join(", ") : "Next dose in the series" })),
+          el("span", { className: "when", textContent: when }));
+      })
+    : [el("div", { className: "mini-empty" }, icon("check"),
+        el("p", { className: "strong", textContent: "Nothing in the next 90 days" }),
+        el("p", { className: "sub", textContent: "No saved child has a catch-up date coming up soon." }))]));
+}
+
+// Bar chart: how many saved records come from each country.
+function renderCountryChart() {
+  const byCountry = {};
+  summaries.forEach((s) => { const c = s.country || "Unknown"; byCountry[c] = (byCountry[c] || 0) + 1; });
+  let rows = Object.entries(byCountry).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  if (rows.length > 6) rows = [...rows.slice(0, 5), ["Other", rows.slice(5).reduce((n, r) => n + r[1], 0)]];
+  const max = Math.max(...rows.map((r) => r[1]));
+  $("countryChart").replaceChildren(...rows.map(([c, n]) => el("div", { className: "bar-row" },
+    el("span", { className: "bar-label", textContent: c }),
+    el("div", { className: "bar-track" }, Object.assign(el("div", { className: "bar" }), { style: `--w: ${(n / max) * 100}%` })),
+    el("b", { textContent: n }))));
+  for (const [i, row] of [...$("countryChart").children].entries()) {
+    row.dataset.tip = `${rows[i][0]}: ${plural(rows[i][1], "record")}`;
+  }
+}
+
 let recordFilter = "all";
 for (const btn of $("recordFilters").children) {
   btn.addEventListener("click", () => {
@@ -251,12 +407,49 @@ for (const btn of $("recordFilters").children) {
   });
 }
 $("recordSearch").addEventListener("input", renderRecords);
+$("recordSort").addEventListener("change", renderRecords);
+
+let recordLayout = "grid";
+try { recordLayout = localStorage.getItem("vaxbridge.layout") || "grid"; } catch {}
+for (const btn of $("recordView").children) {
+  btn.addEventListener("click", () => {
+    recordLayout = btn.dataset.layout;
+    try { localStorage.setItem("vaxbridge.layout", recordLayout); } catch {}
+    renderRecords();
+  });
+}
+
+const SORTS = {
+  updated: (a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""),
+  name: (a, b) => (a.childName || "").localeCompare(b.childName || ""),
+  due: (a, b) => b.counts.DUE - a.counts.DUE || (a.childName || "").localeCompare(b.childName || ""),
+  next: (a, b) => (a.nextDose || "9999").localeCompare(b.nextDose || "9999"),
+};
+
+function recordTable(rows) {
+  const cell = (text, className = "") => el("span", { className, textContent: text });
+  return [el("div", { className: "rt-row rt-head" },
+      cell("Child"), cell("Country", "hide-sm"), cell("Born", "hide-sm"), cell("Due now"), cell("Next dose", "hide-sm"), cell("Saved", "hide-sm")),
+    ...rows.map((s) => el("button", { className: "rt-row", onclick: () => openSaved(s.id) },
+      el("span", { className: "rt-name" }, el("span", { className: "avatar sm", textContent: initials(s.childName || "?") }), s.childName || "Unnamed child"),
+      cell(s.country || "—", "hide-sm"),
+      cell(formatDate(s.dateOfBirth), "hide-sm mono"),
+      s.counts.DUE ? el("span", {}, el("span", { className: "pill DUE" }, icon("alert"), `${s.counts.DUE} due`))
+        : el("span", {}, el("span", { className: "pill COMPLETE" }, icon("check"), "None")),
+      cell(s.nextDose ? formatDate(s.nextDose) : "—", "hide-sm mono"),
+      cell(formatInstant(s.updatedAt), "hide-sm mono")))];
+}
 
 function renderRecords() {
   const q = $("recordSearch").value.trim().toLowerCase();
   const shown = summaries
     .filter((s) => recordFilter === "all" || (recordFilter === "due") === (s.counts.DUE > 0))
-    .filter((s) => !q || `${s.childName} ${s.country}`.toLowerCase().includes(q));
+    .filter((s) => !q || `${s.childName} ${s.country}`.toLowerCase().includes(q))
+    .sort(SORTS[$("recordSort").value]);
+  for (const b of $("recordView").children) b.classList.toggle("active", b.dataset.layout === recordLayout);
+  $("recordGrid").classList.toggle("hidden", recordLayout !== "grid");
+  $("recordTable").classList.toggle("hidden", recordLayout !== "table" || !shown.length);
+  $("recordTable").replaceChildren(...(recordLayout === "table" ? recordTable(shown) : []));
   $("recordsSub").textContent = plural(summaries.length, "record") + " saved to your account";
   $("recordGrid").replaceChildren(...shown.map((s) => el("button", { className: "record-card", onclick: () => openSaved(s.id) },
     el("div", { className: "top" },
@@ -509,6 +702,7 @@ function showReport(report) {
   const order = { DUE: 0, UPCOMING: 1, COMPLETE: 2, NOT_NEEDED: 3 };
   const sorted = [...report.series].sort((a, b) => order[a.status] - order[b.status]);
   $("seriesList").replaceChildren(...sorted.map(seriesRow));
+  renderTimeline(report, sorted);
 
   $("ignoredList").replaceChildren();
   if (report.ignored.length) {
@@ -537,7 +731,7 @@ function seriesRow(s) {
   }
 
   const row = el("div", { className: "series" }, el("div", { className: "series-main" },
-    el("div", {}, el("h3", { textContent: s.name }), el("p", { className: "summary", textContent: s.summary })),
+    el("div", {}, el("h3", { textContent: s.name }), el("p", { className: "summary", textContent: s.summary }), seriesProgress(s)),
     next,
     el("div", {}, statusPill(s.status))));
 
@@ -555,6 +749,65 @@ function seriesRow(s) {
     row.append(el("ul", { className: "notes" }, ...s.notes.map((n) => el("li", { textContent: n }))));
   }
   return row;
+}
+
+// "2 of 4 doses": valid doses on the record against valid doses plus the doses still planned.
+function seriesProgress(s) {
+  const valid = s.doses.filter((d) => d.valid).length;
+  const total = valid + (s.status === "COMPLETE" ? 0 : s.nextDoses.length);
+  if (!total || s.status === "NOT_NEEDED") return "";
+  return el("div", { className: `progress ${s.status}` },
+    el("div", { className: "progress-track" }, Object.assign(el("div", { className: "progress-fill" }), { style: `--w: ${(valid / total) * 100}%` })),
+    el("span", { textContent: `${valid} of ${plural(total, "dose")}` }));
+}
+
+// Every dose on the record and every catch-up dose still planned, on one line per vaccine from birth onward.
+function renderTimeline(report, series) {
+  const rows = series.filter((s) => s.doses.length || (s.status !== "COMPLETE" && s.nextDoses.length));
+  const box = $("timeline");
+  box.classList.toggle("hidden", !rows.length || !report.dateOfBirth);
+  if (!rows.length || !report.dateOfBirth) return box.replaceChildren();
+
+  const birth = parseIso(report.dateOfBirth);
+  const asOf = parseIso(report.asOf);
+  const dates = rows.flatMap((s) => [...s.doses.map((d) => d.given), ...(s.status === "COMPLETE" ? [] : s.nextDoses)]).filter(Boolean).map(parseIso);
+  const end = new Date(Math.max(asOf, ...dates));
+  end.setMonth(end.getMonth() + 3);
+  const span = end - birth || 1;
+  const at = (date) => `${Math.min(100, Math.max(0, ((date - birth) / span) * 100))}%`;
+
+  // Age marks along the bottom: every year, or every few years for older children.
+  const years = span / (365.25 * 86400000);
+  const every = years <= 8 ? 1 : years <= 16 ? 2 : 4;
+  const ticks = [];
+  for (let y = 0; y <= years; y += every) {
+    const d = new Date(birth);
+    d.setFullYear(birth.getFullYear() + y);
+    ticks.push(el("span", { className: "tick", style: `left: ${at(d)}`, textContent: y === 0 ? "Birth" : `${y}y` }));
+  }
+
+  const mark = (kind, iso, label) => {
+    const node = el("span", { className: `mark ${kind}`, style: `left: ${at(parseIso(iso))}` });
+    node.dataset.tip = label;
+    return node;
+  };
+  const lines = rows.map((s) => el("div", { className: "tl-row" },
+    el("span", { className: "tl-name", textContent: s.name }),
+    el("div", { className: "tl-track" },
+      el("span", { className: "today", style: `left: ${at(asOf)}` }),
+      ...s.doses.map((d) => mark(d.valid ? "given" : "invalid", d.given,
+        `${s.name}: ${d.sourceText || d.antigen}, ${formatDate(d.given)}${d.valid ? "" : ` (doesn't count: ${d.reason})`}`)),
+      ...(s.status === "COMPLETE" ? [] : s.nextDoses.map((d, i) => mark("planned", d, `${s.name}: catch-up dose ${i + 1}, on or after ${formatDate(d)}`))))));
+
+  box.replaceChildren(
+    el("div", { className: "card-row" },
+      el("p", { className: "card-title" }, icon("activity"), "Vaccine timeline"),
+      el("ul", { className: "tl-legend" },
+        el("li", {}, el("span", { className: "mark given" }), "Dose on record"),
+        el("li", {}, el("span", { className: "mark invalid" }), "Doesn't count"),
+        el("li", {}, el("span", { className: "mark planned" }), "Catch-up (earliest)"),
+        el("li", {}, el("span", { className: "today-key" }), "Today"))),
+    el("div", { className: "tl" }, ...lines, el("div", { className: "tl-row tl-axis" }, el("span"), el("div", { className: "tl-ticks" }, ...ticks))));
 }
 
 // Thumbnails of the original photos, from this upload or from the saved record.
@@ -599,7 +852,8 @@ $("saveBtn").addEventListener("click", async () => {
     current.dirty = false;
     await loadSummaries();
     renderFiles();
-    setStatus($("saveStatus"), "Saved. You can find it any time under Saved records.");
+    setStatus($("saveStatus"), "");
+    toast("Saved. You can find it any time under Saved records.");
   } catch (err) {
     setStatus($("saveStatus"), err.message, true);
   }
@@ -621,6 +875,7 @@ $("deleteBtn").addEventListener("click", async () => {
     $("report").classList.remove("open");
     await loadSummaries();
     show("records");
+    toast("Record deleted.");
   } catch (err) {
     setStatus($("saveStatus"), err.message, true);
   }
@@ -754,7 +1009,7 @@ $("profileForm").addEventListener("submit", async (e) => {
     user = await postJson("/api/account", { name: $("profileName").value, email: $("profileEmail").value }, "PUT");
     renderUser();
     renderSettings();
-    setStatus($("profileStatus"), "Profile saved.");
+    toast("Profile saved.");
   } catch (err) {
     setStatus($("profileStatus"), err.message, true);
   }
@@ -776,7 +1031,7 @@ $("avatarInput").addEventListener("change", async (e) => {
     avatarVersion = Date.now();
     renderUser();
     renderSettings();
-    setStatus($("profileStatus"), "Picture updated.");
+    toast("Picture updated.");
   } catch (err) {
     setStatus($("profileStatus"), err.message, true);
   }
@@ -798,7 +1053,8 @@ $("passwordForm").addEventListener("submit", async (e) => {
       { currentPassword: $("currentPassword").value, newPassword: $("newPassword").value }, "PUT");
     $("currentPassword").value = "";
     $("newPassword").value = "";
-    setStatus($("passwordStatus"), "Password changed.");
+    setStatus($("passwordStatus"), "");
+    toast("Password changed.");
   } catch (err) {
     setStatus($("passwordStatus"), err.message, true);
   }
@@ -979,6 +1235,7 @@ function exportAs(kind) {
   if (kind === "hl7") download(`${fileBase()}.hl7`, buildHl7(record, state), "application/hl7-v2");
   if (kind === "fhir") download(`${fileBase()}.fhir.json`, buildFhir(record), "application/fhir+json");
   if (kind === "csv") download(`${fileBase()}.csv`, buildCsv(record), "text/csv");
+  toast(`Downloaded the ${state.name} ${kind === "form" ? "school form" : kind.toUpperCase()} file.`);
   setStatus($("exportStatus"), `Downloaded. ${exportDoses(record).length} doses for ${state.name}. Check it against the original before anyone uses it.`);
 }
 
@@ -988,6 +1245,84 @@ for (const btn of document.querySelectorAll("[data-export]")) {
 $("formActionBtn").addEventListener("click", () => {
   if (chosenState()) exportAs(current.format);
   else $("stateSection").scrollIntoView({ behavior: "smooth" });
+});
+
+// ---- quick search (Ctrl+K) -------------------------------------------------
+
+const PAGES = [
+  ["dashboard", "Dashboard", "activity"], ["records", "Saved records", "folder"], ["upload", "Upload record", "upload"],
+  ["review", "Review entries", "list"], ["report", "Report", "file"], ["settings", "Settings", "settings"], ["help", "Help", "help"],
+];
+let paletteItems = [];
+let paletteIndex = 0;
+
+function openPalette() {
+  if (!user) return;
+  $("palette").classList.remove("hidden");
+  $("paletteInput").value = "";
+  renderPalette();
+  $("paletteInput").focus();
+}
+
+function closePalette() {
+  $("palette").classList.add("hidden");
+}
+
+function renderPalette() {
+  const q = $("paletteInput").value.trim().toLowerCase();
+  const records = summaries.filter((s) => !q || `${s.childName} ${s.country}`.toLowerCase().includes(q)).slice(0, 6)
+    .map((s) => ({ group: "Records", label: s.childName || "Unnamed child", sub: [s.country, s.counts.DUE ? `${s.counts.DUE} due now` : "up to date"].filter(Boolean).join(" · "),
+      icon: s.counts.DUE ? "alert" : "file", run: () => openSaved(s.id) }));
+  const pages = PAGES.filter(([, label]) => !q || label.toLowerCase().includes(q))
+    .map(([view, label, ic]) => ({ group: "Pages", label, sub: "", icon: ic, run: () => (view === "upload" ? startNewRecord() : show(view)) }));
+  const actions = [{ group: "Actions", label: "Upload a new record", sub: "", icon: "plus", run: startNewRecord }]
+    .filter((a) => !q || a.label.toLowerCase().includes(q));
+  paletteItems = [...records, ...pages, ...actions];
+  paletteIndex = Math.min(paletteIndex, Math.max(paletteItems.length - 1, 0));
+  let group = "";
+  const nodes = [];
+  paletteItems.forEach((item, i) => {
+    if (item.group !== group) nodes.push(el("p", { className: "palette-group", textContent: (group = item.group) }));
+    nodes.push(el("button", { className: `palette-item ${i === paletteIndex ? "active" : ""}`, onmouseenter: () => { paletteIndex = i; highlightPalette(); },
+      onclick: () => runPalette(i) },
+      icon(item.icon), el("span", { className: "grow", textContent: item.label }), el("span", { className: "sub", textContent: item.sub })));
+  });
+  if (!nodes.length) nodes.push(el("p", { className: "palette-empty sub", textContent: "Nothing matches." }));
+  $("paletteList").replaceChildren(...nodes);
+}
+
+function highlightPalette() {
+  [...$("paletteList").querySelectorAll(".palette-item")].forEach((b, i) => {
+    b.classList.toggle("active", i === paletteIndex);
+    if (i === paletteIndex) b.scrollIntoView({ block: "nearest" });
+  });
+}
+
+function runPalette(i) {
+  const item = paletteItems[i];
+  closePalette();
+  item?.run();
+}
+
+$("searchBtn").addEventListener("click", openPalette);
+document.addEventListener("click", (e) => { if (e.target.closest("[data-palette]")) openPalette(); });
+$("paletteInput").addEventListener("input", () => { paletteIndex = 0; renderPalette(); });
+$("palette").addEventListener("click", (e) => { if (e.target === $("palette")) closePalette(); });
+document.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+    e.preventDefault();
+    $("palette").classList.contains("hidden") ? openPalette() : closePalette();
+    return;
+  }
+  if ($("palette").classList.contains("hidden")) return;
+  if (e.key === "Escape") closePalette();
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    const n = paletteItems.length;
+    if (n) paletteIndex = (paletteIndex + (e.key === "ArrowDown" ? 1 : n - 1)) % n;
+    highlightPalette();
+  }
+  if (e.key === "Enter") { e.preventDefault(); runPalette(paletteIndex); }
 });
 
 // ---- start -----------------------------------------------------------------

@@ -74,6 +74,19 @@
     </div>
   </div>
 
+  <div id="toasts" class="toasts no-print" aria-live="polite"></div>
+
+  <div id="palette" class="palette hidden no-print" role="dialog" aria-label="Search">
+    <div class="palette-box">
+      <div class="palette-input">
+        <svg class="i"><use href="#i-search"/></svg>
+        <input id="paletteInput" type="text" placeholder="Search records or jump to a page" autocomplete="off">
+        <kbd>Esc</kbd>
+      </div>
+      <div id="paletteList" class="palette-list"></div>
+    </div>
+  </div>
+
   <div id="app" class="shell hidden">
     <aside class="sidebar no-print">
       <div class="brand">
@@ -88,6 +101,10 @@
           <p id="userName"></p>
           <p id="userMeta" class="sub"></p>
         </div>
+      </button>
+
+      <button id="searchBtn" class="search-trigger" title="Search records and pages">
+        <svg class="i"><use href="#i-search"/></svg><span>Search</span><kbd>Ctrl K</kbd>
       </button>
 
       <button id="newRecordBtn" class="primary cta"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
@@ -115,9 +132,17 @@
     <main>
       <!-- Dashboard -->
       <section id="dashboard" class="view hidden">
-        <div class="view-head">
-          <h1>Dashboard</h1>
-          <p id="today" class="sub"></p>
+        <div class="hero">
+          <div class="hero-text">
+            <p id="today" class="hero-date"></p>
+            <h1 id="greeting">Dashboard</h1>
+            <p id="heroSummary" class="hero-sub"></p>
+            <div class="hero-actions">
+              <button class="hero-btn solid go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+              <button class="hero-btn ghost" data-palette><svg class="i"><use href="#i-search"/></svg> Search <kbd>Ctrl K</kbd></button>
+            </div>
+          </div>
+          <div id="heroNext" class="hero-next"></div>
         </div>
         <div id="dashStats" class="stats"></div>
         <div id="dashEmpty" class="empty card hidden">
@@ -125,6 +150,23 @@
           <p class="strong">No saved records yet</p>
           <p class="sub">Upload a child's vaccine record, check it, and tap Save to records. It will show up here.</p>
           <button class="primary go-upload"><svg class="i"><use href="#i-upload"/></svg> Upload record</button>
+        </div>
+        <div id="dashCharts" class="dash-charts">
+          <div class="card">
+            <p class="card-title"><svg class="i"><use href="#i-activity"/></svg> Vaccine status, all children</p>
+            <div id="statusChart" class="donut-wrap"></div>
+          </div>
+          <div class="card">
+            <div class="card-row">
+              <p class="card-title"><svg class="i"><use href="#i-calendar"/></svg> Next catch-up dates</p>
+              <span class="sub small">next 90 days</span>
+            </div>
+            <div id="upcomingList" class="upcoming"></div>
+          </div>
+          <div class="card">
+            <p class="card-title"><svg class="i"><use href="#i-globe"/></svg> Records by country</p>
+            <div id="countryChart" class="bars"></div>
+          </div>
         </div>
         <div id="dashGrid" class="dash-grid">
           <div class="card">
@@ -156,12 +198,29 @@
           <svg class="i"><use href="#i-search"/></svg>
           <input id="recordSearch" type="search" placeholder="Search by child's name or country">
         </div>
-        <div id="recordFilters" class="filters">
-          <button data-filter="all" class="active">All</button>
-          <button data-filter="due">Doses due</button>
-          <button data-filter="ok">Up to date</button>
+        <div class="records-bar">
+          <div id="recordFilters" class="filters">
+            <button data-filter="all" class="active">All</button>
+            <button data-filter="due">Doses due</button>
+            <button data-filter="ok">Up to date</button>
+          </div>
+          <div class="records-tools">
+            <label class="sort">Sort
+              <select id="recordSort">
+                <option value="updated">Newest first</option>
+                <option value="name">Name A to Z</option>
+                <option value="due">Most doses due</option>
+                <option value="next">Next dose date</option>
+              </select>
+            </label>
+            <div id="recordView" class="seg" role="group" aria-label="Layout">
+              <button data-layout="grid" class="active" title="Cards"><svg class="i"><use href="#i-folder"/></svg></button>
+              <button data-layout="table" title="Table"><svg class="i"><use href="#i-table"/></svg></button>
+            </div>
+          </div>
         </div>
         <div id="recordGrid" class="record-grid"></div>
+        <div id="recordTable" class="table-card record-table hidden"></div>
         <div id="recordsEmpty" class="empty hidden">
           <div class="tile lg"><svg class="i"><use href="#i-folder"/></svg></div>
           <p class="strong" id="recordsEmptyTitle">No saved records yet</p>
@@ -333,6 +392,8 @@
             catch-up immunization schedule. It is not a medical decision. A licensed provider must verify the
             original record and approve any vaccines given. State school requirements may differ.</p>
         </div>
+
+        <div id="timeline" class="card timeline-card"></div>
 
         <div class="table-card">
           <div class="series-header">
