@@ -26,6 +26,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -71,6 +73,8 @@ public class RecordReader {
     public record Upload(byte[] data, String mediaType) {
     }
 
+    private static final Logger log = LoggerFactory.getLogger(RecordReader.class);
+
     private AnthropicClient client;
 
     private synchronized AnthropicClient client() {
@@ -84,14 +88,22 @@ public class RecordReader {
     public ExtractedRecord read(List<Upload> uploads) {
         StructuredMessageCreateParams<ExtractedRecord> params = buildRequest(uploads);
 
+        String key = System.getenv("ANTHROPIC_API_KEY");
+        if (key == null || key.isBlank()) {
+            throw new ReadException("ANTHROPIC_API_KEY is not set on the server.", null);
+        }
+
         StructuredMessage<ExtractedRecord> response;
         try {
             response = client().messages().create(params);
         } catch (UnauthorizedException e) {
-            throw new ReadException("The Anthropic API key is missing or invalid. Set ANTHROPIC_API_KEY.", e);
+            // Logs Anthropic's reason (never the key) so it shows in the host's logs.
+            log.warn("Anthropic rejected the API key: {}", e.getMessage());
+            throw new ReadException("Anthropic rejected the API key in ANTHROPIC_API_KEY. Check the key and try again.", e);
         } catch (RateLimitException e) {
             throw new ReadException("Too many requests right now. Wait a minute and try again.", e);
         } catch (AnthropicServiceException e) {
+            log.warn("Anthropic API error {}: {}", e.statusCode(), e.getMessage());
             throw new ReadException("The AI service returned an error (" + e.statusCode() + ").", e);
         } catch (RuntimeException e) {
             throw new ReadException("Could not reach the AI service: " + e.getMessage(), e);
