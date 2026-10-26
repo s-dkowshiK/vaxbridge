@@ -246,10 +246,13 @@ async function loadSummaries() {
   $("alertStrip").classList.toggle("hidden", !due);
 }
 
-function stat(kind, value, label, sub) {
+const STAT_ICON = { plain: "folder", DUE: "alert", UPCOMING: "clock", COMPLETE: "check", NOT_NEEDED: "minus" };
+
+function stat(kind, value, label, sub, iconName = STAT_ICON[kind]) {
   const number = el("b");
   countUp(number, value);
   return el("div", { className: `stat ${kind}` },
+    el("span", { className: "stat-icon" }, icon(iconName)),
     number, el("p", { className: "label", textContent: label }), el("p", { className: "sub", textContent: sub }));
 }
 
@@ -261,12 +264,13 @@ function recordFacts(s) {
 
 function renderDashboard() {
   $("today").textContent = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  renderHero();
   const childrenDue = summaries.filter((s) => s.counts.DUE > 0);
   const dosesDue = summaries.reduce((n, s) => n + s.counts.DUE, 0);
   const upToDate = summaries.filter((s) => s.counts.DUE === 0).length;
   $("dashStats").replaceChildren(
-    stat("plain", summaries.length, "Saved records", "children checked"),
-    stat("plain", dosesDue, "Vaccines due now", "across all children"),
+    stat("plain", summaries.length, "Saved records", "children checked", "folder"),
+    stat("plain", dosesDue, "Vaccines due now", "across all children", "syringe"),
     stat("COMPLETE", upToDate, "Up to date", "nothing due today"),
     stat("DUE", childrenDue.length, "Need a visit", "children with doses due"),
   );
@@ -297,6 +301,27 @@ function renderDashboard() {
     : [el("div", { className: "mini-empty" }, icon("check"),
         el("p", { className: "strong", textContent: "All caught up" }),
         el("p", { className: "sub", textContent: "No saved child has a dose due today." }))]));
+}
+
+// The banner at the top of the dashboard: a greeting, a one-line summary and the next catch-up date.
+function renderHero() {
+  const hour = new Date().getHours();
+  const part = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const first = (user?.name || "").split(/[\s,]+/)[0];
+  $("greeting").textContent = first ? `${part}, ${first}` : part;
+  const dueKids = summaries.filter((s) => s.counts.DUE > 0).length;
+  $("heroSummary").textContent = summaries.length
+    ? `${plural(summaries.length, "child", "children")} saved. ${dueKids ? `${plural(dueKids, "child", "children")} need a catch-up visit.` : "Everyone is caught up for now."}`
+    : "Upload a child's vaccine record from any country to get a catch-up report a provider can check.";
+  const next = summaries.filter((s) => s.nextDose).sort((a, b) => a.nextDose.localeCompare(b.nextDose))[0];
+  $("heroNext").classList.toggle("hidden", !next);
+  if (!next) return;
+  const days = daysFromToday(next.nextDose);
+  $("heroNext").replaceChildren(
+    el("p", { className: "hero-next-label" }, icon("calendar"), "Next catch-up"),
+    el("p", { className: "hero-next-date", textContent: days <= 0 ? "Due now" : formatDate(next.nextDose) }),
+    el("p", { className: "hero-next-who", textContent: next.childName || "Unnamed child" }),
+    el("button", { className: "hero-next-open", onclick: () => openSaved(next.id) }, "Open report ", icon("right")));
 }
 
 // Ring chart: every vaccine for every saved child, by status.
@@ -1280,6 +1305,7 @@ function runPalette(i) {
 }
 
 $("searchBtn").addEventListener("click", openPalette);
+document.addEventListener("click", (e) => { if (e.target.closest("[data-palette]")) openPalette(); });
 $("paletteInput").addEventListener("input", () => { paletteIndex = 0; renderPalette(); });
 $("palette").addEventListener("click", (e) => { if (e.target === $("palette")) closePalette(); });
 document.addEventListener("keydown", (e) => {
