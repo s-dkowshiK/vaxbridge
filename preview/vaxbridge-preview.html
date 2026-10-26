@@ -1529,8 +1529,9 @@ const previewStore = (() => {
 
 // First visit: a demo account with sample children already saved, so every chart has something to show.
 (() => {
+  if (previewStore.get("vb-demo-v2", false)) return;
+  previewStore.set("vb-demo-v2", true);
   const users = previewStore.get("vb-users", {});
-  if (Object.keys(users).length) return;
   const email = "demo@vaxbridge.app";
   users[email] = { id: 1, name: "Pat Rivera, RN", email, hash: "", demo: true };
   previewStore.set("vb-users", users);
